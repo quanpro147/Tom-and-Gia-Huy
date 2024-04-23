@@ -81,14 +81,14 @@ class LoginWidget(QWidget):
             QMessageBox.warning(self, "Lỗi", "Tên người dùng hoặc mật khẩu không đúng!")
 
     def register(self):
-        username = self.username_input.text().strip()
-        password = self.password_input.text().strip()
+        username = self.username_edit.text().strip()
+        password = self.password_edit.text().strip()
         if checkaccount(username, password):
             QMessageBox.warning("Tài khoản đã tồn tại")
         else:
             with open("account.txt", "a") as f:
                 f.write(f"{username}\n")
-                f.write(f, "{password}\n")
+                f.write(f"{password}\n")
             QMessageBox.information(self, "Thông Báo", "Đăng Ký Thành Công!")
         # Lưu thông tin đăng ký vào tệp account.txt
 
