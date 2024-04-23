@@ -1,6 +1,16 @@
-doanquangthang
-123456
-thang123
-123444
-khoa
-123321
+{
+    "users": [
+        {
+            "username": "khoa",
+            "password": "123456"
+        },
+        {
+            "username": "minhkhoa",
+            "password": "adidaphat"
+        },
+        {
+            "username": "minhkhoa",
+            "password": "muvodich"
+        }
+    ]
+}
