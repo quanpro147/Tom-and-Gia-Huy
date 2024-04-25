@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 doanquangthang
 123456
 thang123
@@ -6,3 +7,21 @@ minhkhoa
 123321
 quanpro147
 123
+=======
+{
+    "users": [
+        {
+            "username": "khoa",
+            "password": "123456"
+        },
+        {
+            "username": "minhkhoa",
+            "password": "adidaphat"
+        },
+        {
+            "username": "minhkhoa",
+            "password": "muvodich"
+        }
+    ]
+}
+>>>>>>> b5ebe9f5e4e6b9f7105c91b0320cb8bc0f6bdf14
