@@ -1,199 +1,129 @@
-import numpy as np
-from numpy.random import shuffle
-from random import randrange
-#import matplotlib.pyplot as plt
+from random import *
+from cell import cell
+from algrithms import generator
 
-class BacktrackingGenerator():
-    """
-    1. Randomly choose a starting cell.
-    2. Randomly choose a wall at the current cell and open a passage through to any random adjacent
-        cell, that has not been visited yet. This is now the current cell.
-    3. If all adjacent cells have been visited, back up to the previous and repeat step 2.
-    4. Stop when the algorithm has backed all the way up to the starting cell.
-    """
-
-    def __init__(self, w, h):
-        self.w = w
-        self.h = h
-        self.H = (2 * self.h) + 1
-        self.W = (2 * self.w) + 1
-
-    def generate(self):
-        """highest-level method that implements the maze-generating algorithm
-
-        Returns:
-            np.array: returned matrix
-        """
-        # create empty grid, with walls
-        grid = np.empty((self.H, self.W), dtype=np.int8)
-        grid.fill(1)
-
-        crow = randrange(1, self.H, 2)
-        ccol = randrange(1, self.W, 2)
-        track = [(crow, ccol)]
-        grid[crow][ccol] = 0
-
-        while track:
-            (crow, ccol) = track[-1]
-            neighbors = self._find_neighbors(crow, ccol, grid, True)
-
-            if len(neighbors) == 0:
-                track = track[:-1]
-            else:
-                nrow, ncol = neighbors[0]
-                grid[nrow][ncol] = 0
-                grid[(nrow + crow) // 2][(ncol + ccol) // 2] = 0
-
-                track += [(nrow, ncol)]
-
-        return grid
-    def _find_neighbors(self, r, c, grid, is_wall=False):
-        """Find all the grid neighbors of the current position; visited, or not.
-        Args:
-            r (int): row of cell of interest
-            c (int): column of cell of interest
-            grid (np.array): 2D maze grid
-            is_wall (bool): Are we looking for neighbors that are walls, or open cells?
-        Returns:
-            list: all neighboring cells that match our request
-        """
-        ns = []
-
-        if r > 1 and grid[r - 2][c] == is_wall:
-            ns.append((r - 2, c))
-        if r < self.H - 2 and grid[r + 2][c] == is_wall:
-            ns.append((r + 2, c))
-        if c > 1 and grid[r][c - 2] == is_wall:
-            ns.append((r, c - 2))
-        if c < self.W - 2 and grid[r][c + 2] == is_wall:
-            ns.append((r, c + 2))
-
-        shuffle(ns)
-        return ns
-    
-     
 class maze():
-    def __init__(self, h, w):
-        '''
-        h (int): height of maze, in number of hallways
-        w (int): width of maze, in number of hallways
-        H (int): height of maze, in number of hallways + walls
-        W (int): width of maze, in number of hallways + walls
-
-        '''
-        self.h = h
-        self.w = w
-        self.H = (2 * self.h) + 1
-        self.W = (2 * self.w) + 1
-        self.generator = None
-        self.grid = None
-        self.start = None
-        self.end = None
+    def __init__(self, num_rows, num_cols):
+        
+        self.num_rows = num_rows
+        self.num_cols = num_cols
+        self.grid = self.generate_grid()
+        self.start = self.pick_random_entry_exit()
+        self.end = self.pick_random_entry_exit(self.start)
         self.transmuters = []
         self.solver = None
         self.solutions = None
+        self.generation_path = None
+        self.generate_maze(self, self.start)
 
-    
-    def generate(self):
-        self.generator = BacktrackingGenerator(self.h, self.w)
-        self.grid = self.generator.generate()
+    def generate_grid(self):
+        """
+        Function that creates a 2D grid of Cell objects. This can be thought 
+        of as a maze without any paths carved out
 
-    def generate_entrances(self, start_outer=True, end_outer=True):
-        """Generate maze entrances. Entrances can be on the walls, or inside the maze.
+        Return:
+            A list with Cell objects at each position
+
+        """
+
+        # Create an empty list
+        grid = list()
+
+        # Place a Cell object at each location in the grid
+        for i in range(self.num_rows):
+            grid.append(list())
+
+            for j in range(self.num_cols):
+                grid[i].append(cell(i, j))
+
+        return grid
+
+    def find_neighbours(self, cell_row, cell_col):
+        """Finds all existing and unvisited neighbours of a cell in the grid.
+        Return a list of tuples containing indices for the unvisited neighbours.
 
         Args:
-            start_outer (bool): Do you want the start of the maze to be on an outer wall?
-            end_outer (bool): Do you want the end of the maze to be on an outer wall?
-        Returns: None
+            cell_row (int):
+            cell_col (int):
+
+        Return:
+            None: If there are no unvisited neighbors
+            list: A list of neighbors that have not been visited
         """
-        if start_outer and end_outer:
-            self._generate_outer_entrances()
-        elif not start_outer and not end_outer:
-            self._generate_inner_entrances()
-        elif start_outer:
-            self.start, self.end = self._generate_opposite_entrances()
+        neighbours = list()
+
+        def check_neighbour(row, col):
+            # Check that a neighbour exists and that it's not visited before.
+            if row >= 0 and row < self.num_rows and col >= 0 and col < self.num_cols:
+                neighbours.append((row, col))
+
+        check_neighbour(cell_row-1, cell_col)     # Top neighbour
+        check_neighbour(cell_row, cell_col+1)     # Right neighbour
+        check_neighbour(cell_row+1, cell_col)     # Bottom neighbour
+        check_neighbour(cell_row, cell_col-1)     # Left neighbour
+
+        if len(neighbours) > 0:
+            return neighbours
         else:
-            self.end, self.start = self._generate_opposite_entrances()
-
-        # the start and end shouldn't be right next to each other
-        if abs(self.start[0] - self.end[0]) + abs(self.start[1] - self.end[1]) < 2:
-            self.generate_entrances(start_outer, end_outer)
-
-    def _generate_outer_entrances(self):
-        """Generate maze entrances, along the outer walls.
-
-        Returns: None
+            return None     # None if no unvisited neighbours found
+        
+    def validate_neighbours_generate(self, neighbour_indices):
         """
-        H = self.grid.shape[0]
-        W = self.grid.shape[1]
+        Function that validates whether a neighbour is unvisited or not.
 
-        start_side = randrange(4)
+        Args:
+            neighbour_indices:
 
-        # maze entrances will be on opposite sides of the maze.
-        if start_side == 0:
-            self.start = (0, randrange(1, W, 2))  # North
-            self.end = (H - 1, randrange(1, W, 2))
-        elif start_side == 1:
-            self.start = (H - 1, randrange(1, W, 2))  # South
-            self.end = (0, randrange(1, W, 2))
-        elif start_side == 2:
-            self.start = (randrange(1, H, 2), 0)  # West
-            self.end = (randrange(1, H, 2), W - 1)
+        Return:
+            True: If the neighbor has been visited
+            False: If the neighbor has not been visited
+
+        """
+        neigh_list = []
+        for x, y in neighbour_indices:
+            if not self.grid[x][y].is_visited:
+                neigh_list.append((x, y))
+
+        if len(neigh_list) > 0:
+            return neigh_list
         else:
-            self.start = (randrange(1, H, 2), W - 1)  # East
-            self.end = (randrange(1, H, 2), 0)
-
-    def _generate_inner_entrances(self):
-        """Generate maze entrances, randomly within the maze.
-
-        Returns: None
+            return None   
+        
+    def pick_random_entry_exit(self, used_entry_exit=None):
         """
-        H, W = self.grid.shape
+        Function that picks random coordinates along the maze boundary to represent either
+        the entry or exit point of the maze. Makes sure they are not at the same place.
 
-        self.start = (randrange(1, H, 2), randrange(1, W, 2))
-        end = (randrange(1, H, 2), randrange(1, W, 2))
+        Args:
+            used_entry_exit
 
-        # make certain the start and end points aren't the same
-        while end == self.start:
-            end = (randrange(1, H, 2), randrange(1, W, 2))
+        Return:
 
-        self.end = end
-
-    def _generate_opposite_entrances(self):
-        """Generate one inner and one outer entrance.
-
-        Returns:
-            tuple: start cell, end cell
         """
-        H, W = self.grid.shape
+        rng_entry_exit = used_entry_exit    # Initialize with used value
 
-        start_side = randrange(4)
+        # Try until unused location along boundary is found.
+        while rng_entry_exit == used_entry_exit:
+            rng_side = random.randint(0, 3)
 
-        # pick a side for the outer maze entrance
-        if start_side == 0:
-            first = (0, randrange(1, W, 2))  # North
-        elif start_side == 1:
-            first = (H - 1, randrange(1, W, 2))  # South
-        elif start_side == 2:
-            first = (randrange(1, H, 2), 0)  # West
-        else:
-            first = (randrange(1, H, 2), W - 1)  # East
+            if (rng_side == 0):     # Top side
+                rng_entry_exit = (0, random.randint(0, self.num_cols-1))
 
-        # create an inner maze entrance
-        second = (randrange(1, H, 2), randrange(1, W, 2))
+            elif (rng_side == 2):   # Right side
+                rng_entry_exit = (self.num_rows-1, random.randint(0, self.num_cols-1))
 
-        return (first, second)
+            elif (rng_side == 1):   # Bottom side
+                rng_entry_exit = (random.randint(0, self.num_rows-1), self.num_cols-1)
 
-# def showPNG(grid):
-#     """Generate a simple image of the maze."""
-#     plt.figure(figsize=(10, 5))
-#     plt.imshow(grid, cmap=plt.cm.binary, interpolation='nearest')
-#     plt.xticks([]), plt.yticks([])
-#     plt.show()
-a = maze(5, 5)
-a.generate()
-a.generate_entrances()
-print(a.grid)
+            elif (rng_side == 3):   # Left side
+                rng_entry_exit = (random.randint(0, self.num_rows-1), 0)
+
+        return rng_entry_exit       # Return entry/exit that is different from exit/entry
+
+    def generate_maze(self):
+        generator().depth_first_recursive_backtracker(self, self.start)
+##############
+
 
 
 
