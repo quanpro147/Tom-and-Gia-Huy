@@ -194,3 +194,9 @@ a = maze(5, 5)
 a.generate()
 a.generate_entrances()
 print(a.grid)
+
+
+
+
+
+    
