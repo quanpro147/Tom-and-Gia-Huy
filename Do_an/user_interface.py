@@ -3,20 +3,24 @@ from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButto
 from PyQt5.QtWidgets import*
 from PyQt5.QtGui import QFont 
 from PyQt5.QtCore import Qt
-def checkaccount(acc, passw):
-    with open("account.txt","r") as f:
-        a = f.readline().split()[0]
-        b = f.readline().split()[0]
-        while(a!='' and b!= ''):
-            if(acc == a and passw == b):
-                return True
-            a1 = f.readline().split()
-            b1 = f.readline().split()
-            if(a1 == []or b == []):
-                break
-            a = a1[0]
-            b = b1[0]
+import json
+def load_data():
+    with open("Do_an/account.json", "r") as file:
+        data = json.load(file)
+    return data
+def save_data(data, file_name):
+    with open(file_name, "w") as file:
+        json.dump(data, file, indent=4)
+def check_account(username, password):
+    data = load_data()
+    for user in data["users"]:
+        if user["username"] == username and user["password"] == password:
+            return True
     return False
+def add_user(username, password):
+    data = load_data()
+    data["users"].append({"username": username, "password": password})
+    save_data(data, "Do_an/account.json")
 class LoginWidget(QWidget):
     def __init__(self):
         super().__init__()
@@ -73,7 +77,7 @@ class LoginWidget(QWidget):
         password = self.password_edit.text()
 
         # Thực hiện kiểm tra tên người dùng và mật khẩu ở đây
-        if checkaccount(username,password):
+        if check_account(username,password):
             self.close()
             self.w = MenuWidget()
             self.w.show()
@@ -83,12 +87,10 @@ class LoginWidget(QWidget):
     def register(self):
         username = self.username_edit.text().strip()
         password = self.password_edit.text().strip()
-        if checkaccount(username, password):
-            QMessageBox.warning("Tài khoản đã tồn tại")
+        if check_account(username, password):
+            QMessageBox.warning(self, "Lỗi", "Tài khoản đã tồn tại")
         else:
-            with open("account.txt", "a") as f:
-                f.write(f"{username}\n")
-                f.write(f"{password}\n")
+            add_user(username, password)
             QMessageBox.information(self, "Thông Báo", "Đăng Ký Thành Công!")
         # Lưu thông tin đăng ký vào tệp account.txt
 
