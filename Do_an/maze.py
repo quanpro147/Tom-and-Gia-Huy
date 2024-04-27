@@ -1,12 +1,13 @@
-from random import *
+import random
 from cell import cell
-from algrithms import generator
+from algrithms import depth_first_recursive_backtracker
 
 class maze():
     def __init__(self, num_rows, num_cols):
         
         self.num_rows = num_rows
         self.num_cols = num_cols
+        self.grid_size = num_rows * num_cols
         self.grid = self.generate_grid()
         self.start = self.pick_random_entry_exit()
         self.end = self.pick_random_entry_exit(self.start)
@@ -14,7 +15,6 @@ class maze():
         self.solver = None
         self.solutions = None
         self.generation_path = None
-        self.generate_maze(self, self.start)
 
     def generate_grid(self):
         """
@@ -109,10 +109,10 @@ class maze():
             if (rng_side == 0):     # Top side
                 rng_entry_exit = (0, random.randint(0, self.num_cols-1))
 
-            elif (rng_side == 2):   # Right side
+            elif (rng_side == 2):   # Bottom side
                 rng_entry_exit = (self.num_rows-1, random.randint(0, self.num_cols-1))
 
-            elif (rng_side == 1):   # Bottom side
+            elif (rng_side == 1):   # Right side
                 rng_entry_exit = (random.randint(0, self.num_rows-1), self.num_cols-1)
 
             elif (rng_side == 3):   # Left side
@@ -121,8 +121,7 @@ class maze():
         return rng_entry_exit       # Return entry/exit that is different from exit/entry
 
     def generate_maze(self):
-        generator().depth_first_recursive_backtracker(self, self.start)
-##############
+        depth_first_recursive_backtracker(self, self.start)
 
 
 

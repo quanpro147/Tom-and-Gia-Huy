@@ -129,7 +129,7 @@ class MenuWidget(QWidget):
         self.setLayout(layout)
         self.setMinimumSize(400, 400) 
 
-if __name__ == "__main__":
+def ui():
     app = QApplication(sys.argv)
     login = LoginWidget()
     login.show()
