@@ -25,9 +25,8 @@ class maze():
             A list with Cell objects at each position
 
         """
-
         # Create an empty list
-        grid = list()
+        grid = []
 
         # Place a Cell object at each location in the grid
         for i in range(self.num_rows):
@@ -50,7 +49,7 @@ class maze():
             None: If there are no unvisited neighbors
             list: A list of neighbors that have not been visited
         """
-        neighbours = list()
+        neighbours = []
 
         def check_neighbour(row, col):
             # Check that a neighbour exists and that it's not visited before.
@@ -121,7 +120,9 @@ class maze():
         return rng_entry_exit       # Return entry/exit that is different from exit/entry
 
     def generate_maze(self):
-        depth_first_recursive_backtracker(self, self.start)
+        self = depth_first_recursive_backtracker(self, self.start)
+    
+    
 
 
 

@@ -17,7 +17,7 @@ def depth_first_recursive_backtracker(maze, start_coor):
             row_next, col_next = random.choice(neighbour_list)     # Choose random neighbour
             maze.grid[row_cur][col_cur].remove_walls(row_next, col_next)   # Remove walls between neighbours
             maze.grid[row_next][col_next].remove_walls(row_cur, col_cur)   # Remove walls between neighbours
-            maze.grid[row_next][col_next].visited = True                 # Move to that neighbour
+            maze.grid[row_next][col_next].is_visited = True                 # Move to that neighbour
             row_cur = row_next
             col_cur = col_next
             path.append((row_cur, col_cur))   # Add coordinates to part of generation path
@@ -34,6 +34,7 @@ def depth_first_recursive_backtracker(maze, start_coor):
         for j in range(maze.num_cols):
             maze.grid[i][j].is_visited = False      # Set all cells to unvisited before returning grid
     maze.generation_path = path   
+    
     return maze
 ##### SOLVE MAZE ALGRITHMS
 #class solver():
