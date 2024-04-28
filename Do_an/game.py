@@ -1,24 +1,37 @@
 import pygame
-from visual import draw_Maze
-from maze import maze
+from visual import *
+import constants
+from player import player
 
+WIDTH, HEIGHT = constants.SIZE
+FPS = constants.FPS
 
+def draw_window(screen, player, maze):
+    rect = player.get_rect(maze)
+    screen.fill(pygame.Color(constants.WHITE))
+    screen.blit(player.img, (rect.x, rect.y))
+    pygame.display.update()
 
-def game():
-    FPS = 60
-    Maze = maze(10, 10)
-    Maze = Maze.generate_maze()
+def game(Maze):
+
     pygame.init()
-    surface = pygame.display.set_mode((1200, 700))
+    pygame.display.set_caption('Tam and Gia Huy')
+    Screen = pygame.display.set_mode((WIDTH, HEIGHT))
     clock = pygame.time.Clock()
+    Player = player(Maze)
+    
     run = True
     while run:
-        surface.fill(pygame.Color('darkslategrey'))
+        clock.tick(FPS)
+        draw_window(Screen, Player, Maze)
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
-        draw_Maze(Maze, surface)
+        Player.x += 1
+        draw_maze(Maze, Screen)
+        pygame.display.update()
         pygame.display.flip() 
-        clock.tick(FPS)
+        
         
 
