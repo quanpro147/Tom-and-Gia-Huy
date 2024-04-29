@@ -10,7 +10,7 @@ import Register
 def check_account(username:str,password:str):
     with open('account.json', 'r') as file:
         data = json.load(file)
-        for acc in data[0]:
+        for acc in data:
             if acc['username'] == username:
                 if acc['password'] == password:
                     return 1
@@ -77,7 +77,7 @@ class loginWidget(QWidget):
             "border :2px solid gray;\n"
             "font: bold 8pt \"Space Grotesk\";font: 10pt \"Work Sans\";")
         self.login_button.setText("Login")
-        self.login_button.clicked.connect(self.menu_window)
+        self.login_button.clicked.connect(self.login1)
         # create "Sign up"
         self.sign_up_button = QPushButton(self.frame_main)
         self.sign_up_button.setObjectName(u"pushButton_3")
@@ -95,13 +95,16 @@ class loginWidget(QWidget):
         layout.addWidget(self.frame_main, alignment=Qt.AlignCenter)
         self.setMinimumSize(860, 900)
         self.setLayout(layout)
-    def login():
+    def login1(self):
         username = self.User_name.text()
         password = self.Password.text()
-        if(check_account(username,password)):
-            print("hello")
+        X = check_account(username,password)
+        if(X ==0):
+            QMessageBox.warning(self,"loi","wrong password ")
+        elif (X == -1):
+            QMessageBox.warning(self,"loi","account is not exist")
         else:
-            print("no")
+            self.menu_window()
     def register_window(self):
         self.W = Register.registerWidget()
         self.close()

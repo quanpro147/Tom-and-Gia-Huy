@@ -1,12 +1,22 @@
-{
-    "users": [
-        {
-            "username": "khoa",
-            "password": "123456"
-        },
-        {
-            "username": "khoa",
-            "password": "12345"
-        }
-    ]
-}
+[
+    {
+        "username": "Doanquangthang",
+        "password": "123456"
+    },
+    {
+        "username": "abc",
+        "password": "abc"
+    },
+    {
+        "username": "123",
+        "password": "123"
+    },
+    {
+        "username": "1234",
+        "password": "123"
+    },
+    {
+        "username": "1235",
+        "password": "123"
+    }
+]
