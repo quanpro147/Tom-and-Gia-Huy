@@ -95,7 +95,7 @@ class registerWidget(QWidget):
         layout.addWidget(self.frame_main, alignment=Qt.AlignCenter)
         self.setMinimumSize(860, 900)
         self.setLayout(layout)
-    def login():
+    def login(self):
         username = self.User_name.text()
         password = self.Password.text()
         if(check_account(username,password)):
