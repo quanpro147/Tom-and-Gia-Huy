@@ -127,6 +127,7 @@ class menu_Widget(QWidget):
 "")
         self.log_out_button.setIcon(icon)
         self.log_out_button.setText("              BACK")
+        self.log_out_button.clicked.connect(self.back)
         # create WELCOME
         self.label = QLabel(self.mainFrame)
         self.label.setObjectName(u"label")
@@ -141,6 +142,10 @@ class menu_Widget(QWidget):
 
         self.setLayout(layout)
         self.setMinimumSize(800,800)
+    def back(self):
+        self.W = login_window.loginWidget()
+        self.close()
+        self.W.show()
 
 
 
