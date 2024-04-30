@@ -4,11 +4,16 @@ from PyQt5.QtWidgets import*
 from PyQt5.QtCore import *
 from PyQt5 import QtGui,QtCore
 from PyQt5.QtGui import *
+import os
 import json
 import menu
 import Register
 def check_account(username:str,password:str):
+<<<<<<< HEAD
     with open('account.json', mode = 'r',encoding= 'utf8') as file:
+=======
+    with open(os.path.join('account.json'), 'r') as file:
+>>>>>>> main
         data = json.load(file)
         for acc in data:
             if acc['username'] == username:
