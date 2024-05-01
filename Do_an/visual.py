@@ -20,6 +20,7 @@ def draw_maze(maze, surface):
         for i in range(maze.num_rows):
             for j in range(maze.num_cols):    
                 draw_cell(maze.grid[i][j], surface)
+     
     
 
 

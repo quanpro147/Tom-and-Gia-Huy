@@ -1,4 +1,5 @@
 import random
+from queue import PriorityQueue
 ##### GENERATE MAZE ALGRITHM
 def depth_first_recursive_backtracker(maze, start_coor):
 
@@ -38,3 +39,60 @@ def depth_first_recursive_backtracker(maze, start_coor):
     return maze
 ##### SOLVE MAZE ALGRITHMS
 #class solver():
+
+def dfs(maze):
+    start = maze.start
+    end = maze.end
+    row_cur, col_cur = start            # Where to start generating
+    path = [(row_cur, col_cur)]               # To track path of solution
+    maze.grid[row_cur][col_cur].is_visited = True     # Set initial cell to visited
+    visited_cells = list()                  # Stack of visited cells for backtracking
+
+    def unblock_neighbours(row_cur, col_cur, neighbours):
+        """ Thic function use to find neighbours that can move """
+        unblock = []
+        for row_next, col_next in neighbours:
+            if not maze.grid[row_cur][col_cur].walls['top'] and not maze.grid[row_next][col_next].walls['bot']:
+                unblock.append((row_next, col_next))
+            elif not maze.grid[row_cur][col_cur].walls['right'] and not maze.grid[row_next][col_next].walls['left']:
+                unblock.append((row_next, col_next))
+            elif not maze.grid[row_cur][col_cur].walls['bot'] and not maze.grid[row_next][col_next].walls['top']:
+                unblock.append((row_next, col_next))
+            elif not maze.grid[row_cur][col_cur].walls['left'] and not maze.grid[row_next][col_next].walls['right']:
+                unblock.append((row_next, col_next))
+        return unblock
+    while (row_cur, col_cur) != end:     # While there are unvisited cells
+        neighbour_list = maze.find_neighbours(row_cur, col_cur)    # Find neighbour indicies
+        neighbour_list = maze.validate_neighbours_generate(neighbour_list)
+        neighbour_list = unblock_neighbours(row_cur, col_cur, neighbour_list)
+
+        if neighbour_list is not None:   # If there are unvisited neighbour cells
+            visited_cells.append((row_cur, col_cur))              # Add current cell to stack
+            row_next, col_next = random.choice(neighbour_list)     # Choose random neighbour
+            maze.grid[row_next][col_next].is_visited = True                 # Move to that neighbour
+            row_cur = row_next
+            col_cur = col_next
+            path.append((row_cur, col_cur))   # Add coordinates to part of generation path
+
+        else:  
+            row_cur, col_cur = visited_cells.pop()      # Pop previous visited cell (backtracking)
+            path.pop((row_cur, col_cur))   
+    return path
+
+def A_star(maze):
+    start = maze.start
+    end = maze.end
+
+    def manhattan_dis(cell1, cell2):
+        x1, y1 = cell1
+        x2, y2 = cell2
+        return abs(x1 - x2) + abs(y1 - y2)
+    
+    g_score = {cell: float('inf') for cell in maze.grid}
+    g_score[start] = 0
+    f_score = {cell: float('inf') for cell in maze.grid}
+    f_score[start] = manhattan_dis(start, end)
+    open = PriorityQueue()
+    open.put((f_score[start], manhattan_dis(start, end), start))
+    
+    

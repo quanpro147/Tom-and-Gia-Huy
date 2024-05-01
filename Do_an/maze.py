@@ -1,6 +1,6 @@
 import random
 from cell import cell
-from algrithms import depth_first_recursive_backtracker
+from algrithms import *
 
 class maze():
     def __init__(self, num_rows, num_cols):
@@ -13,7 +13,7 @@ class maze():
         self.end = self.pick_random_entry_exit(self.start)
         self.transmuters = []
         self.solver = None
-        self.solutions = None
+        self.solutions = self.solve()
         self.generation_path = None
 
     def generate_grid(self):
@@ -121,6 +121,14 @@ class maze():
 
     def generate_maze(self):
         self = depth_first_recursive_backtracker(self, self.start)
+    
+    def solve(self):
+        solutions = {}
+        solutions['dfs'] = dfs(self) # dfs will return a list of path from begin to end point
+
+        return solutions
+        
+
     
     
 

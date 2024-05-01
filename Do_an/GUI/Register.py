@@ -5,12 +5,11 @@ from PyQt5.QtCore import *
 from PyQt5 import QtGui,QtCore
 from PyQt5.QtGui import *
 import json
-
 import login_window
-
+import os
 
 def check_account(username:str,password:str):
-    with open('account.json', 'r') as file:
+    with open(os.path.join('Do_an', 'GUI', 'account.json'), 'r') as file:
         data = json.load(file)
         for acc in data:
             if acc['username'] == username:
@@ -113,9 +112,9 @@ class registerWidget(QWidget):
         if(check_account(username,password)!= -1):
             QMessageBox.warning(self,"loi","tai khoan da ton tai")
         else:
-            with open('account.json',mode ='r',encoding= 'utf8') as file:
+            with open(os.path.join('Do_an', 'GUI', 'account.json'),mode ='r',encoding= 'utf8') as file:
                 data = json.load(file)
-            with open('account.json',mode ='w',encoding= 'utf8') as file:
+            with open(os.path.join('Do_an', 'GUI', 'account.json'),mode ='w',encoding= 'utf8') as file:
                 newinf = {'username':username,'password':password}
                 data.append(newinf)
                 json.dump(data,file,indent= 4)
