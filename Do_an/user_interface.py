@@ -136,3 +136,4 @@ def ui():
     login = LoginWidget()
     login.show()
     sys.exit(app.exec_())
+ui()

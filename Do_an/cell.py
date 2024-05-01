@@ -62,4 +62,4 @@ class cell():
 
         self.is_entry_exit = entry_exit
     
-    
+print(cell(2,3))

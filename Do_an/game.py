@@ -33,5 +33,3 @@ def game(Maze):
         pygame.display.update()
         pygame.display.flip() 
         
-        
-

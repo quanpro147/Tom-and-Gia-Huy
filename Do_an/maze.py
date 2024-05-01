@@ -1,7 +1,8 @@
 import random
 from cell import cell
 from algrithms import depth_first_recursive_backtracker
-
+from visual import *
+from game import game
 class maze():
     def __init__(self, num_rows, num_cols):
         
@@ -121,12 +122,8 @@ class maze():
 
     def generate_maze(self):
         self = depth_first_recursive_backtracker(self, self.start)
-    
-    
 
+mazes = maze(10,10)
+mazes.generate_maze()
+game(mazes)
 
-
-
-
-
-    

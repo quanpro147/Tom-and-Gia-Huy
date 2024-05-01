@@ -4,18 +4,19 @@ import random
 import pygame
 from os import listdir 
 from os.path import isfile, join
+
 pygame.init()
 pygame.display.set_caption("Tam an Gia Huy")
 
 BG_COLOR = (255, 255, 255)
 WIDTH, HEIGHT, = 1200, 700
 FPS = 60
-PLAYER_VEL = 5
+PLAYER_VEL = 7
 
 window = pygame.display.set_mode((WIDTH, HEIGHT))
-
+# lat anh
 def flip(sprites):
-    return [pygame.transform.flip(sprite,True, False) for sprite in sprites]
+    return [pygame.transform.flip(sprite, True, False) for sprite in sprites]
 
 def load_sprite_sheets(dir1, dir2, width, height, direction=False):
     path = join("assets", dir1, dir2)
@@ -31,13 +32,13 @@ def load_sprite_sheets(dir1, dir2, width, height, direction=False):
             surface = pygame.Surface((width, height), pygame.SRCALPHA, 32)
             rect = pygame.Rect(i * width, 0, width, height)
             surface.blit(sprite_sheet, (0, 0), rect)
-            sprites.append(pygame.transform.scale2x(surface))
+            sprites.append(surface)
 
         if direction:
             all_sprites[image.replace(".png", "") + "_right"] = sprites
             all_sprites[image.replace(".png", "") + "_left"] = flip(sprites)
             all_sprites[image.replace(".png", "") + "_up"] = sprites
-            all_sprites[image.replace(".png", "") + "_down"] = flip(sprites)
+            all_sprites[image.replace(".png", "") + "_down"] = sprites
         else:
             all_sprites[image.replace(".png", "")] = sprites
 
@@ -52,11 +53,24 @@ def get_block(size1, size2):
     surface.blit(image, (0, 0), rect)
     return pygame.transform.scale2x(surface)
 
+def get_background_block(name, size1, size2):
+    path = join("assets", "Terrain", name)
+    image = pygame.image.load(path)
+    subsurface = image.subsurface((0, 0, size1, size2))
+    image = pygame.transform.scale2x(subsurface)
+    titles = []
+    for i in range(WIDTH // size1 + 1):
+        for j in range(HEIGHT // size2 + 1):
+            token = [i * size1, j * size2]
+            titles.append(token)
+    return titles, image
+    
+
 
 class Player(pygame.sprite.Sprite):
     COLOR = (255, 255, 0)
-    SPRITES = load_sprite_sheets("MainCharacters", "NinjaFrog", 32, 32, True)
-    ANIMATION_DELAY = 1
+    SPRITES = load_sprite_sheets("MainCharacters", "Tom", 58, 58, True)
+    ANIMATION_DELAY = 3
     def __init__(self, x, y , width, height):
         super().__init__()
         self.rect = pygame.Rect(x, y, width, height)
@@ -96,9 +110,12 @@ class Player(pygame.sprite.Sprite):
     def update_sprite(self):
         sprite_sheet = "idle"
         
-        if self.x_vel != 0 or self.y_vel != 0 or (self.x_vel != 0 and self.y_vel != 0):
+        if self.x_vel != 0 :
             sprite_sheet = "run"
-
+        if self.y_vel > 0 :
+            sprite_sheet = "down"
+        if self.y_vel < 0 :
+            sprite_sheet = "up"
         sprite_sheet_name = sprite_sheet + "_" + self.direction
         sprites = self.SPRITES[sprite_sheet_name]
         sprite_index = (self.animation_count //
@@ -188,7 +205,7 @@ def handle_move(player, objects: Block):
 
 def main(window):
     clock = pygame.time.Clock()
-    background, bg_image = get_background("Yellow.png")
+    background, bg_image = get_background_block("Overworld.png", 16, 16)
     player = Player(200, 100, 20, 20)
     block = [Block(200, 300, 96, 8)]
     run = True
