@@ -1,18 +1,15 @@
 import sys
-
-
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QSizePolicy, QMessageBox,QFrame
 from PyQt5.QtWidgets import*
 from PyQt5.QtCore import *
 from PyQt5 import QtGui,QtCore
 from PyQt5.QtGui import *
 import json
-
 import login_window
-
+import os
 
 def check_account(username:str,password:str):
-    with open('account.json', 'r') as file:
+    with open(os.path.join('Do_an', 'GUI', 'account.json'), 'r') as file:
         data = json.load(file)
         for acc in data:
             if acc['username'] == username:
@@ -141,7 +138,7 @@ class menu_Widget(QWidget):
         layout.addWidget(self.mainFrame, alignment=Qt.AlignCenter)
 
         self.setLayout(layout)
-        self.setMinimumSize(800,800)
+        self.setMinimumSize(1400,900)
     def back(self):
         self.W = login_window.loginWidget()
         self.close()

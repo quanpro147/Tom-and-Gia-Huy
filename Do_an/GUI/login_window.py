@@ -7,8 +7,9 @@ from PyQt5.QtGui import *
 import json
 import menu
 import Register
+import os
 def check_account(username:str,password:str):
-    with open('account.json', mode = 'r',encoding= 'utf8') as file:
+    with open(os.path.join('Do_an', 'GUI', 'account.json'), 'r') as file:
         data = json.load(file)
         for acc in data:
             if acc['username'] == username:
