@@ -2,10 +2,14 @@
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QFont 
+from PyQt5.QtGui import QFont, QIcon
 from PyQt5.QtCore import Qt
-from PyQt5.QtMultimedia import QSoundEffect
-from PyQt5.QtCore import QUrl
+#from PyQt5.QtMultimedia import QSoundEffect
+#from PyQt5.QtCore import QUrl
+#from PyQt5.QtMultimedia import QMediaPlayer
+#from PyQt5 import QtMultimedia as M
+from music import *
+
 
 import json
 
@@ -19,7 +23,7 @@ def save_data(data, file_name):
         json.dump(data, file, indent=4)
 def check_account(file_name, username, password):
     data = load_data(file_name)
-    if len(username) < 3 or len(password) < 6:
+    if len(username) < 6 or len(password) < 6:
         return -1
     for user in data["users"]:
         if user["username"] == username and user["password"] == password:
@@ -56,12 +60,18 @@ class LoginWidget(QWidget):
         self.password_label.setObjectName("password_label")
         self.login_button = QtWidgets.QPushButton(self.centralwidget)
         self.login_button.setGeometry(QtCore.QRect(270, 330, 221, 91))
+        self.bg_music_button = QtWidgets.QPushButton(self.centralwidget)
+        self.bg_music_button.setGeometry(QtCore.QRect(700, 30, 50, 50))
+        self.bg_music_button_2 = QtWidgets.QPushButton(self.centralwidget)
+        self.bg_music_button_2.setGeometry(QtCore.QRect(700, 80, 50, 50))
         font = QtGui.QFont()
         font.setFamily("Courier New")
         font.setPointSize(24)
         font.setWeight(50)
         self.login_button.setFont(font)
         self.login_button.setObjectName("login_button")
+        self.login_button.setFont(font)
+        self.login_button.setObjectName("Âm thanh")
         self.Register = QtWidgets.QPushButton(self.centralwidget)
         self.Register.setGeometry(QtCore.QRect(380, 480, 151, 51))
         font = QtGui.QFont()
@@ -79,12 +89,12 @@ class LoginWidget(QWidget):
         self.jerry_label = QtWidgets.QLabel(self.centralwidget)
         self.jerry_label.setGeometry(QtCore.QRect(550, 320, 241, 221))
         self.jerry_label.setText("")
-        self.jerry_label.setPixmap(QtGui.QPixmap("UI/image/jerry.png"))
+        self.jerry_label.setPixmap(QtGui.QPixmap("Do_an/UI/image/jerry.png"))
         self.jerry_label.setObjectName("jerry_label")
         self.tom_label = QtWidgets.QLabel(self.centralwidget)
         self.tom_label.setGeometry(QtCore.QRect(-10, 210, 231, 331))
         self.tom_label.setText("")
-        self.tom_label.setPixmap(QtGui.QPixmap("UI/image/Tom.png"))
+        self.tom_label.setPixmap(QtGui.QPixmap("Do_an/UI/image/Tom.png"))
         self.tom_label.setObjectName("tom_label")
         self.noAccount_label = QtWidgets.QLabel(self.centralwidget)
         self.noAccount_label.setGeometry(QtCore.QRect(170, 480, 191, 51))
@@ -108,17 +118,6 @@ class LoginWidget(QWidget):
         self.password_edit.setObjectName("password_edit")
         MainWindow.setCentralWidget(self.centralwidget)
 
-        # Tạo và cấu hình âm thanh (chưa xong)
-        self.sound_effect = QSoundEffect(self)
-        self.sound_effect.setSource(QUrl.fromLocalFile("Tom-and-Gia-huy/Do_an/UI/sound/clickSound.m4a"))
-
-        #Xử lí click chuột
-        self.login_button.clicked.connect(self.play_sound)
-        self.login_button.clicked.connect(self.login)
-        self.Register.clicked.connect(self.register)
-
-        
-
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
@@ -133,16 +132,35 @@ class LoginWidget(QWidget):
         self.Register.setText(_translate("MainWindow", "Đăng kí ngay"))
         self.GameName_label.setText(_translate("MainWindow", "Tâm và Gia Huy"))
         self.noAccount_label.setText(_translate("MainWindow", "Chưa có Tài Khoản?"))
+        self.bg_music_button.setIcon(QIcon("Do_an/UI/image/music.png"))
+        self.bg_music_button_2.setIcon(QIcon("Do_an/UI/image/mute.png"))
+        #âm thanh
+        #self.url = QtCore.QUrl.fromLocalFile('Do_an/UI/sound/bg_music.mp3')
+        #self.content = M.QMediaContent(self.url)
+        #self.player = M.QMediaPlayer()
+        #self.player.setMedia(self.content)
+        #self.player.stateChanged.connect(self.handleStateChanged)
+
+        #Xử lí click chuột
+        self.login_button.clicked.connect(self.login)
+        self.Register.clicked.connect(self.register)
+
+        self.sound = Sound()
+        self.sound.setUp()
+        self.bg_music_button.clicked.connect(self.sound.bgSound)
+        self.bg_music_button_2.clicked.connect(self.sound.pause_bgSound)
+        
 
 
     def login(self):
-        filename = "UI/account.json"
+        self.sound.clickSound()
+        filename = "Do_an/UI/account.json"
         username = self.username_edit.text()
         password = self.password_edit.text()
 
         # Thực hiện kiểm tra tên người dùng và mật khẩu ở đây
-        if check_account(filename, username,password) == 1 :
-            self.close
+        if check_account(filename, username,password) == 1:
+            self.close()
             self.MenuWindow = QtWidgets.QMainWindow()
             self.Menu = MenuWidget()
             self.Menu.setupUi(self.MenuWindow)
@@ -152,15 +170,24 @@ class LoginWidget(QWidget):
             QMessageBox.warning(self, "Lỗi", "Tên người dùng hoặc mật khẩu không đúng!")
 
     def register(self):
+        self.sound.clickSound()
+        
         self.RegWindow = QtWidgets.QMainWindow()
         self.Reg = RegisterWidget()
         self.Reg.setupUi(self.RegWindow)
         self.RegWindow.show()
     
-    #chưa xong
-    def play_sound(self):
-        # Phát âm thanh khi click vào nút
-        self.sound_effect.play()
+    #xử lí âm thanh
+    """ def bgSound(self):
+        self.player.play()
+    def pause_bgSound(self):
+        self.player.pause()
+
+    def handleStateChanged(self, state):
+        # Kiểm tra nếu âm thanh đã kết thúc
+        if state == QMediaPlayer.StoppedState:
+            # Phát lại âm thanh từ đầu
+            self.player.play() """
         
 class RegisterWidget(QWidget):
     def __init__(self):
@@ -193,7 +220,7 @@ class RegisterWidget(QWidget):
         self.bg_label = QtWidgets.QLabel(self.centralwidget)
         self.bg_label.setGeometry(QtCore.QRect(40, -50, 771, 351))
         self.bg_label.setText("")
-        self.bg_label.setPixmap(QtGui.QPixmap("UI/image/bg_register.webp"))
+        self.bg_label.setPixmap(QtGui.QPixmap("Do_an/UI/image/bg_register.webp"))
         self.bg_label.setObjectName("bg_label")
         self.username_edit = QtWidgets.QLineEdit(self.centralwidget)
         self.username_edit.setGeometry(QtCore.QRect(360, 310, 311, 51))
@@ -211,7 +238,7 @@ class RegisterWidget(QWidget):
         self.password_edit.setObjectName("password_edit")
         MainWindow.setCentralWidget(self.centralwidget)
 
-        self.register_button.clicked.connect(self.register)
+        
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -222,10 +249,11 @@ class RegisterWidget(QWidget):
         self.username_label.setText(_translate("MainWindow", "Tên Đăng Nhập:"))
         self.password_label.setText(_translate("MainWindow", "Mật khẩu: "))
         self.register_button.setText(_translate("MainWindow", "Đăng Kí"))
+        self.register_button.clicked.connect(self.register)
 
     #Bắt đầu xử lí
     def register(self):
-        filename = "UI/account.json"
+        filename = "Do_an/UI/account.json"
         username = self.username_edit.text()
         password = self.password_edit.text()
 
@@ -233,11 +261,11 @@ class RegisterWidget(QWidget):
         if check_account(filename, username,password) == 1 :
             QMessageBox.warning(self, "Lỗi", "Tên người dùng đã tồn tại!")
         elif check_account(filename, username, password) == -1:
-            QMessageBox.warning(self, "Lỗi", "Tên đăng nhập hoặc mật khẩu không đủ độ dài!")
+            QMessageBox.warning(self, "Lỗi", "Tên đăng nhập và mật khẩu phải có ít nhất 6 kí tự!")
         else:
             add_user(filename, username, password)
             QMessageBox.information(self, "Thông Báo", "Đăng Ký Thành Công!")
-        
+                   
 class MenuWidget(QWidget):
     def __init__(self):
         super().__init__()
@@ -248,35 +276,31 @@ class MenuWidget(QWidget):
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.newgame_button = QtWidgets.QPushButton(self.centralwidget)
-        self.newgame_button.setGeometry(QtCore.QRect(330, 160, 141, 42))
+        self.newgame_button.setGeometry(QtCore.QRect(330, 180, 141, 48))
         font = QtGui.QFont()
         font.setPointSize(16)
         self.newgame_button.setFont(font)
         self.newgame_button.setObjectName("newgame_button")
         self.loadgame_button = QtWidgets.QPushButton(self.centralwidget)
-        self.loadgame_button.setGeometry(QtCore.QRect(330, 240, 141, 42))
+        self.loadgame_button.setGeometry(QtCore.QRect(330, 270, 141, 48))
         font = QtGui.QFont()
         font.setPointSize(16)
         self.loadgame_button.setFont(font)
         self.loadgame_button.setObjectName("loadgame_button")
         self.help_button = QtWidgets.QPushButton(self.centralwidget)
-        self.help_button.setGeometry(QtCore.QRect(330, 320, 141, 42))
+        self.help_button.setGeometry(QtCore.QRect(330, 360, 141, 48))
         font = QtGui.QFont()
         font.setPointSize(16)
         self.help_button.setFont(font)
         self.help_button.setObjectName("help_button")
         self.About_button = QtWidgets.QPushButton(self.centralwidget)
-        self.About_button.setGeometry(QtCore.QRect(330, 400, 141, 42))
+        self.About_button.setGeometry(QtCore.QRect(330, 450, 141, 48))
         font = QtGui.QFont()
         font.setPointSize(16)
         self.About_button.setFont(font)
         self.About_button.setObjectName("About_button")
-        self.exit_button = QtWidgets.QPushButton(self.centralwidget)
-        self.exit_button.setGeometry(QtCore.QRect(330, 480, 141, 42))
         font = QtGui.QFont()
         font.setPointSize(16)
-        self.exit_button.setFont(font)
-        self.exit_button.setObjectName("exit_button")
         self.GameName_label = QtWidgets.QLabel(self.centralwidget)
         self.GameName_label.setGeometry(QtCore.QRect(180, 40, 431, 71))
         font = QtGui.QFont()
@@ -287,12 +311,12 @@ class MenuWidget(QWidget):
         self.tom_label = QtWidgets.QLabel(self.centralwidget)
         self.tom_label.setGeometry(QtCore.QRect(20, 190, 231, 331))
         self.tom_label.setText("")
-        self.tom_label.setPixmap(QtGui.QPixmap("UI/image/Tom.png"))
+        self.tom_label.setPixmap(QtGui.QPixmap("Do_an/UI/image/Tom.png"))
         self.tom_label.setObjectName("tom_label")
         self.jerry_label = QtWidgets.QLabel(self.centralwidget)
         self.jerry_label.setGeometry(QtCore.QRect(540, 300, 241, 221))
         self.jerry_label.setText("")
-        self.jerry_label.setPixmap(QtGui.QPixmap("UI/image/jerry.png"))
+        self.jerry_label.setPixmap(QtGui.QPixmap("Do_an/UI/image/jerry.png"))
         self.jerry_label.setObjectName("jerry_label")
         MainWindow.setCentralWidget(self.centralwidget)
 
@@ -306,10 +330,12 @@ class MenuWidget(QWidget):
         self.loadgame_button.setText(_translate("MainWindow", "Load Game"))
         self.help_button.setText(_translate("MainWindow", "Help"))
         self.About_button.setText(_translate("MainWindow", "About Us"))
-        self.exit_button.setText(_translate("MainWindow", "Exit Game"))
         self.GameName_label.setText(_translate("MainWindow", "Tâm và Gia Huy"))
 
+
+
 def login():
+    global app
     app = QtWidgets.QApplication(sys.argv)
     LoginWindow = QtWidgets.QMainWindow()
     ui = LoginWidget()
