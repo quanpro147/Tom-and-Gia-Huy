@@ -173,6 +173,7 @@ class LoginWidget(QWidget):
         self.sound.clickSound()
         
         self.RegWindow = QtWidgets.QMainWindow()
+        self.close()
         self.Reg = RegisterWidget()
         self.Reg.setupUi(self.RegWindow)
         self.RegWindow.show()
