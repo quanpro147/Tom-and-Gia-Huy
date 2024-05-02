@@ -1,6 +1,6 @@
 SIZE = WIDTH, HEIGHT = 1200, 700
 CELL_SIZE = 600//10
-FPS = 30
+FPS = 60
 VELOCITY = 5
 # some color rgb
 WHITE = (255, 255, 255)

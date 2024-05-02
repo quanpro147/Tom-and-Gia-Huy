@@ -11,10 +11,8 @@ class maze():
         self.grid = self.generate_grid()
         self.start = self.pick_random_entry_exit()
         self.end = self.pick_random_entry_exit(self.start)
-        self.transmuters = []
         self.solver = None
-        self.solutions = self.solve()
-        self.generation_path = None
+        # self.solutions = self.solve()
 
     def generate_grid(self):
         """
@@ -125,7 +123,7 @@ class maze():
     def solve(self):
         solutions = {}
         solutions['dfs'] = dfs(self) # dfs will return a list of path from begin to end point
-
+        solutions['A_star'] = A_star(self)
         return solutions
         
 

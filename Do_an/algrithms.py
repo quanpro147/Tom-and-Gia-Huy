@@ -61,6 +61,7 @@ def dfs(maze):
             elif not maze.grid[row_cur][col_cur].walls['left'] and not maze.grid[row_next][col_next].walls['right']:
                 unblock.append((row_next, col_next))
         return unblock
+    
     while (row_cur, col_cur) != end:     # While there are unvisited cells
         neighbour_list = maze.find_neighbours(row_cur, col_cur)    # Find neighbour indicies
         neighbour_list = maze.validate_neighbours_generate(neighbour_list)
@@ -80,6 +81,7 @@ def dfs(maze):
     return path
 
 def A_star(maze):
+
     start = maze.start
     end = maze.end
 
@@ -87,12 +89,48 @@ def A_star(maze):
         x1, y1 = cell1
         x2, y2 = cell2
         return abs(x1 - x2) + abs(y1 - y2)
-    
+    # check
     g_score = {cell: float('inf') for cell in maze.grid}
     g_score[start] = 0
     f_score = {cell: float('inf') for cell in maze.grid}
     f_score[start] = manhattan_dis(start, end)
     open = PriorityQueue()
     open.put((f_score[start], manhattan_dis(start, end), start))
+    path = {}
+
+    while not open.empty():
+        cur_cell = open.get()[2]
+        if cur_cell == end: break
+        for direction in ['top', 'right', 'left', 'bot']:
+            if not maze.grid[cur_cell[0]][cur_cell[1]].walls[direction]:
+                if direction == 'top':
+                    next_cell = (cur_cell[0] - 1, cur_cell[0])
+                elif direction == 'right':
+                    next_cell = (cur_cell[0], cur_cell[1] + 1)
+                elif direction == 'bot':
+                    next_cell = (cur_cell[0] + 1, cur_cell[1])
+                else:
+                    next_cell = (cur_cell[0], cur_cell[1] - 1)
+
+                g_score_tmp = g_score[cur_cell] + 1
+                f_score_tmp = g_score_tmp + manhattan_dis(cur_cell, next_cell)
+
+                if f_score_tmp < f_score[next_cell]:
+                    g_score[next_cell] = g_score_tmp
+                    f_score[next_cell] = f_score_tmp
+                    open.put((f_score_tmp, manhattan_dis(cur_cell, next_cell), next_cell))
+                    path[next_cell] = cur_cell
+    
+    solution = []
+    cell = start
+    while cell != end:
+        solution.append(cell)
+        cell = path[cell]
+    
+    return path
+
+    
+
+
     
     
