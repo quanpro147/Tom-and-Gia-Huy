@@ -142,7 +142,7 @@ class LoginWidget(QWidget):
 
         # Thực hiện kiểm tra tên người dùng và mật khẩu ở đây
         if check_account(filename, username,password) == 1 :
-            self.close
+            self.close()
             self.MenuWindow = QtWidgets.QMainWindow()
             self.Menu = MenuWidget()
             self.Menu.setupUi(self.MenuWindow)
@@ -153,6 +153,7 @@ class LoginWidget(QWidget):
 
     def register(self):
         self.RegWindow = QtWidgets.QMainWindow()
+        self.close()
         self.Reg = RegisterWidget()
         self.Reg.setupUi(self.RegWindow)
         self.RegWindow.show()

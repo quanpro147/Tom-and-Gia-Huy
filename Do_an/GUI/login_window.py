@@ -26,24 +26,31 @@ class loginWidget(QWidget):
 "\n"
 "")
 
+
         #create Frame
         self.frame_main = QFrame()
         self.frame_main.setFixedSize(400,600)
         self.frame_main.setStyleSheet("background-color:qlineargradient(x1: 0.338569, y1: 0.94055, x2: 0.992115, y2: 0.123027, stop: 0.071 rgba(255, 244, 228, 255), stop: 0.674 rgba(240, 246, 238, 255));border-radius:20px;box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.5)")
         self.frame_main.setGraphicsEffect(QGraphicsDropShadowEffect())
+        # create stackedwidget
+        self.stWidget = QStackedWidget(self.frame_main)
+        self.stWidget.setGeometry(QRect(0,0,400,600))
+        #create widget1
+        self.widget1 = QWidget()
+
         # icon and icon_button
         pass_icon = QIcon()
         user_icon = QIcon()
         pass_icon.addFile('icon/password.jpg')
         user_icon.addFile('icon/username.jpg')
-        self.pass_icon_button = QPushButton(self.frame_main)
-        self.user_icon_button = QPushButton(self.frame_main)
+        self.pass_icon_button = QPushButton(self.widget1)
+        self.user_icon_button = QPushButton(self.widget1)
         self.user_icon_button.setGeometry(QRect(50, 310, 40, 40))
         self.pass_icon_button.setGeometry(QRect(50, 380, 40, 40))
         self.user_icon_button.setIcon(user_icon)
         self.pass_icon_button.setIcon(pass_icon)
         #create "WELCOME" line
-        self.label_frame = QLabel(self.frame_main)
+        self.label_frame = QLabel(self.widget1)
         self.label_frame.setGeometry(0,120,400,100)
         self.label_frame.setStyleSheet(u"background-color:rgba(0, 146, 255, 0.65);\n"
         "font: 28pt \"Work Sans\";\n"
@@ -51,7 +58,7 @@ class loginWidget(QWidget):
         self.label_frame.setText("WELCOME")
         self.label_frame.setAlignment(Qt.AlignCenter)
         #user_name
-        self.User_name = QLineEdit(self.frame_main)
+        self.User_name = QLineEdit(self.widget1)
         self.User_name.setObjectName(u"lineEdit")
         self.User_name.setGeometry(QRect(90, 310, 220, 40))
         self.User_name.setStyleSheet(u"border:none;\n"
@@ -59,7 +66,7 @@ class loginWidget(QWidget):
                                     "background-color:rgba(39, 89, 245, 0.13);border-radius:14px;font: 10pt \"Work Sans\";")
         self.User_name.setPlaceholderText("username")
         #password
-        self.Password = QLineEdit(self.frame_main)
+        self.Password = QLineEdit(self.widget1)
         self.Password.setObjectName(u"lineEdit_2")
         self.Password.setGeometry(QRect(90, 380, 220, 40))
         self.Password.setStyleSheet(u"border:none;\n"
@@ -69,7 +76,7 @@ class loginWidget(QWidget):
         self.Password.setEchoMode(QLineEdit.Password)
 
         #create "Dont have an account ?"
-        self.label_2 = QLabel(self.frame_main)
+        self.label_2 = QLabel(self.widget1)
         self.label_2.setGeometry(QRect(70, 530, 161, 20))
         self.label_2.setStyleSheet(u"font: 9pt \"Space Grotesk\";color: rgba(0, 0, 245, 0.81);\n"
                                    "text-decoration: underline;qlineargradient(x1: 0.338569, y1: 0.94055, x2: 0.992115, y2: 0.123027, stop: 0.071 rgba(255, 244, 228, 255), stop: 0.674 rgba(240, 246, 238, 255));border-radius:20px;box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.5)"
@@ -79,7 +86,7 @@ class loginWidget(QWidget):
 
 
         #create button "login"
-        self.login_button = QPushButton(self.frame_main)
+        self.login_button = QPushButton(self.widget1)
         self.login_button.setObjectName(u"pushButton")
         self.login_button.setGeometry(QRect(80, 480, 240, 40))
         self.login_button.setCursor(QCursor(Qt.PointingHandCursor))
@@ -93,7 +100,7 @@ class loginWidget(QWidget):
         self.login_button.clicked.connect(self.login)
 
         # create "Sign up"
-        self.sign_up_button = QPushButton(self.frame_main)
+        self.sign_up_button = QPushButton(self.widget1)
         self.sign_up_button.setObjectName(u"pushButton_3")
         self.sign_up_button.setGeometry(QRect(240, 530, 81, 20))
         self.sign_up_button.setCursor(QCursor(Qt.PointingHandCursor))
@@ -109,6 +116,14 @@ class loginWidget(QWidget):
         layout.addWidget(self.frame_main, alignment=Qt.AlignCenter)
         self.setMinimumSize(1440, 900)
         self.setLayout(layout)
+        self.stWidget.addWidget(self.widget1)
+
+        #widget2
+        self.widget2 = Register.registerWidget()
+        self.stWidget.addWidget(self.widget2)
+        self.widget2.login_button.clicked.connect(self.login_window)
+        self.stWidget.setCurrentIndex(0)
+
     def login(self):
         username = self.User_name.text()
         password = self.Password.text()
@@ -118,109 +133,19 @@ class loginWidget(QWidget):
         elif (X == -1):
             QMessageBox.warning(self,"loi","account is not exist")
         else:
+            screenGeometry = QApplication.desktop().screenGeometry()
+            print(screenGeometry)
             self.menu_window()
     def register_window(self):
-        self.W = Register.registerWidget()
-        self.close()
-        self.W.show()
+        self.stWidget.setCurrentIndex(1)
     def menu_window(self):
         self.W =menu.menu_Widget()
         self.close()
-        self.W.show()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        self.W.showFullScreen()
+        print(self.W.width())
+        print(self.W.height())
+    def login_window(self):
+        self.stWidget.setCurrentIndex(0)
 
 
 
