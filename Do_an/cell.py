@@ -21,7 +21,7 @@ class cell():
             pygame.draw.line(screen, pygame.Color('darkorange'), (x, y), (x + CELL_SIZE, y), self.thickness)
         if self.walls['right']:
             pygame.draw.line(screen, pygame.Color('darkorange'), (x + CELL_SIZE, y), (x + CELL_SIZE, y + CELL_SIZE), self.thickness)
-        if self.walls['bottom']:
+        if self.walls['bot']:
             pygame.draw.line(screen, pygame.Color('darkorange'), (x + CELL_SIZE, y + CELL_SIZE), (x , y + CELL_SIZE), self.thickness)
         if self.walls['left']:
             pygame.draw.line(screen, pygame.Color('darkorange'), (x, y + CELL_SIZE), (x, y), self.thickness)
@@ -34,7 +34,7 @@ class cell():
             rects.append(pygame.Rect( (x, y), (CELL_SIZE, self.thickness) ))
         if self.walls['right']:
             rects.append(pygame.Rect( (x + CELL_SIZE, y), (self.thickness, CELL_SIZE) ))
-        if self.walls['bottom']:
+        if self.walls['bot']:
             rects.append(pygame.Rect( (x, y + CELL_SIZE), (CELL_SIZE , self.thickness) ))
         if self.walls['left']:
             rects.append(pygame.Rect( (x, y), (self.thickness, CELL_SIZE) ))

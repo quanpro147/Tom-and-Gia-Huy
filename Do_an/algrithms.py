@@ -52,15 +52,17 @@ def dfs(maze):
         """ Thic function use to find neighbours that can move """
         unblock = []
         for row_next, col_next in neighbours:
-            if not maze.grid[row_cur][col_cur].walls['top'] and not maze.grid[row_next][col_next].walls['bot']:
+            if not maze.grid[row_cur][col_cur].walls['top'] and not maze.grid[row_next][col_next].walls['bot'] and row_cur > row_next:
                 unblock.append((row_next, col_next))
-            elif not maze.grid[row_cur][col_cur].walls['right'] and not maze.grid[row_next][col_next].walls['left']:
+            elif not maze.grid[row_cur][col_cur].walls['right'] and not maze.grid[row_next][col_next].walls['left'] and col_cur < col_next:
                 unblock.append((row_next, col_next))
-            elif not maze.grid[row_cur][col_cur].walls['bot'] and not maze.grid[row_next][col_next].walls['top']:
+            elif not maze.grid[row_cur][col_cur].walls['bot'] and not maze.grid[row_next][col_next].walls['top'] and row_cur < row_next:
                 unblock.append((row_next, col_next))
-            elif not maze.grid[row_cur][col_cur].walls['left'] and not maze.grid[row_next][col_next].walls['right']:
+            elif not maze.grid[row_cur][col_cur].walls['left'] and not maze.grid[row_next][col_next].walls['right'] and col_cur > col_next:
                 unblock.append((row_next, col_next))
-        return unblock
+
+        if len(unblock) > 0: return unblock
+        else: return None
     
     while (row_cur, col_cur) != end:     # While there are unvisited cells
         neighbour_list = maze.find_neighbours(row_cur, col_cur)    # Find neighbour indicies
@@ -85,14 +87,19 @@ def A_star(maze):
     start = maze.start
     end = maze.end
 
+    grid = []
+    for i in range(maze.num_rows):
+        for j in range(maze.num_cols):
+            grid.append((i, j))
+
     def manhattan_dis(cell1, cell2):
         x1, y1 = cell1
         x2, y2 = cell2
         return abs(x1 - x2) + abs(y1 - y2)
     # check
-    g_score = {cell: float('inf') for cell in maze.grid}
+    g_score = {cell: float('inf') for cell in grid}
     g_score[start] = 0
-    f_score = {cell: float('inf') for cell in maze.grid}
+    f_score = {cell: float('inf') for cell in grid}
     f_score[start] = manhattan_dis(start, end)
     open = PriorityQueue()
     open.put((f_score[start], manhattan_dis(start, end), start))
@@ -103,17 +110,17 @@ def A_star(maze):
         if cur_cell == end: break
         for direction in ['top', 'right', 'left', 'bot']:
             if not maze.grid[cur_cell[0]][cur_cell[1]].walls[direction]:
-                if direction == 'top':
+                if direction == 'top' and cur_cell[0] != 0:
                     next_cell = (cur_cell[0] - 1, cur_cell[0])
-                elif direction == 'right':
+                elif direction == 'right' and cur_cell[1] != maze.num_cols - 1:
                     next_cell = (cur_cell[0], cur_cell[1] + 1)
-                elif direction == 'bot':
+                elif direction == 'bot' and cur_cell[0] != maze.num_rows - 1:
                     next_cell = (cur_cell[0] + 1, cur_cell[1])
-                else:
+                elif cur_cell[1] != 0:
                     next_cell = (cur_cell[0], cur_cell[1] - 1)
 
                 g_score_tmp = g_score[cur_cell] + 1
-                f_score_tmp = g_score_tmp + manhattan_dis(cur_cell, next_cell)
+                f_score_tmp = g_score_tmp + manhattan_dis(next_cell, end)
 
                 if f_score_tmp < f_score[next_cell]:
                     g_score[next_cell] = g_score_tmp
@@ -122,8 +129,8 @@ def A_star(maze):
                     path[next_cell] = cur_cell
     
     solution = []
-    cell = start
-    while cell != end:
+    cell = end
+    while cell != start:
         solution.append(cell)
         cell = path[cell]
     
