@@ -258,7 +258,7 @@ class RegisterWidget(QWidget):
         password = self.password_edit.text()
 
         # Thực hiện kiểm tra tên người dùng và mật khẩu ở đây
-        if check_account(filename, username,password) == 1 :
+        if check_account(filename, username,password) == 1:
             QMessageBox.warning(self, "Lỗi", "Tên người dùng đã tồn tại!")
         elif check_account(filename, username, password) == -1:
             QMessageBox.warning(self, "Lỗi", "Tên đăng nhập và mật khẩu phải có ít nhất 6 kí tự!")
