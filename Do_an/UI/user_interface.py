@@ -4,10 +4,11 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QFont, QIcon
 from PyQt5.QtCore import Qt
-from PyQt5.QtMultimedia import QSoundEffect
-from PyQt5.QtCore import QUrl
-from PyQt5.QtMultimedia import QMediaPlayer
-from PyQt5 import QtMultimedia as M
+#from PyQt5.QtMultimedia import QSoundEffect
+#from PyQt5.QtCore import QUrl
+#from PyQt5.QtMultimedia import QMediaPlayer
+#from PyQt5 import QtMultimedia as M
+from music import *
 
 
 import json
@@ -134,20 +135,25 @@ class LoginWidget(QWidget):
         self.bg_music_button.setIcon(QIcon("Do_an/UI/image/music.png"))
         self.bg_music_button_2.setIcon(QIcon("Do_an/UI/image/mute.png"))
         #âm thanh
-        self.url = QtCore.QUrl.fromLocalFile('Do_an/UI/sound/bg_music.mp3')
-        self.content = M.QMediaContent(self.url)
-        self.player = M.QMediaPlayer()
-        self.player.setMedia(self.content)
-        self.player.stateChanged.connect(self.handleStateChanged)
+        #self.url = QtCore.QUrl.fromLocalFile('Do_an/UI/sound/bg_music.mp3')
+        #self.content = M.QMediaContent(self.url)
+        #self.player = M.QMediaPlayer()
+        #self.player.setMedia(self.content)
+        #self.player.stateChanged.connect(self.handleStateChanged)
 
         #Xử lí click chuột
         self.login_button.clicked.connect(self.login)
         self.Register.clicked.connect(self.register)
-        self.bg_music_button.clicked.connect(self.bg_sound)
-        self.bg_music_button_2.clicked.connect(self.mute_sound)
+
+        self.sound = Sound()
+        self.sound.setUp()
+        self.bg_music_button.clicked.connect(self.sound.bgSound)
+        self.bg_music_button_2.clicked.connect(self.sound.pause_bgSound)
+        
 
 
     def login(self):
+        self.sound.clickSound()
         filename = "Do_an/UI/account.json"
         username = self.username_edit.text()
         password = self.password_edit.text()
@@ -164,23 +170,24 @@ class LoginWidget(QWidget):
             QMessageBox.warning(self, "Lỗi", "Tên người dùng hoặc mật khẩu không đúng!")
 
     def register(self):
-        self.close()
+        self.sound.clickSound()
+        
         self.RegWindow = QtWidgets.QMainWindow()
         self.Reg = RegisterWidget()
         self.Reg.setupUi(self.RegWindow)
         self.RegWindow.show()
     
     #xử lí âm thanh
-    def bg_sound(self):
+    """ def bgSound(self):
         self.player.play()
-    def mute_sound(self):
+    def pause_bgSound(self):
         self.player.pause()
 
     def handleStateChanged(self, state):
         # Kiểm tra nếu âm thanh đã kết thúc
         if state == QMediaPlayer.StoppedState:
             # Phát lại âm thanh từ đầu
-            self.player.play()
+            self.player.play() """
         
 class RegisterWidget(QWidget):
     def __init__(self):
