@@ -159,7 +159,7 @@ class LoginWidget(QWidget):
         password = self.password_edit.text()
 
         # Thực hiện kiểm tra tên người dùng và mật khẩu ở đây
-        if check_account(filename, username,password) == 1:
+        if check_account(filename, username,password) == 1 :
             self.close()
             self.MenuWindow = QtWidgets.QMainWindow()
             self.Menu = MenuWidget()
