@@ -3,16 +3,22 @@ from cell import cell
 from algrithms import *
 
 class maze():
-    def __init__(self, num_rows, num_cols):
-        
+    def __init__(self, num_rows, num_cols, auto_set_entry = True):
+        """
+        num_rows is the number of row of maze and num_cols is the number of col of maze
+        auto_set_trence = True if player don't choose entry, exit and = False if player choose paticular entry, exit
+
+        """
         self.num_rows = num_rows
         self.num_cols = num_cols
         self.grid_size = num_rows * num_cols
         self.grid = self.generate_grid()
-        self.start = self.pick_random_entry_exit()
-        self.end = self.pick_random_entry_exit(self.start)
-        self.solver = None
-        # self.solutions = self.solve()
+        if auto_set_entry == True:
+            self.start = self.pick_random_entry_exit()
+            self.end = self.pick_random_entry_exit(self.start)
+        else:
+            self.start = None
+            self.end = None
 
     def generate_grid(self):
         """
@@ -86,45 +92,58 @@ class maze():
         else:
             return None   
         
-    def pick_random_entry_exit(self, used_entry_exit=None):
+    def pick_random_entry_exit(self, start=None):
         """
         Function that picks random coordinates along the maze boundary to represent either
         the entry or exit point of the maze. Makes sure they are not at the same place.
 
         Args:
-            used_entry_exit
+            start
 
         Return:
 
         """
-        rng_entry_exit = used_entry_exit    # Initialize with used value
+        entry = start    # Initialize with used value
 
-        # Try until unused location along boundary is found.
-        while rng_entry_exit == used_entry_exit:
-            rng_side = random.randint(0, 3)
+        if start is None:
+            while entry == start:
+                rand_side = random.randint(0, 3)
+                if (rand_side == 0):     # Top side
+                    entry = (0, random.randint(0, self.num_cols-1))
+                elif (rand_side == 2):   # Bottom side
+                    entry = (self.num_rows-1, random.randint(0, self.num_cols-1))
+                elif (rand_side == 1):   # Right side
+                    entry = (random.randint(0, self.num_rows-1), self.num_cols-1)
+                elif (rand_side == 3):   # Left side
+                    entry = (random.randint(0, self.num_rows-1), 0)
 
-            if (rng_side == 0):     # Top side
-                rng_entry_exit = (0, random.randint(0, self.num_cols-1))
+        else:
+            if start[0] == 0:
+                entry = (self.num_rows-1, random.randint(0, self.num_cols-1))
+            elif start[0] == self.num_rows-1:
+                entry = (0, random.randint(0, self.num_cols-1))
+            elif start[1] == 0:
+                entry = (random.randint(0, self.num_rows-1), self.num_cols-1)
+            else:
+                entry = (random.randint(0, self.num_rows-1), 0)
 
-            elif (rng_side == 2):   # Bottom side
-                rng_entry_exit = (self.num_rows-1, random.randint(0, self.num_cols-1))
+        return entry       # Return entry/exit that is different from exit/entry
 
-            elif (rng_side == 1):   # Right side
-                rng_entry_exit = (random.randint(0, self.num_rows-1), self.num_cols-1)
-
-            elif (rng_side == 3):   # Left side
-                rng_entry_exit = (random.randint(0, self.num_rows-1), 0)
-
-        return rng_entry_exit       # Return entry/exit that is different from exit/entry
+    def set_entry_exit(self, _entry, _exit):
+        """ This function use to set entry and exit which is entered by user """
+        if _entry == _exit:
+            print('Entry and exit cannot be similar')
+            # raise error f{entry and exit cannot be similar}
+        self.start = _entry
+        self.end = _exit
 
     def generate_maze(self):
         self = depth_first_recursive_backtracker(self, self.start)
-    
-    def solve(self):
-        solutions = {}
-        solutions['dfs'] = dfs(self) # dfs will return a list of path from begin to end point
-        solutions['A_star'] = A_star(self)
-        return solutions
+
+    def solve_maze(self, algorithm):
+        if algorithm == 'bfs': return bfs(self)
+        elif algorithm == 'dfs': return dfs(self)
+        else: return None
         
 
     

@@ -1,8 +1,11 @@
 import pygame
 import constants
+from save_load import saveloadsystem
 
 WIDTH, HEIGHT = constants.SIZE
 FPS = constants.FPS
+
+saveloadmangager = saveloadsystem('.save', 'Do_an/SaveLoad')
 
 def draw_window(screen):
     screen.fill(pygame.Color(constants.WHITE))
@@ -14,7 +17,7 @@ def draw_maze(maze, screen):
             for j in range(maze.num_cols):    
                 maze.grid[i][j].draw(screen)
 
-def game(Maze):
+def game(Maze = saveloadmangager.load('maze')):
 
     pygame.init()
     pygame.display.set_caption('Tam and Gia Huy')
@@ -27,7 +30,9 @@ def game(Maze):
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                exit()
+                saveloadmangager.save('maze', Maze)
+                pygame.quit()
+                quit()
 
         pygame.display.flip() 
         clock.tick(FPS)
