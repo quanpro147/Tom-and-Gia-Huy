@@ -59,27 +59,27 @@ def unblock_neighbours(maze, row_cur, col_cur, neighbours):
         
 def bfs(maze):
 
-    start = tuple(maze.start)
+    start = tuple(maze.start) # lay pos start va end
     end = maze.end
-    paths = [[]]
+    paths = [[]] # tao duong di co san o start
     paths[0].append(start)
     cur_cell = start
-    maze.grid[cur_cell[0]][cur_cell[1]].is_visited = True
+    maze.grid[cur_cell[0]][cur_cell[1]].is_visited = True # cho o start da duoc tham
     Flag = True
     while Flag:
-        path = paths[0]
-        paths = paths[1:]   
-        cur_cell = path[-1]
-        neighbour_list = maze.find_neighbours(cur_cell[0], cur_cell[1])    
+        path = paths[0] # lay path dau tien cua paths
+        paths = paths[1:]   # xoa path dau tien
+        cur_cell = path[-1] # lay cur_cell la o cuoi cung cua path dang xet
+        neighbour_list = maze.find_neighbours(cur_cell[0], cur_cell[1])  # tim tat ca cac o ke ben co the di 
         neighbour_list = maze.validate_neighbours_generate(neighbour_list)
         neighbour_list = unblock_neighbours(maze, cur_cell[0], cur_cell[1], neighbour_list)
         if neighbour_list is not None:
-            for neighbour in neighbour_list:
-                maze.grid[neighbour[0]][neighbour[1]].is_visited = True
-                add = path.copy()
+            for neighbour in neighbour_list: # xet tung o trong cac o lien ke
+                maze.grid[neighbour[0]][neighbour[1]].is_visited = True # cho cac o duoc xet da dc tham
+                add = path.copy() # tao bien phu add de luu duong di dang xet + o ke tiep dang duoc xet
                 add.append(neighbour)
-                paths.append(add)
-                if neighbour == end: 
+                paths.append(add) # them duong di moi vao sau paths
+                if neighbour == end: # neu o ke tiep la end thi dung lap
                     Flag = False
 
     for i in range(maze.num_rows):
@@ -170,8 +170,6 @@ def A_star(maze):
     
     return solution
 
-def new_func(next_cell):
-    return next_cell
 
     
 
