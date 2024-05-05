@@ -1,0 +1,12 @@
+SIZE = WIDTH, HEIGHT = 1200, 700
+CELL_SIZE = 600//10
+FPS = 60
+VELOCITY = 5
+# some color rgb
+WHITE = (255, 255, 255)
+RED = (255, 0, 0)
+BLUE = (0, 0, 255)
+GREEN = (0, 255, 0)
+BLACK = (60, 60, 60)
+PINK = (238, 130, 238)
+YELLOW = (255, 165, 0)
