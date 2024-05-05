@@ -1,11 +1,9 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QSizePolicy, QMessageBox,QFrame
+from PyQt5.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QMessageBox
 from PyQt5.QtWidgets import*
 from PyQt5.QtCore import *
-from PyQt5 import QtGui,QtCore
 from PyQt5.QtGui import *
 import json
-import login_window
 import os
 
 def check_account(username:str,password:str):
@@ -21,17 +19,6 @@ def check_account(username:str,password:str):
 class registerWidget(QWidget):
     def __init__(self):
         super().__init__()
-        #self.setWindowTitle("HI")
-        #self.setStyleSheet(u"background-color:qradialgradient(cx: 0.1, cy: 0.2, radius: 1, fx: 1, fy: 1, stop: 0.42 rgba(176, 229, 208, 255), stop: 0.936 rgba(92, 202, 238, 105));\n"
-#"\n"
-#"")
-
-        #create Frame
-        #self.frame_main = QFrame()
-        #self.frame_main.setFixedSize(400,600)
-        #self.frame_main.setStyleSheet("background-color:qlineargradient(x1: 0.338569, y1: 0.94055, x2: 0.992115, y2: 0.123027, stop: 0.071 rgba(255, 244, 228, 255), stop: 0.674 rgba(240, 246, 238, 255));border-radius:20px;box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.5)")
-        #self.frame_main.setGraphicsEffect(QGraphicsDropShadowEffect())
-        #create "WELCOME" line
         self.label_frame = QLabel(self)
         self.label_frame.setGeometry(0,120,400,100)
         self.label_frame.setStyleSheet(u"background-color:rgba(0, 146, 255, 0.65);\n"
@@ -100,12 +87,7 @@ class registerWidget(QWidget):
                                         "text-decoration: underline;\n"
                                         "")
         self.login_button.setText("Login")
-
-        #
-        #layout = QVBoxLayout()
-        #layout.addWidget(self.frame_main, alignment=Qt.AlignCenter)
-        #self.setMinimumSize(860, 900)
-        #self.setLayout(layout)
+        
     def register(self):
         username = self.User_name.text()
         password = self.Password.text()
