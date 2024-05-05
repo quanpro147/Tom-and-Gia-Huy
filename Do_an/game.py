@@ -1,11 +1,13 @@
 import pygame
 import constants
+from maze import maze
 from save_load import saveloadsystem
+from algrithms import bfs, dfs
 
 WIDTH, HEIGHT = constants.SIZE
 FPS = constants.FPS
 
-saveloadmangager = saveloadsystem('.save', 'Do_an/SaveLoad')
+saveloadmangager = saveloadsystem('.save', 'Do_an/SaveLoad/maze_manager')
 
 def draw_window(screen):
     screen.fill(pygame.Color(constants.WHITE))
@@ -17,7 +19,7 @@ def draw_maze(maze, screen):
             for j in range(maze.num_cols):    
                 maze.grid[i][j].draw(screen)
 
-def game(Maze = saveloadmangager.load('maze')):
+def game(Maze):
 
     pygame.init()
     pygame.display.set_caption('Tam and Gia Huy')
@@ -30,12 +32,16 @@ def game(Maze = saveloadmangager.load('maze')):
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                saveloadmangager.save('maze', Maze)
+                #saveloadmangager.save_maze('quy', Maze)
                 pygame.quit()
                 quit()
 
         pygame.display.flip() 
         clock.tick(FPS)
+if __name__ == '__main__':
+     Maze = saveloadmangager.load_maze('quy')
+     game(Maze)
+
         
         
 
