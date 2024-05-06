@@ -57,9 +57,9 @@ def unblock_neighbours(maze, row_cur, col_cur, neighbours):
         if len(unblock) > 0: return unblock
         else: return None
         
-def bfs(maze):
+def bfs(maze, start = None):
 
-    start = tuple(maze.start) # lay pos start va end
+    if start is None: start = maze.start # lay pos start va end
     end = maze.end
     paths = [[]] # tao duong di co san o start
     paths[0].append(start)
@@ -85,10 +85,12 @@ def bfs(maze):
     for i in range(maze.num_rows):
         for j in range(maze.num_cols):
             maze.grid[i][j].is_visited = False
+
     return paths[-1]
 
-def dfs(maze):
-    start = maze.start
+def dfs(maze, start = None):
+
+    if start is None: start = maze.start
     end = maze.end
     cur_cell = start            
     path = [cur_cell]              
@@ -113,6 +115,34 @@ def dfs(maze):
         for j in range(maze.num_cols):
             maze.grid[i][j].is_visited = False 
     return path
+
+def hint(maze, cur, algorithms):
+    """ 
+    Ham nay dung de goi y duong di tiep theo
+    Arg
+    - maze: la me cung dang giai
+    - cur: la vi tri hien tai cua nguoi choi
+    Return: huong di tiep theo [top, right, bot, left]
+
+    """
+    if algorithms == 'dfs':
+        path = dfs(maze, cur)
+    elif algorithms == 'bfs':
+        path = bfs(maze, cur)
+    else:
+        #raise error
+        return False
+    next_cell = path[1]
+    if next_cell[0] == cur[0]:
+        if next_cell[1] - cur[1] == 1:
+            return 'right'
+        else:
+            return 'left'
+    elif next_cell[1] == cur[1]:
+        if next_cell[0] - cur[0] == 1:
+            return 'bot'
+        else:
+            return 'top'
 
 def A_star(maze):
 
