@@ -4,12 +4,15 @@ import random
 import pygame
 from os import listdir 
 from os.path import isfile, join
-from maze import maze
-
+from maze import *
+mode = [True] 
+Path1 = join("Do_an","button")
+button = [['LoadButton.png',(650,200,150,45)],['MenuButton.png',(650,100,150,45)],['QuitButton.png',(650,400,150,45)],['Resume.png',(650,300,150,45)]]
+makebutton = [[pygame.image.load(join(Path1,a[0])),a[1]] for a in button]
 
 pygame.init()
 pygame.display.set_caption("Tam an Gia Huy")
-mazes = maze(40, 40)
+mazes = maze(20, 20)
 mazes.generate_maze()
 BG_COLOR = (255, 255, 255)
 WIDTH, HEIGHT, = 1400, 800
@@ -36,7 +39,7 @@ def flip(sprites):
     return [pygame.transform.flip(sprite, True, False) for sprite in sprites]
 # load tất cả khung ảnh để tạo chuyển động
 def load_sprite_sheets(dir1, dir2, width, height, direction=False):
-    path = join("Do_an/assets", dir1, dir2)
+    path = join("Do_an","assets", dir1, dir2)
     images = [f for f in listdir(path) if isfile(join(path, f))]
 
     all_sprites = {}
@@ -63,7 +66,7 @@ def load_sprite_sheets(dir1, dir2, width, height, direction=False):
 
 # lấy 1 khối chan ten
 def get_block(size1, size2, dx, dy):
-    path = join("Do_an/assets", "Terrain", "landscape.png")
+    path = join("Do_an","assets", "Terrain", "landscape.png")
     image = pygame.image.load(path).convert_alpha()
     surface = pygame.Surface((size1, size2), pygame.SRCALPHA, 32)
     rect = pygame.Rect(dx ,dy, size1, size2)
@@ -72,7 +75,7 @@ def get_block(size1, size2, dx, dy):
 
 # lấy 1 khối
 def get_background_block(name, size1, size2):
-    path = join("Do_an/assets", "Terrain", name)
+    path = join("Do_an","assets", "Terrain", name)
     image = pygame.image.load(path)
     subsurface = image.subsurface((0, 0, size1, size2))
     image = subsurface
@@ -84,7 +87,7 @@ def get_background_block(name, size1, size2):
     return titles, image
 
 def draw_background(name, dx, dy, size1, size2):
-    image = pygame.image.load(join("Do_an/assets", "Terrain", name))
+    image = pygame.image.load(join("Do_an","assets", "Terrain", name))
     subsurface = image.subsurface((dx, dy, size1, size2))
     image = subsurface
     titles = []
@@ -210,16 +213,26 @@ class Jerry(Object):
             self.animation_count = 0
 
 
-def draw(window,background, bg_image, background2, bg_image2, player, Object, offset_x, offset_y): #bg_image2, background2)
-    for title in background:
-        window.blit(bg_image, tuple(title)) 
-    for title in background2:
-        window.blit(bg_image2, tuple([title[0] - offset_x, title[1] - offset_y]))
-    for obj in Object:
-        obj.draw(window, offset_x, offset_y)
-
-    player.draw(window, offset_x, offset_y)
-    pygame.display.update()
+def draw(window,background, bg_image, background2, bg_image2, player, Object, offset_x, offset_y,button,menubutton,mode): #bg_image2, background2)
+    if mode[0]:
+        for title in background:
+            window.blit(bg_image, tuple(title)) 
+        for title in background2:
+            window.blit(bg_image2, tuple([title[0] - offset_x, title[1] - offset_y]))
+        for obj in Object:
+            obj.draw(window, offset_x, offset_y)
+        
+        player.draw(window, offset_x, offset_y)
+        window.blit(menubutton,(1300,20,20,21))
+        pygame.display.update()
+    else:
+        window.fill('white')
+        for title in background:
+            window.blit(bg_image, tuple(title)) 
+        for i in button:
+            window.blit(i[0],i[1])
+        window.blit(menubutton,(1300,20,20,21))
+        pygame.display.update()
 
 # va chạm player với vật thể
 def collide(player : Player, objects, dx, dy):
@@ -294,6 +307,7 @@ def get_maze_titles(mazes):
 def main(window):
     clock = pygame.time.Clock()
     background, bg_image = get_background_block("Overworld.png", 16, 16)
+    Menubutton = pygame.image.load(join("Do_an","Assets","Menu","Buttons","Settings.png"))
     background2, bg_image2 = draw_background("atlat.png", 0, 464, 16, 16)
     player = Player(WIDTH // 2 + 32, HEIGHT // 2 + 32, 5, 5)
     jerry = Jerry(-LOCAL[0][1] * 64 + WIDTH // 2 + (LOCAL[1][1]) * 64 + 32  ,-LOCAL[0][0] * 64 + HEIGHT // 2 + (LOCAL[1][0]) * 64 + 16 ,34,58, 0,0 )
@@ -312,11 +326,20 @@ def main(window):
             if even.type == pygame.QUIT:
                 run = False
                 break
+            if even.type == pygame.MOUSEBUTTONDOWN:
+                pos = pygame.mouse.get_pos()
+                if even.button == 1 and pos[0] >= 1300 and pos[0] <= 1320 and pos[1]>=20 and pos[1] <= 41:
+                    mode[0]= not mode[0]
+                if even.button == 1 and pos[0] >= 650 and pos[0] <= 800 and pos[1]>=400 and pos[1] <= 445 and mode[0] == False:
+                    run = False
+                    break
+                
+        
         player.loop(FPS)
         jerry.loop()
         handle_move(player, block)
         
-        draw(window,background, bg_image, background2,bg_image2 , player, block, offset_x, offset_y) 
+        draw(window,background, bg_image, background2,bg_image2 , player, block, offset_x, offset_y,makebutton,Menubutton,mode) 
         if ((player.rect.right - offset_x >= WIDTH - scroll_area_width) and player.x_vel > 0) or (
                 (player.rect.left - offset_x <= scroll_area_width) and player.x_vel < 0):
             offset_x += player.x_vel
