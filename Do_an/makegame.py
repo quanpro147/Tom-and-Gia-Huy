@@ -4,7 +4,7 @@ import random
 import pygame
 from os import listdir 
 from os.path import isfile, join
-from maze import *
+from maze import maze
 
 
 pygame.init()
@@ -36,7 +36,7 @@ def flip(sprites):
     return [pygame.transform.flip(sprite, True, False) for sprite in sprites]
 # load tất cả khung ảnh để tạo chuyển động
 def load_sprite_sheets(dir1, dir2, width, height, direction=False):
-    path = join("assets", dir1, dir2)
+    path = join("Do_an/assets", dir1, dir2)
     images = [f for f in listdir(path) if isfile(join(path, f))]
 
     all_sprites = {}
@@ -63,7 +63,7 @@ def load_sprite_sheets(dir1, dir2, width, height, direction=False):
 
 # lấy 1 khối chan ten
 def get_block(size1, size2, dx, dy):
-    path = join("assets", "Terrain", "landscape.png")
+    path = join("Do_an/assets", "Terrain", "landscape.png")
     image = pygame.image.load(path).convert_alpha()
     surface = pygame.Surface((size1, size2), pygame.SRCALPHA, 32)
     rect = pygame.Rect(dx ,dy, size1, size2)
@@ -72,7 +72,7 @@ def get_block(size1, size2, dx, dy):
 
 # lấy 1 khối
 def get_background_block(name, size1, size2):
-    path = join("assets", "Terrain", name)
+    path = join("Do_an/assets", "Terrain", name)
     image = pygame.image.load(path)
     subsurface = image.subsurface((0, 0, size1, size2))
     image = subsurface
@@ -84,7 +84,7 @@ def get_background_block(name, size1, size2):
     return titles, image
 
 def draw_background(name, dx, dy, size1, size2):
-    image = pygame.image.load(join("assets", "Terrain", name))
+    image = pygame.image.load(join("Do_an/assets", "Terrain", name))
     subsurface = image.subsurface((dx, dy, size1, size2))
     image = subsurface
     titles = []
