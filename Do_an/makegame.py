@@ -4,24 +4,20 @@ import random
 import pygame
 from os import listdir 
 from os.path import isfile, join
-from PyQt5 import QtWidgets
-from UI.mainUI import GiaoDien
-from maze import *
-menu_check = [False]
-mode = [True] 
-Path1 = join("Do_an","button")
-button = [['LoadButton.png',(650,200,150,45)],['MenuButton.png',(650,100,150,45)],['QuitButton.png',(650,400,150,45)],['Resume.png',(650,300,150,45)]]
-makebutton = [[pygame.image.load(join(Path1,a[0])),a[1]] for a in button]
+from maze import maze
+
 
 pygame.init()
 pygame.display.set_caption("Tam an Gia Huy")
-mazes = maze(20, 20)
+mazes = maze(40, 40)
 mazes.generate_maze()
 BG_COLOR = (255, 255, 255)
 WIDTH, HEIGHT, = 1400, 800
 FPS = 60
-PLAYER_VEL = 10      
+PLAYER_VEL = 10
 window = pygame.display.set_mode((WIDTH, HEIGHT))
+
+
 def get_index(mazes):
     index = []
     for i in range(mazes.num_rows):
@@ -44,7 +40,6 @@ def flip(sprites):
 def load_sprite_sheets(dir1, dir2, width, height, direction=False):
     path = join("Do_an","assets", dir1, dir2)
     images = [f for f in listdir(path) if isfile(join(path, f))]
-
     all_sprites = {}
 
     for image in images:
@@ -272,23 +267,6 @@ def handle_move(player, objects):
             pygame.quit()
             quit()
 
-
-
-def get_index(mazes):
-    index = []
-    for i in range(mazes.num_rows):
-        for j in range(mazes.num_cols):
-            if i == 0 and mazes.grid[i][j].walls["top"]:
-                index.append([i, j])
-            if j == 0 and mazes.grid[i][j].walls["left"]:
-                index.append([i, j])
-
-            if j == mazes.num_rows - 1 and mazes.grid[i][j].walls["right"]:
-                index.append([i, j])
-            if i == mazes.num_rows - 1 and mazes.grid[i][j].walls["bot"]:
-                index.append([i, j])
-    return index
-
 def get_maze_titles(mazes):
     block = []
     if mazes.num_rows >= 0:
@@ -306,9 +284,8 @@ def get_maze_titles(mazes):
                     block.append(Block(-LOCAL[0][1]* 64 + x + 64 +  WIDTH //2, -LOCAL[0][0] * 64 + y + HEIGHT // 2, 16, 96, 212, 112))
     return block
 
-
 def main(window):
-    clock = pygame.time.Clock()
+    
     background, bg_image = get_background_block("Overworld.png", 16, 16)
     Menubutton = pygame.image.load(join("Do_an","Assets","Menu","Buttons","Settings.png"))
     background2, bg_image2 = draw_background("atlat.png", 0, 464, 16, 16)
@@ -324,7 +301,6 @@ def main(window):
     scroll_area_width = 700
     scroll_area_height = 400
     while run:
-        clock.tick(FPS)
         for even in pygame.event.get():
             if even.type == pygame.QUIT:
                 run = False
