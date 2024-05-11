@@ -15,7 +15,7 @@ makebutton = [[pygame.image.load(join(Path1,a[0])),a[1]] for a in button]
 
 pygame.init()
 pygame.display.set_caption("Tam an Gia Huy")
-mazes = maze(40, 40)
+mazes = maze(20, 20)
 mazes.generate_maze()
 BG_COLOR = (255, 255, 255)
 WIDTH, HEIGHT, = 1400, 800
