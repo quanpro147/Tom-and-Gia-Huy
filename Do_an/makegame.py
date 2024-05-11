@@ -4,8 +4,14 @@ import random
 import pygame
 from os import listdir 
 from os.path import isfile, join
-from maze import maze
-
+from PyQt5 import QtWidgets
+from UI.mainUI import GiaoDien
+from maze import *
+menu_check = [False]
+mode = [True] 
+Path1 = join("Do_an","button")
+button = [['LoadButton.png',(650,200,150,45)],['MenuButton.png',(650,100,150,45)],['QuitButton.png',(650,400,150,45)],['Resume.png',(650,300,150,45)]]
+makebutton = [[pygame.image.load(join(Path1,a[0])),a[1]] for a in button]
 
 pygame.init()
 pygame.display.set_caption("Tam an Gia Huy")
