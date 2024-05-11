@@ -1,5 +1,5 @@
 import random
-from queue import PriorityQueue, Queue
+
 ##### GENERATE MAZE ALGRITHM
 def depth_first_recursive_backtracker(maze, start_coor):
 
@@ -38,7 +38,6 @@ def depth_first_recursive_backtracker(maze, start_coor):
     
     return maze
 ##### SOLVE MAZE ALGRITHMS
-#class solver():
 
 def unblock_neighbours(maze, row_cur, col_cur, neighbours):
         """ Thic function use to find neighbours that can move """
@@ -74,7 +73,7 @@ def bfs(maze, start = None):
         neighbour_list = maze.validate_neighbours_generate(neighbour_list)
         neighbour_list = unblock_neighbours(maze, cur_cell[0], cur_cell[1], neighbour_list)
         if neighbour_list is not None:
-            for neighbour in neighbour_list: # xet tung o trong cac o lien ke
+            for neighbour in neighbour_list: # xet tung o trong cac o lien ke                
                 maze.grid[neighbour[0]][neighbour[1]].is_visited = True # cho cac o duoc xet da dc tham
                 add = path.copy() # tao bien phu add de luu duong di dang xet + o ke tiep dang duoc xet
                 add.append(neighbour)
@@ -144,65 +143,3 @@ def hint(maze, cur, algorithms):
         else:
             return 'top'
 
-def A_star(maze):
-
-    start = maze.start
-    end = maze.end
-
-    grid = []
-    for i in range(maze.num_rows):
-        for j in range(maze.num_cols):
-            grid.append((i, j))
-
-    def manhattan_dis(cell1, cell2):
-        x1, y1 = cell1
-        x2, y2 = cell2
-        return abs(x1 - x2) + abs(y1 - y2)
-    # check
-    g_score = {cell: float('inf') for cell in grid}
-    g_score[start] = 0
-    f_score = {cell: float('inf') for cell in grid}
-    f_score[start] = manhattan_dis(start, end)
-    open = PriorityQueue()
-    open.put((f_score[start], manhattan_dis(start, end), start))
-    path = {}
-
-    while not open.empty():
-        cur_cell = open.get()[2]
-        if cur_cell == end: break
-        for direction in ['top', 'right', 'left', 'bot']:
-            if not maze.grid[cur_cell[0]][cur_cell[1]].walls[direction]:
-                next_cell = None
-                if direction == 'top' and cur_cell[0] != 0:
-                    next_cell = (cur_cell[0] - 1, cur_cell[0])
-                elif direction == 'right' and cur_cell[1] != maze.num_cols - 1:
-                    next_cell = (cur_cell[0], cur_cell[1] + 1)
-                elif direction == 'bot' and cur_cell[0] != maze.num_rows - 1:
-                    next_cell = (cur_cell[0] + 1, cur_cell[1])
-                elif direction == 'left' and cur_cell[1] != 0:
-                    next_cell = (cur_cell[0], cur_cell[1] - 1)
-                if next_cell is None and cur_cell == start:
-                    continue
-                g_score_tmp = g_score[cur_cell] + 1
-                f_score_tmp = g_score_tmp + manhattan_dis(next_cell, end)
-
-                if f_score_tmp < f_score[next_cell]:
-                    g_score[next_cell] = g_score_tmp
-                    f_score[next_cell] = f_score_tmp
-                    open.put((f_score_tmp, manhattan_dis(next_cell, end), next_cell))
-                    path[next_cell] = cur_cell
-    
-    solution = {}
-    cell = end
-    while cell != start:
-        solution[path[cell]] = cell
-        cell = path[cell]
-    
-    return solution
-
-
-    
-
-
-    
-    

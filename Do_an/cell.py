@@ -11,33 +11,33 @@ class cell():
         self.walls = {'top': True, 'bot': True, 'right': True, 'left': True}
         self.is_visited = False
         self.is_entry_exit = None
-        self.thickness = 4
+        self.thickness = 3
 
-    def draw(self, screen):
+    def draw(self, screen, cell_size):
         """ This function use to draw wall if it appear """
-        x, y = self.x * CELL_SIZE, self.y * CELL_SIZE
+        x, y = self.x * cell_size, self.y * cell_size
 
         if self.walls['top']:
-            pygame.draw.line(screen, pygame.Color('darkorange'), (x, y), (x + CELL_SIZE, y), self.thickness)
+            pygame.draw.line(screen, pygame.Color('black'), (x, y), (x + cell_size, y), self.thickness)
         if self.walls['right']:
-            pygame.draw.line(screen, pygame.Color('darkorange'), (x + CELL_SIZE, y), (x + CELL_SIZE, y + CELL_SIZE), self.thickness)
+            pygame.draw.line(screen, pygame.Color('black'), (x + cell_size, y), (x + cell_size, y + cell_size), self.thickness)
         if self.walls['bot']:
-            pygame.draw.line(screen, pygame.Color('darkorange'), (x + CELL_SIZE, y + CELL_SIZE), (x , y + CELL_SIZE), self.thickness)
+            pygame.draw.line(screen, pygame.Color('black'), (x + cell_size, y + cell_size), (x , y + cell_size), self.thickness)
         if self.walls['left']:
-            pygame.draw.line(screen, pygame.Color('darkorange'), (x, y + CELL_SIZE), (x, y), self.thickness)
+            pygame.draw.line(screen, pygame.Color('black'), (x, y + cell_size), (x, y), self.thickness)
 
-    def get_rects(self):
+    def get_rects(self, cell_size):
         """ This function use to mask the wall to process collision """
         rects = []
-        x, y = self.x * CELL_SIZE, self.y * CELL_SIZE
+        x, y = self.x * cell_size, self.y * cell_size
         if self.walls['top']:
-            rects.append(pygame.Rect( (x, y), (CELL_SIZE, self.thickness) ))
+            rects.append(pygame.Rect( (x, y), (cell_size, self.thickness) ))
         if self.walls['right']:
-            rects.append(pygame.Rect( (x + CELL_SIZE, y), (self.thickness, CELL_SIZE) ))
+            rects.append(pygame.Rect( (x + cell_size, y), (self.thickness, cell_size) ))
         if self.walls['bot']:
-            rects.append(pygame.Rect( (x, y + CELL_SIZE), (CELL_SIZE , self.thickness) ))
+            rects.append(pygame.Rect( (x, y + cell_size), (cell_size , self.thickness) ))
         if self.walls['left']:
-            rects.append(pygame.Rect( (x, y), (self.thickness, CELL_SIZE) ))
+            rects.append(pygame.Rect( (x, y), (self.thickness, cell_size) ))
         return rects
     
     def remove_walls(self, neighbour_row, neighbour_col):

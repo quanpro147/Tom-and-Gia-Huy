@@ -131,11 +131,7 @@ class maze():
 
     def set_entry_exit(self, _entry, _exit):
         """ This function use to set entry and exit which is entered by user """
-        if _entry == _exit:
-            print('Entry and exit cannot be similar')
-            # raise error f{entry and exit cannot be similar}
         self.start = _entry
-        self.end = _exit
 
     def generate_maze(self):
         self = depth_first_recursive_backtracker(self, self.start)
@@ -144,14 +140,3 @@ class maze():
         if algorithm == 'bfs': return bfs(self)
         elif algorithm == 'dfs': return dfs(self)
         else: return None
-        
-
-    
-    
-
-
-
-
-
-
-    

@@ -2,7 +2,6 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QIcon
 from UI.user_interface.music import Sound
 
-
 class NewGame_Window(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -141,5 +140,7 @@ class NewGame_Window(object):
             if self.ez.isChecked():
                 if self.random.isChecked():
                     makegame.main(makegame.window)
+
+
 
 
