@@ -1,0 +1,48 @@
+[
+   {
+    "name":"game1",
+    "maze":[]
+   },
+   {
+    "name":"game2",
+    "maze":[]
+   },
+   {
+    "name":"game3",
+    "maze":[]
+   },
+   {
+      "name":"game4",
+      "maze":[]
+     },
+     {
+      "name":"game5",
+      "maze":[]
+     },
+     {
+      "name":"game6",
+      "maze":[]
+     },
+     {
+      "name":"game7",
+      "maze":[]
+     },
+     {
+      "name":"game8",
+      "maze":[]
+     },
+     {
+      "name":"game9",
+      "maze":[]
+     },
+     {
+      "name":"game10",
+      "maze":[]
+     },
+     {
+      "name":"game11",
+      "maze":[]
+     }
+
+
+]
