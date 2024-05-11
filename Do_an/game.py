@@ -5,7 +5,7 @@ from algrithms import *
 import time
 
 class Game():
-    def __init__(self, level, mode = None):
+    def __init__(self, level, mode = None, random_start_end = None):
         pygame.init()
         pygame.display.set_caption('Maze Game')
         self.WINDOW_SIZE = 1202, 802
@@ -17,7 +17,38 @@ class Game():
         self.algorithm = None
         self.tile = None
         self.font = pygame.font.Font('freesansbold.ttf', 32)
+        self.player = Player(None, None)
+        self.random_start = random_start_end
 
+    # Player funtions
+    def handle_move(self):
+        cur_row, cur_col = self.player.row, self.player.col
+        key = pygame.key.get_pressed()
+        if (key[pygame.K_LEFT] or key[pygame.K_a]) and self.player.col > 0 and not self.maze.grid[cur_row][cur_col].walls['left']:
+            self.player.move('left')
+        elif (key[pygame.K_RIGHT] or key[pygame.K_d]) and self.player.col < self.maze.num_cols-1 and not self.maze.grid[cur_row][cur_col].walls['right']:
+            self.player.move('right')
+        elif (key[pygame.K_UP] or key[pygame.K_w]) and self.player.row > 0 and not self.maze.grid[cur_row][cur_col].walls['top']:
+            self.player.move('top')
+        elif (key[pygame.K_DOWN] or key[pygame.K_s]) and self.player.row < self.maze.num_rows-1 and not self.maze.grid[cur_row][cur_col].walls['bot']:
+            self.player.move('bot')
+
+    def handle_hint(self):
+        cur = self.player.row, self.player.col
+        _hint = hint(self.maze, cur, 'dfs')
+        key = pygame.key.get_pressed()
+        if key[pygame.K_h]:
+            if _hint == 'top':
+                return self.player.row-1, self.player.col
+            elif _hint == 'bot':
+                return self.player.row+1, self.player.col
+            elif _hint == 'right':
+                return self.player.row, self.player.col+1
+            elif _hint == 'left':
+                return self.player.row, self.player.col-1
+        else: return None
+
+    # Setting functions
     def set_algorithm(self, algorithm):
         self.algorithm = algorithm
     
@@ -35,6 +66,7 @@ class Game():
         pygame.display.update()
         self.clock.tick(60)
 
+    # Draw functions
     def draw_text(self, text, color, x, y):
         text_font = pygame.font.SysFont('Arial', 30)
         img = text_font.render(text, True, color)
@@ -62,7 +94,8 @@ class Game():
     def draw(self):
         self.screen.fill('white')
         self.draw_maze()
-            
+
+    # Game funtions   
     def check_event(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -158,8 +191,30 @@ class Game():
                                 running = False
                     time.sleep(1)
                     self.update()
-        else: # che do nguoi choi
-            pass
+        elif self.mode == 'not_auto': # che do nguoi choi
+            start = self.maze.start
+            end = self.maze.end
+            self.player.row, self.player.col = start[0], start[1]
+            
+            while running:
+                self.check_event()
+                self.draw()
+                # upload time
+                timer.update()
+                if not timer.active:
+                    _time += 1      
+                    timer.activate()
+                timer.draw(self.screen, _time)
+                self.handle_move()
+                if (self.player.row, self.player.col) == end:
+                    running = False
+                self.draw_cur((self.player.row, self.player.col))
+                hint_cell = self.handle_hint()
+                if hint_cell is not None:
+                        pygame.draw.rect(self.screen, (0, 255, 0), (hint_cell[1]*self.tile + 2, hint_cell[0]*self.tile + 2, self.tile - 4, self.tile - 4))
+                self.update()
+                time.sleep(0.1)
+            
 class Timer:
     def __init__(self, duration, font):
         self.duration = duration 
@@ -193,14 +248,20 @@ class Timer:
         screen.blit(text_suf, (900, 50))     
 
 class Player:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-        self.image 
-    def move(self):
-        pass
+    def __init__(self, row, col):
+        self.row = row
+        self.col = col
+
+    def move(self, direction):
+        if direction == 'top':
+            self.row -= 1
+        elif direction == 'bot':
+            self.row += 1
+        elif direction == 'right':
+            self.col += 1
+        elif direction == 'left':
+            self.col -= 1
 
 if __name__ == '__main__':
-    game = Game('easy', 'auto')
-    game.set_algorithm('dfs')
+    game = Game('easy', 'not_auto')
     game.run()

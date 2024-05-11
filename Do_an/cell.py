@@ -1,5 +1,4 @@
 import pygame
-from constants import *
 
 class cell():
 
@@ -25,20 +24,6 @@ class cell():
             pygame.draw.line(screen, pygame.Color('black'), (x + cell_size, y + cell_size), (x , y + cell_size), self.thickness)
         if self.walls['left']:
             pygame.draw.line(screen, pygame.Color('black'), (x, y + cell_size), (x, y), self.thickness)
-
-    def get_rects(self, cell_size):
-        """ This function use to mask the wall to process collision """
-        rects = []
-        x, y = self.x * cell_size, self.y * cell_size
-        if self.walls['top']:
-            rects.append(pygame.Rect( (x, y), (cell_size, self.thickness) ))
-        if self.walls['right']:
-            rects.append(pygame.Rect( (x + cell_size, y), (self.thickness, cell_size) ))
-        if self.walls['bot']:
-            rects.append(pygame.Rect( (x, y + cell_size), (cell_size , self.thickness) ))
-        if self.walls['left']:
-            rects.append(pygame.Rect( (x, y), (self.thickness, cell_size) ))
-        return rects
     
     def remove_walls(self, neighbour_row, neighbour_col):
         """

@@ -13,7 +13,7 @@ class saveloadsystem():
             pickle.dump(data, f)
 
     def process_maze_to_save(self,name_file, maze):
-        """ Ham nay dung de xu them maze vao mot maze_manager chua cac maze khac """
+        """ Ham nay dung de them maze muon luu vao maze_manager quan ly cac maze khac """
         try:
             maze_manager = self.load_data()
             maze_manager[name_file] = maze
