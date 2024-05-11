@@ -1,7 +1,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QIcon
 from UI.user_interface.music import Sound
-
+from UI.mainUI import GiaoDien
 
 class NewGame_Window(object):
     def setupUi(self, MainWindow):
@@ -140,6 +140,15 @@ class NewGame_Window(object):
         if self.human.isChecked():
             if self.ez.isChecked():
                 if self.random.isChecked():
-                    makegame.main(makegame.window)
+                    MainWindow.close()
+                    check = makegame.main(makegame.window)
+                    
+        if(check):
+            print(check)
+            MenuWindow = QtWidgets.QMainWindow()
+            Menu = MenuWidget()
+            Menu.setupUi(self.MenuWindow)
+            MenuWindow.show()
+                    
 
 

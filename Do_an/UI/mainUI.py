@@ -8,6 +8,8 @@ def GiaoDien():
     ui = LoginWidget()
     ui.setupUi(LoginWindow)
     LoginWindow.show()
+    print(123)
     sys.exit(app.exec_())
+    print(123)
 
 #GiaoDien()
