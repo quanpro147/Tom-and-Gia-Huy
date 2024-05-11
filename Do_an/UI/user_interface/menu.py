@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QIcon
 from UI.user_interface.music import Sound
 from UI.user_interface.data_process import *
+from UI.Menu.new import NewGame_Window
 
 class MenuWidget(QWidget):
     def __init__(self):
@@ -110,15 +111,21 @@ class MenuWidget(QWidget):
     def newGame(self, MainWindow):
         self.sound.clickSound()
         self.sound.pause_bgSound()
-        from UI.Menu.new import NewGame_Window
+        
         self.NewWindow = QtWidgets.QMainWindow()
         self.New = NewGame_Window()
         self.New.setupUi(self.NewWindow)
-        self.NewWindow.show()
         MainWindow.close()
+        self.NewWindow.show()
+        
     def loadGame(self, MainWindow):
         self.sound.clickSound()
         self.sound.pause_bgSound()
+        from UI.Menu.load import LoadWidget
+        self.Load = LoadWidget()
+        self.Load.show()
+        MainWindow.close()
+
     def help(self, MainWindow):
         self.sound.clickSound()
         self.sound.pause_bgSound()

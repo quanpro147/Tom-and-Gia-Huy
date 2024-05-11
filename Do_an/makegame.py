@@ -4,7 +4,10 @@ import random
 import pygame
 from os import listdir 
 from os.path import isfile, join
+from PyQt5 import QtWidgets
+from UI.mainUI import GiaoDien
 from maze import *
+menu_check = [False]
 mode = [True] 
 Path1 = join("Do_an","button")
 button = [['LoadButton.png',(650,200,150,45)],['MenuButton.png',(650,100,150,45)],['QuitButton.png',(650,400,150,45)],['Resume.png',(650,300,150,45)]]
@@ -333,8 +336,14 @@ def main(window):
                 if even.button == 1 and pos[0] >= 650 and pos[0] <= 800 and pos[1]>=400 and pos[1] <= 445 and mode[0] == False:
                     run = False
                     break
-                
-        
+                if even.button == 1 and pos[0] >= 650 and pos[0] <= 800 and pos[1]>=300 and pos[1] <=345 and mode[0] == False:
+                    mode[0] = not mode[0]
+                if even.button == 1 and pos[0] >= 650 and pos[0] <= 800 and pos[1]>=100 and pos[1] <=145 and mode[0] == False:
+                    run = False
+                    menu_check[0] = not menu_check[0]
+                    break
+
+    
         player.loop(FPS)
         jerry.loop()
         handle_move(player, block)
@@ -348,7 +357,10 @@ def main(window):
             offset_y += player.y_vel
         
     pygame.quit()
-    quit()
+    #app = QtWidgets.QApplication(sys.argv)
+    #sys.exit(app.exec_())
+    return menu_check[0]
+
 
 if __name__ == "__main__":
 
