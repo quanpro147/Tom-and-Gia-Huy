@@ -4,6 +4,81 @@ from maze import maze
 from algrithms import *
 import time
 
+class Button:
+	def __init__(self, x, y, image, scale):
+		width = image.get_width()
+		height = image.get_height()
+		self.image = pygame.transform.scale(image, (int(width * scale), int(height * scale)))
+		self.rect = self.image.get_rect()
+		self.rect.topleft = (x, y)
+		self.clicked = False
+
+	def draw(self, surface):
+		action = False
+		#get mouse position
+		pos = pygame.mouse.get_pos()
+
+		#check mouseover and clicked conditions
+		if self.rect.collidepoint(pos):
+			if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False:
+				self.clicked = True
+				action = True
+
+		if pygame.mouse.get_pressed()[0] == 0:
+			self.clicked = False
+
+		#draw button on screen
+		surface.blit(self.image, (self.rect.x, self.rect.y))
+
+		return action
+    
+class Timer:
+    def __init__(self, duration, font):
+        self.duration = duration 
+        self.active = False
+        self.font = font
+        self.start = 0
+        self.time = time
+
+    def activate(self):
+        self.active = True
+        self.start = get_ticks()
+
+    def deactivate(self):
+        self.active = False
+        self.start = 0
+
+    def update(self):
+        if self.active:
+            cur_time = get_ticks()
+            if cur_time - self.start >= self.duration:
+                self.deactivate()
+
+    def time_text(self, _time):
+        hou = _time//3600
+        min = (_time - hou*3600)//60
+        sec = _time - hou*3600 - min*60
+        return str('Time: {}:{}:{}'.format(hou, min, sec))
+    
+    def draw(self, screen, _time):
+        text_suf = self.font.render(self.time_text(_time), True, 'black')
+        screen.blit(text_suf, (900, 50))     
+
+class Player:
+    def __init__(self, row, col):
+        self.row = row
+        self.col = col
+
+    def move(self, direction):
+        if direction == 'top':
+            self.row -= 1
+        elif direction == 'bot':
+            self.row += 1
+        elif direction == 'right':
+            self.col += 1
+        elif direction == 'left':
+            self.col -= 1
+
 class Game():
     def __init__(self, level, mode = None, random_start_end = None):
         pygame.init()
@@ -19,6 +94,20 @@ class Game():
         self.font = pygame.font.Font('freesansbold.ttf', 32)
         self.player = Player(None, None)
         self.random_start = random_start_end
+        self.buttons = self.button()
+
+    def button(self):
+        # load img
+        resume_img = pygame.image.load('Do_an/button/Resume.png').convert_alpha()
+        load_img = pygame.image.load('Do_an/button/LoadButton.png').convert_alpha()
+        menu_img = pygame.image.load('Do_an/button/MenuButton.png').convert_alpha()
+        quit_img = pygame.image.load('Do_an/button/QuitButton.png').convert_alpha()
+        # create button
+        resume_button = Button(500, 200, resume_img, 1)
+        load_button = Button(500, 300, load_img, 1)
+        menu_button = Button(500, 400, menu_img, 1)
+        quit_button = Button(500, 500, quit_img, 1)
+        return [resume_button, load_button, menu_button, quit_button]
 
     # Player funtions
     def handle_move(self):
@@ -67,6 +156,10 @@ class Game():
         self.clock.tick(60)
 
     # Draw functions
+    def draw_button(self):
+        for button in self.buttons:
+            button.draw(self.screen)
+
     def draw_text(self, text, color, x, y):
         text_font = pygame.font.SysFont('Arial', 30)
         img = text_font.render(text, True, color)
@@ -96,12 +189,6 @@ class Game():
         self.draw_maze()
 
     # Game funtions   
-    def check_event(self):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                quit()
-
     def run(self):
         self.new_game()
         running = True
@@ -195,73 +282,51 @@ class Game():
             start = self.maze.start
             end = self.maze.end
             self.player.row, self.player.col = start[0], start[1]
-            
+            game_paused = False
+
             while running:
-                self.check_event()
                 self.draw()
-                # upload time
+                # check event
+                if game_paused == True:
+                    if self.buttons[0].draw(self.screen):
+                        game_paused = False
+                    if self.buttons[1].draw(self.screen):
+                        pass
+                    if self.buttons[2].draw(self.screen):
+                        pass
+                    if self.buttons[3].draw(self.screen):
+                        running = False
+                for event in pygame.event.get():
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_SPACE:
+                            game_paused = True
+                        
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        quit()
+                
+                #if game_paused == True: continue
+                # process time
                 timer.update()
                 if not timer.active:
                     _time += 1      
                     timer.activate()
                 timer.draw(self.screen, _time)
+                # process move (press w,a,s,d or up,down,right,left)
                 self.handle_move()
                 if (self.player.row, self.player.col) == end:
                     running = False
                 self.draw_cur((self.player.row, self.player.col))
-                hint_cell = self.handle_hint()
+                # process hint(press H)
+                hint_cell = self.handle_hint()    
                 if hint_cell is not None:
                         pygame.draw.rect(self.screen, (0, 255, 0), (hint_cell[1]*self.tile + 2, hint_cell[0]*self.tile + 2, self.tile - 4, self.tile - 4))
                 self.update()
                 time.sleep(0.1)
             
-class Timer:
-    def __init__(self, duration, font):
-        self.duration = duration 
-        self.active = False
-        self.font = font
-        self.start = 0
-        self.time = time
 
-    def activate(self):
-        self.active = True
-        self.start = get_ticks()
 
-    def deactivate(self):
-        self.active = False
-        self.start = 0
-
-    def update(self):
-        if self.active:
-            cur_time = get_ticks()
-            if cur_time - self.start >= self.duration:
-                self.deactivate()
-
-    def time_text(self, _time):
-        hou = _time//3600
-        min = (_time - hou*3600)//60
-        sec = _time - hou*3600 - min*60
-        return str('Time: {}:{}:{}'.format(hou, min, sec))
     
-    def draw(self, screen, _time):
-        text_suf = self.font.render(self.time_text(_time), True, 'black')
-        screen.blit(text_suf, (900, 50))     
-
-class Player:
-    def __init__(self, row, col):
-        self.row = row
-        self.col = col
-
-    def move(self, direction):
-        if direction == 'top':
-            self.row -= 1
-        elif direction == 'bot':
-            self.row += 1
-        elif direction == 'right':
-            self.col += 1
-        elif direction == 'left':
-            self.col -= 1
-
 if __name__ == '__main__':
     game = Game('easy', 'not_auto')
     game.run()
