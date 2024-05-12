@@ -2,6 +2,7 @@ import pygame
 from pygame.time import get_ticks
 from maze import maze
 from algrithms import *
+from save_load import *
 import time
 
 class Button:
@@ -79,8 +80,8 @@ class Player:
         elif direction == 'left':
             self.col -= 1
 
-class Game():
-    def __init__(self, level, mode = None, random_start_end = None):
+class Game:
+    def __init__(self, level, mode):
         pygame.init()
         pygame.display.set_caption('Maze Game')
         self.WINDOW_SIZE = 1202, 802
@@ -89,25 +90,52 @@ class Game():
         self.level = level
         self.mode = mode
         self.maze = None
-        self.algorithm = None
+        self.algorithm = 'dfs'
         self.tile = None
         self.font = pygame.font.Font('freesansbold.ttf', 32)
         self.player = Player(None, None)
-        self.random_start = random_start_end
         self.buttons = self.button()
+        self.start, self.end = None, None
+        self.record = 0
+        self.rank = None
+        self.file_name = ''
 
     def button(self):
         # load img
         resume_img = pygame.image.load('Do_an/button/Resume.png').convert_alpha()
         load_img = pygame.image.load('Do_an/button/LoadButton.png').convert_alpha()
         menu_img = pygame.image.load('Do_an/button/MenuButton.png').convert_alpha()
+        options_img = pygame.image.load('Do_an/button/OptionsButton.png').convert_alpha()
         quit_img = pygame.image.load('Do_an/button/QuitButton.png').convert_alpha()
+        change_alg_img = pygame.image.load('Do_an/button/Change_AlgButton.png').convert_alpha()
+        back_img = pygame.image.load('Do_an/button/BackButton.png').convert_alpha()
+        play_again_img = pygame.image.load('Do_an/button/Play_againButton.png').convert_alpha()
+        save_img = pygame.image.load('Do_an/button/SaveButton.png').convert_alpha()
+        accept_img = pygame.image.load('Do_an/button/AcceptButton.png').convert_alpha()
+        cancel_img = pygame.image.load('Do_an/button/CancelButton.png').convert_alpha()
         # create button
         resume_button = Button(500, 200, resume_img, 1)
         load_button = Button(500, 300, load_img, 1)
         menu_button = Button(500, 400, menu_img, 1)
-        quit_button = Button(500, 500, quit_img, 1)
-        return [resume_button, load_button, menu_button, quit_button]
+        options_button = Button(500, 500, options_img, 1)
+        quit_button = Button(500, 600, quit_img, 1)
+        change_alg_button = Button(500, 450, change_alg_img, 1)
+        back_button = Button(500, 550, back_img, 1)
+        play_again_button = Button(400, 150, play_again_img, 1)
+        save_button = Button(400, 200, save_img, 1)
+        accept_button = Button(600, 300, accept_img, 1)
+        cancel_button = Button(400, 300, cancel_img, 1)
+        return {'resume': resume_button, 
+                'load': load_button,
+                'main_menu': menu_button,
+                'options': options_button,
+                'quit': quit_button,
+                'chang_alg': change_alg_button,
+                'back': back_button,
+                'play_again': play_again_button,
+                'save': save_button,
+                'accept': accept_button,
+                'cancel': cancel_button}
 
     # Player funtions
     def handle_move(self):
@@ -124,7 +152,7 @@ class Game():
 
     def handle_hint(self):
         cur = self.player.row, self.player.col
-        _hint = hint(self.maze, cur, 'dfs')
+        _hint = hint(self.maze, cur, self.algorithm)
         key = pygame.key.get_pressed()
         if key[pygame.K_h]:
             if _hint == 'top':
@@ -138,35 +166,41 @@ class Game():
         else: return None
 
     # Setting functions
+    def set_start_end(self, start, end):
+        self.start = start
+        self.end = end
+
     def set_algorithm(self, algorithm):
         self.algorithm = algorithm
     
     def new_game(self):
         if self.level == 'easy':
-            self.maze = maze(20, 20)
+            self.maze = maze(10, 10)
         elif self.level == 'medium':
             self.maze = maze(40, 40)
         elif self.level == 'hard':
-            self.maze = maze(100, 100)
+            self.maze = maze(100, 100)  
+
         self.maze.generate_maze()
+        if self.start is not None:
+            self.maze.start = self.start
+            self.maze.end = self.end
         self.tile = 800//self.maze.num_rows
 
     def update(self):
         pygame.display.update()
         self.clock.tick(60)
 
+    def save(self):
+        pass
     # Draw functions
-    def draw_button(self):
-        for button in self.buttons:
-            button.draw(self.screen)
-
     def draw_text(self, text, color, x, y):
-        text_font = pygame.font.SysFont('Arial', 30)
-        img = text_font.render(text, True, color)
+        img = self.font.render(text, True, color)
         self.screen.blit(img, (x, y))
 
     def draw_cur(self, cur_cell):
         pygame.draw.rect(self.screen, (255, 0, 0), (cur_cell[1]*self.tile + 2, cur_cell[0]*self.tile + 2, self.tile - 4, self.tile - 4))
+        pygame.display.update()
 
     def draw_maze(self):
         for i in range(self.maze.num_rows):
@@ -179,154 +213,292 @@ class Game():
             pygame.draw.rect(self.screen, 'darkviolet', (cell_y*self.tile + 2, cell_x*self.tile + 2, self.tile - 4, self.tile - 4)) 
         pygame.display.update()
 
-    def draw_solution(self, path):
-        for cell_x, cell_y in path:
-            pygame.draw.rect(self.screen, 'chartreuse2', (cell_y*self.tile + self.tile//4, cell_x*self.tile + self.tile//4, self.tile//2, self.tile//2))
-        pygame.display.update()
-
     def draw(self):
         self.screen.fill('white')
         self.draw_maze()
-
+    
+    # Event funtions
+    def record_text(self, _time):
+        hou = _time//3600
+        min = (_time - hou*3600)//60
+        sec = _time - hou*3600 - min*60
+        return str('Time of completion: {}:{}:{}'.format(hou, min, sec))
+    
+    def ranking(self):
+        pass
+    
     # Game funtions   
     def run(self):
+
         self.new_game()
         running = True
+        running_dfs = True
         _time = 0
         timer = Timer(1000, self.font)
         timer.activate()
+        pause = False
+        menu_state = 'menu'
 
-        if self.mode == 'auto': # che do may choi
-            if self.algorithm == 'dfs': # dung thuat toan dfs
-
-                solution = dfs(self.maze)
-                solution_path = []
+        if self.mode == 'auto': 
+            while running:          
+                cur_cell = self.maze.start
                 end = self.maze.end
-                cur_cell = self.maze.start         
-                path = [cur_cell]              
-                self.maze.grid[cur_cell[0]][cur_cell[1]].is_visited = True     
-                visited_cells = [] 
-
-                while running:
-                    self.check_event()
+                if self.algorithm == 'dfs': running_dfs = True
+                else: running_dfs = False
+                
+                # dfs
+                if running_dfs:
+                    path_dfs = [cur_cell]              
+                    self.maze.grid[cur_cell[0]][cur_cell[1]].is_visited = True     
+                    visited_cells = []
+                while running_dfs:
                     self.draw()
-                    # upload time
+                    # check event
+                    if pause:
+                        if menu_state == 'menu':
+                            if self.buttons['resume'].draw(self.screen): # resume
+                                pause = False
+                            if self.buttons['load'].draw(self.screen): # load
+                                pass
+                            if self.buttons['main_menu'].draw(self.screen): # main_menu
+                                pass
+                            if self.buttons['options'].draw(self.screen): # options
+                                menu_state = 'options'
+                            if self.buttons['quit'].draw(self.screen): # quit
+                                running = False
+
+                        elif menu_state == 'options':
+                            self.draw_text('{}'.format(self.algorithm), 'black', 500, 500)
+                            if self.buttons['chang_alg'].draw(self.screen): # chang_alg
+                                if self.algorithm == 'dfs': 
+                                    self.set_algorithm('bfs') 
+                                    running_dfs = False
+                                elif self.algorithm == 'bfs': 
+                                    self.set_algorithm('dfs')                                   
+                                    running_dfs = True
+                                self.maze.start = cur_cell
+                                for i in range(self.maze.num_rows):
+                                        for j in range(self.maze.num_cols):
+                                            self.maze.grid[i][j].is_visited = False 
+                            if self.buttons['back'].draw(self.screen): # back
+                                menu_state = 'menu'
+
+                    for event in pygame.event.get():
+                        if event.type == pygame.KEYDOWN:
+                            if event.key == pygame.K_SPACE:
+                                if not pause: pause = True
+                                else: pause = False 
+                        if event.type == pygame.QUIT:
+                            pygame.quit()
+                            quit()
+                    
+                    if not pause:
+                        # upload time
+                        timer.update()
+                        if not timer.active:
+                            _time += 1      
+                            timer.activate()
+                        timer.draw(self.screen, _time)
+                            
+                        neighbour_list = self.maze.find_neighbours(cur_cell[0], cur_cell[1])    
+                        neighbour_list = self.maze.validate_neighbours_generate(neighbour_list)
+                        neighbour_list = unblock_neighbours(self.maze, cur_cell[0], cur_cell[1], neighbour_list)
+
+                        self.draw_path(path_dfs)
+                        self.draw_cur(cur_cell) 
+                        if neighbour_list is not None:
+                            
+                            visited_cells.append(cur_cell)             
+                            next_cell = random.choice(neighbour_list)   
+                            self.maze.grid[next_cell[0]][next_cell[1]].is_visited = True     
+                            cur_cell = next_cell
+                            if next_cell == end:
+                                running = False
+                                break
+                            path_dfs.append(cur_cell) 
+
+                        else:  
+                            cur_cell = visited_cells.pop()    
+                            path_dfs.pop() 
+                        time.sleep(0.1)
+                        # visual algorithm
+                        alg_text = 'Algorithm: {}'.format(self.algorithm)
+                        self.draw_text(alg_text, 'black', 900, 100)
+                        self.update()
+                
+                # bfs
+                if running_dfs == False:
+                    self.maze.grid[cur_cell[0]][cur_cell[1]].is_visited = True
+                    paths = [[]]
+                    paths[0].append(cur_cell)
+                    flag = False
+                while not running_dfs:
+                    self.draw()
+                    # check event
+                    if pause:
+                        if menu_state == 'menu':
+                            if self.buttons['resume'].draw(self.screen): # resume
+                                pause = False
+                            if self.buttons['load'].draw(self.screen): # load
+                                pass
+                            if self.buttons['main_menu'].draw(self.screen): # main_menu
+                                pass
+                            if self.buttons['options'].draw(self.screen): # options
+                                menu_state = 'options'
+                            if self.buttons['quit'].draw(self.screen): # quit
+                                running = False
+
+                        elif menu_state == 'options':
+                            self.draw_text('{}'.format(self.algorithm), 'black', 500, 500)
+                            if self.buttons['chang_alg'].draw(self.screen): # chang_alg
+                                if self.algorithm == 'dfs': 
+                                    self.set_algorithm('bfs')
+                                    self.maze.start = cur_cell
+                                    running_dfs = False
+                                elif self.algorithm == 'bfs': 
+                                    self.set_algorithm('dfs')
+                                    self.maze.start = cur_cell
+                                    runnning_dfs = True
+                            if self.buttons['back'].draw(self.screen): # back
+                                menu_state = 'menu'
+
+                    for event in pygame.event.get():
+                        if event.type == pygame.KEYDOWN:
+                            if event.key == pygame.K_SPACE:
+                                if not pause: pause = True
+                                else: pause = False 
+                        if event.type == pygame.QUIT:
+                            pygame.quit()
+                            quit()
+                    if not pause:
+                        # upload time
+                        timer.update()
+                        if not timer.active:
+                            _time += 1      
+                            timer.activate()
+                        timer.draw(self.screen, _time)
+
+                        for i in paths:
+                            self.draw_path(i)
+                        path = paths[0] 
+                        paths = paths[1:]  
+                        cur_cell = path[-1] 
+                        neighbour_list = self.maze.find_neighbours(cur_cell[0], cur_cell[1]) 
+                        neighbour_list = self.maze.validate_neighbours_generate(neighbour_list)
+                        neighbour_list = unblock_neighbours(self.maze, cur_cell[0], cur_cell[1], neighbour_list)
+
+                        if neighbour_list is not None:
+                            for neighbour in neighbour_list:
+                                self.draw_cur(neighbour)
+                                self.maze.grid[neighbour[0]][neighbour[1]].is_visited = True 
+                                add = path.copy() 
+                                add.append(neighbour)
+                                paths.append(add) 
+                                if neighbour == end: 
+                                    running = False
+                                    flag = True
+                            if flag: break                     
+                        # visual algorithm
+                        alg_text = 'Algorithm: {}'.format(self.algorithm)
+                        self.draw_text(alg_text, 'black', 900, 100)
+                        time.sleep(0.1)
+                        self.update()
+            time.sleep(3)
+        elif self.mode == 'not_auto': # che do nguoi choi
+            start = self.maze.start
+            end = self.maze.end
+            self.player.row, self.player.col = start[0], start[1]
+            pause = False
+            menu_state = 'menu'
+
+            while running:
+                self.draw()
+                # check event
+                if pause:
+                    if menu_state == 'menu':
+                        if self.buttons['resume'].draw(self.screen): # resume
+                            pause = False
+                        if self.buttons['load'].draw(self.screen): # load
+                            pass
+                        if self.buttons['main_menu'].draw(self.screen): # main_menu
+                            pass
+                        if self.buttons['options'].draw(self.screen): # options
+                            menu_state = 'options'
+                        if self.buttons['quit'].draw(self.screen): # quit
+                            running = False
+
+                    elif menu_state == 'options':
+                        self.draw_text('{}'.format(self.algorithm), 'black', 500, 500)
+                        if self.buttons['chang_alg'].draw(self.screen): # chang_alg
+                            if self.algorithm == 'dfs': self.set_algorithm('bfs')
+                            elif self.algorithm == 'bfs': self.set_algorithm('dfs')
+                        if self.buttons['back'].draw(self.screen): # back
+                            menu_state = 'menu'
+                    
+                    elif menu_state == 'finish':
+                        bg_img = pygame.image.load('Do_an/Assets/tom_catch_jerry.png').convert_alpha()
+                        self.screen.blit(bg_img, (0, 0))
+                        self.draw_text(self.record_text(self.record), 'black', 400, 100)
+                        if self.buttons['play_again'].draw(self.screen): # # play_again
+                            pass
+                        if self.buttons['save'].draw(self.screen): # save
+                            menu_state = 'save'
+                    elif menu_state == 'save':
+                        bg_img = pygame.image.load('Do_an/Assets/tom_catch_jerry.png').convert_alpha()
+                        self.screen.blit(bg_img, (0, 0))
+                        self.draw_text(self.record_text(self.record), 'black', 400, 100)
+                        self.buttons['play_again'].draw(self.screen)
+                        self.buttons['save'].draw(self.screen)
+                        self.draw_text('Enter name of file: {}'.format(self.file_name), 'black', 400, 250)
+                        if self.buttons['accept'].draw(self.screen):
+                            pass
+                        if self.buttons['cancel'].draw(self.screen):
+                            menu_state = 'finish'
+                for event in pygame.event.get():
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_SPACE:
+                            if not pause: pause = True
+                            else: pause = False
+                        elif event.key == pygame.K_BACKSPACE:
+                            if menu_state == 'save':
+                                self.file_name = self.file_name[:-1]
+                        else:
+                            if menu_state == 'save':
+                                self.file_name += event.unicode
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        quit()
+                
+                if not pause:
+                    # process and visual time
                     timer.update()
                     if not timer.active:
                         _time += 1      
                         timer.activate()
                     timer.draw(self.screen, _time)
 
-                    neighbour_list = self.maze.find_neighbours(cur_cell[0], cur_cell[1])    
-                    neighbour_list = self.maze.validate_neighbours_generate(neighbour_list)
-                    neighbour_list = unblock_neighbours(self.maze, cur_cell[0], cur_cell[1], neighbour_list)
+                    # visual algorithm
+                    alg_text = 'Algorithm: {}'.format(self.algorithm)
+                    self.draw_text(alg_text, 'black', 900, 100)
 
-                    self.draw_path(path)
-                    self.draw_cur(cur_cell) 
-                    self.draw_solution(solution_path)
-                    if neighbour_list is not None:
-                        
-                        visited_cells.append(cur_cell)             
-                        next_cell = random.choice(neighbour_list)   
-                        self.maze.grid[next_cell[0]][next_cell[1]].is_visited = True     
-                        cur_cell = next_cell
-                        if next_cell == end:
-                            running = False
-                        path.append(cur_cell) 
+                    # process move (press w,a,s,d or up,down,right,left)
+                    self.handle_move()
+                    if (self.player.row, self.player.col) == end:
+                        self.record = _time
+                        pause = True
+                        menu_state = 'finish'
+                    self.draw_cur((self.player.row, self.player.col))
 
-                    else:  
-                        cur_cell = visited_cells.pop()    
-                        path.pop() 
-                    time.sleep(0.08)
-                    self.update()
-                time.sleep(3)
-            elif self.algorithm == 'bfs': # dung thuat toan bfs
-
-                start = self.maze.start
-                end = self.maze.end
-                paths = [[]]
-                paths[0].append(start)
-                cur_cell = start
-                self.maze.grid[cur_cell[0]][cur_cell[1]].is_visited = True 
-
-                start = self.maze.start
-                end = self.maze.end
-                paths = [[]]
-                paths[0].append(start)
-                cur_cell = start
-                self.maze.grid[cur_cell[0]][cur_cell[1]].is_visited = True 
-
-                while running:
-                    self.check_event()
-                    self.draw()
-
-                    path = paths[0] 
-                    paths = paths[1:]  
-                    cur_cell = path[-1] 
-                    neighbour_list = self.maze.find_neighbours(cur_cell[0], cur_cell[1]) 
-                    neighbour_list = self.maze.validate_neighbours_generate(neighbour_list)
-                    neighbour_list = unblock_neighbours(self.maze, cur_cell[0], cur_cell[1], neighbour_list)
-
-                    if neighbour_list is not None:
-                        for neighbour in neighbour_list:
-                            self.draw_cur(neighbour)
-                            self.maze.grid[neighbour[0]][neighbour[1]].is_visited = True 
-                            add = path.copy() 
-                            add.append(neighbour)
-                            paths.append(add) 
-                            if neighbour == end: 
-                                running = False
-                    time.sleep(1)
-                    self.update()
-        elif self.mode == 'not_auto': # che do nguoi choi
-            start = self.maze.start
-            end = self.maze.end
-            self.player.row, self.player.col = start[0], start[1]
-            game_paused = False
-
-            while running:
-                self.draw()
-                # check event
-                if game_paused == True:
-                    if self.buttons[0].draw(self.screen):
-                        game_paused = False
-                    if self.buttons[1].draw(self.screen):
-                        pass
-                    if self.buttons[2].draw(self.screen):
-                        pass
-                    if self.buttons[3].draw(self.screen):
-                        running = False
-                for event in pygame.event.get():
-                    if event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_SPACE:
-                            game_paused = True
-                        
-                    if event.type == pygame.QUIT:
-                        pygame.quit()
-                        quit()
-                
-                #if game_paused == True: continue
-                # process time
-                timer.update()
-                if not timer.active:
-                    _time += 1      
-                    timer.activate()
-                timer.draw(self.screen, _time)
-                # process move (press w,a,s,d or up,down,right,left)
-                self.handle_move()
-                if (self.player.row, self.player.col) == end:
-                    running = False
-                self.draw_cur((self.player.row, self.player.col))
-                # process hint(press H)
-                hint_cell = self.handle_hint()    
-                if hint_cell is not None:
-                        pygame.draw.rect(self.screen, (0, 255, 0), (hint_cell[1]*self.tile + 2, hint_cell[0]*self.tile + 2, self.tile - 4, self.tile - 4))
+                    # process hint(press H)
+                    hint_cell = self.handle_hint()    
+                    if hint_cell is not None:
+                            pygame.draw.rect(self.screen, (0, 255, 0), (hint_cell[1]*self.tile + 2, 
+                                                                        hint_cell[0]*self.tile + 2, self.tile - 4, self.tile - 4))
+                    
                 self.update()
-                time.sleep(0.1)
-            
+                time.sleep(0.1) 
+                   
 
-
-    
 if __name__ == '__main__':
     game = Game('easy', 'not_auto')
     game.run()

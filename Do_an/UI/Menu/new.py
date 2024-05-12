@@ -2,6 +2,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QIcon
 from UI.user_interface.music import Sound
 from UI.mainUI import GiaoDien
+from game import *
 
 class NewGame_Window(object):
     def setupUi(self, MainWindow):
@@ -136,19 +137,65 @@ class NewGame_Window(object):
         MainWindow.close()
     
     def play(self, MainWindow):
-        import makegame
+        MainWindow.close()
         if self.human.isChecked():
             if self.ez.isChecked():
-                if self.random.isChecked():
-                    MainWindow.close()
-                    check = makegame.main(makegame.window)
+                if self.random.isChecked():  
+                    game = Game('easy', 'not_auto')
+                    game.run()
+                else:
+                    game = Game('easy', 'not_auto')
+                    #game.set_start_end()
+                    game.run()
+            elif self.medium.isChecked():
+                if self.random.isChecked():  
+                    game = Game('medium', 'not_auto')
+                    game.run()
+                else:
+                    game = Game('medium', 'not_auto')
+                    #game.set_start_end()
+                    game.run()
+            else:
+                if self.random.isChecked():  
+                    game = Game('hard', 'not_auto')
+                    game.run()
+                else:
+                    game = Game('hard', 'not_auto')
+                    #game.set_start_end()
+                    game.run()
+        else:
+            if self.ez.isChecked():
+                if self.random.isChecked():  
+                    game = Game('easy', 'auto')
+                    game.run()
+                else:
+                    game = Game('easy', 'auto')
+                    #game.set_start_end()
+                    game.run()
+            elif self.medium.isChecked():
+                if self.random.isChecked():  
+                    game = Game('medium', 'auto')
+                    game.run()
+                else:
+                    game = Game('medium', 'auto')
+                    #game.set_start_end()
+                    game.run()
+            else:
+                if self.random.isChecked():  
+                    game = Game('hard', 'auto')
+                    game.run()
+                else:
+                    game = Game('hart', 'auto')
+                    #game.set_start_end()
+                    game.run()
+
                     
-        if(check):
-            print(check)
-            MenuWindow = QtWidgets.QMainWindow()
-            Menu = MenuWidget()
-            Menu.setupUi(self.MenuWindow)
-            MenuWindow.show()
+        # if(check):
+        #     print(check)
+        #     MenuWindow = QtWidgets.QMainWindow()
+        #     Menu = MenuWidget()
+        #     Menu.setupUi(self.MenuWindow)
+        #     MenuWindow.show()
                     
 
 
