@@ -2,17 +2,23 @@ import pygame
 import os 
 import random
 import pygame
+import load_game
 from os import listdir 
-from os.path import isfile, join
 from PyQt5 import QtWidgets
+from os.path import isfile, join
+from PyQt5.QtWidgets import QMessageBox,QApplication
+from PyQt5.QtCore import *
+from UI.user_interface.login import LoginWidget
+from UI.user_interface.menu import MenuWidget
 from UI.mainUI import GiaoDien
 from maze import *
+import sys
 menu_check = [False]
 mode = [True] 
 Path1 = join("Do_an","button")
 button = [['LoadButton.png',(650,200,150,45)],['MenuButton.png',(650,100,150,45)],['QuitButton.png',(650,400,150,45)],['Resume.png',(650,300,150,45)]]
 makebutton = [[pygame.image.load(join(Path1,a[0])),a[1]] for a in button]
-
+LoginWindow = [None]
 pygame.init()
 pygame.display.set_caption("Tam an Gia Huy")
 mazes = maze(20, 20)
@@ -22,6 +28,7 @@ WIDTH, HEIGHT, = 1400, 800
 FPS = 60
 PLAYER_VEL = 10      
 window = pygame.display.set_mode((WIDTH, HEIGHT))
+
 def get_index(mazes):
     index = []
     for i in range(mazes.num_rows):
@@ -316,7 +323,6 @@ def main(window):
     jerry = Jerry(-LOCAL[0][1] * 64 + WIDTH // 2 + (LOCAL[1][1]) * 64 + 32  ,-LOCAL[0][0] * 64 + HEIGHT // 2 + (LOCAL[1][0]) * 64 + 16 ,34,58, 0,0 )
     
     block = get_maze_titles(mazes)
-    
     block.append(jerry)
     run = True
     offset_x = 0
@@ -339,9 +345,18 @@ def main(window):
                 if even.button == 1 and pos[0] >= 650 and pos[0] <= 800 and pos[1]>=300 and pos[1] <=345 and mode[0] == False:
                     mode[0] = not mode[0]
                 if even.button == 1 and pos[0] >= 650 and pos[0] <= 800 and pos[1]>=100 and pos[1] <=145 and mode[0] == False:
-                    run = False
+                    
+                   
                     menu_check[0] = not menu_check[0]
+                    run = False 
                     break
+                    
+                    
+                if even.button == 1 and pos[0] >= 650 and pos[0] <= 800 and pos[1]>=200 and pos[1] <=245 and mode[0] == False:
+                    loadWindow = load_game.LoadWindow()
+                    loadWindow.show()
+                    
+                    print(234)
 
     
         player.loop(FPS)
@@ -359,6 +374,7 @@ def main(window):
     pygame.quit()
     #app = QtWidgets.QApplication(sys.argv)
     #sys.exit(app.exec_())
+    print(123)
     return menu_check[0]
 
 

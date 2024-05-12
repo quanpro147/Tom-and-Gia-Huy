@@ -58,4 +58,4 @@ if __name__ == '__main__':
     demo = LoadWidget()
     demo.show()
 
-    sys.exit(app.exec_())
+    app.exec_()
