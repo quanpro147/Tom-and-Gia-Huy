@@ -3,7 +3,7 @@ from cell import cell
 from algrithms import *
 
 class maze():
-    def __init__(self, num_rows, num_cols, auto_set_entry = True):
+    def __init__(self, num_rows, num_cols):
         """
         num_rows is the number of row of maze and num_cols is the number of col of maze
         auto_set_trence = True if player don't choose entry, exit and = False if player choose paticular entry, exit
@@ -13,12 +13,8 @@ class maze():
         self.num_cols = num_cols
         self.grid_size = num_rows * num_cols
         self.grid = self.generate_grid()
-        if auto_set_entry == True:
-            self.start = self.pick_random_entry_exit()
-            self.end = self.pick_random_entry_exit(self.start)
-        else:
-            self.start = None
-            self.end = None
+        self.start = self.pick_random_entry_exit()
+        self.end = self.pick_random_entry_exit(self.start)
 
     def generate_grid(self):
         """
@@ -129,9 +125,10 @@ class maze():
 
         return entry       # Return entry/exit that is different from exit/entry
 
-    def set_entry_exit(self, _entry, _exit):
+    def set_entry_exit(self, start, end):
         """ This function use to set entry and exit which is entered by user """
-        self.start = _entry
+        self.start = start
+        self.end = end
 
     def generate_maze(self):
         self = depth_first_recursive_backtracker(self, self.start)

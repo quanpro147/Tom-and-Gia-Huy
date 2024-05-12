@@ -131,15 +131,17 @@ def hint(maze, cur, algorithms):
     else:
         #raise error
         return False
-    next_cell = path[1]
-    if next_cell[0] == cur[0]:
-        if next_cell[1] - cur[1] == 1:
-            return 'right'
-        else:
-            return 'left'
-    elif next_cell[1] == cur[1]:
-        if next_cell[0] - cur[0] == 1:
-            return 'bot'
-        else:
-            return 'top'
+    if len(path) < 2: return 
+    else:
+        next_cell = path[1]
+        if next_cell[0] == cur[0]:
+            if next_cell[1] - cur[1] == 1:
+                return 'right'
+            else:
+                return 'left'
+        elif next_cell[1] == cur[1]:
+            if next_cell[0] - cur[0] == 1:
+                return 'bot'
+            else:
+                return 'top'
 
