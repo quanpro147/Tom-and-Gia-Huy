@@ -2,10 +2,7 @@ import pygame
 from pygame.time import get_ticks
 from maze import maze
 from algrithms import *
-<<<<<<< HEAD
-=======
 import pickle
->>>>>>> 3448da3341d228edb89eb120233b16dc4f721ae0
 import time
 
 class Button:
