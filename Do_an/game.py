@@ -2,7 +2,6 @@ import pygame
 from pygame.time import get_ticks
 from maze import maze
 from algrithms import *
-from save_load import *
 import time
 
 class Button:

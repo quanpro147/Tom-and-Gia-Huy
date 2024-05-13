@@ -121,9 +121,12 @@ class MenuWidget(QWidget):
     def loadGame(self, MainWindow):
         self.sound.clickSound()
         self.sound.pause_bgSound()
-        from UI.Menu.load import LoadWidget
-        self.Load = LoadWidget()
-        self.Load.show()
+
+        from UI.Menu.load import LoadWindow
+        self.LoadWindow = QtWidgets.QMainWindow()
+        self.Load = LoadWindow()
+        self.Load.setupUi(self.LoadWindow)
+        self.LoadWindow.show()
         MainWindow.close()
 
     def help(self, MainWindow):
@@ -146,7 +149,13 @@ class MenuWidget(QWidget):
         MainWindow.close()
     def exit(self, MainWindow):
         self.sound.clickSound()
-        MainWindow.close()
+        question = QMessageBox.question(self,"Exit App?",
+                                        "Do you want to quit?",
+                                        QMessageBox.Yes | QMessageBox.No)
+
+        if question == QMessageBox.Yes:
+            MainWindow.close()
+        
 
     def login(self, MainWindow):
         self.sound.clickSound()
