@@ -1,7 +1,6 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QIcon
 from UI.user_interface.music import Sound
-from UI.mainUI import GiaoDien
 from game import *
 
 class NewGame_Window(object):
@@ -141,12 +140,12 @@ class NewGame_Window(object):
         if self.human.isChecked():
             if self.ez.isChecked():
                 if self.random.isChecked():  
-                    game = Game('easy', 'not_auto')
+                    game = Game('easy', 'not_auto', 'random')
                     game.run()
                 else:
-                    game = Game('easy', 'not_auto')
-                    #game.set_start_end()
+                    game = Game('easy', 'not_auto', 'edit')
                     game.run()
+                    
             elif self.medium.isChecked():
                 if self.random.isChecked():  
                     game = Game('medium', 'not_auto')
@@ -185,18 +184,10 @@ class NewGame_Window(object):
                     game = Game('hard', 'auto')
                     game.run()
                 else:
-                    game = Game('hart', 'auto')
+                    game = Game('hard', 'auto')
                     #game.set_start_end()
                     game.run()
 
-                    
-        # if(check):
-        #     print(check)
-        #     MenuWindow = QtWidgets.QMainWindow()
-        #     Menu = MenuWidget()
-        #     Menu.setupUi(self.MenuWindow)
-        #     MenuWindow.show()
-                    
 
 
 

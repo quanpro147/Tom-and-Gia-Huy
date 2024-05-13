@@ -3,7 +3,7 @@ from PyQt5.QtGui import QIcon
 from UI.user_interface.music import Sound
 from PyQt5.QtWidgets import *
 
-from UI.Menu.load_process import *
+from game import saveloadsystem, Game
 
 
 class LoadWindow(object):
@@ -62,8 +62,9 @@ class LoadWindow(object):
         self.Del_Button.setText(_translate("MainWindow", "Delete"))
         self.back_button.setIcon(QIcon("Do_an/UI/image/back.png"))
         self.back_button.clicked.connect(lambda: self.menu(MainWindow))
-        self.Del_Button.clicked.connect(lambda: self.removeGame(MainWindow))
 
+        self.Del_Button.clicked.connect(lambda: self.removeGame(MainWindow))
+        self.Play_Button.clicked.connect(lambda: self.LoadGame(MainWindow))
         self.loadfilegame()
 
 
@@ -78,7 +79,7 @@ class LoadWindow(object):
         MainWindow.close()
 
     def loadfilegame(self):
-        self.oldgame = readfile(self.path)
+        self.oldgame = saveloadsystem.readfile(self.path)
         self.listGame.addItems(self.oldgame)
 
     def removeGame(self, MainWindow):
@@ -92,8 +93,16 @@ class LoadWindow(object):
 
         if question == QMessageBox.Yes:
             item = self.listGame.takeItem(currentIndex)
-            delete(item.text(self.path, item.text()))
+            saveloadmanager = saveloadsystem('.save', 'Do_an/SaveLoad/game_manager')
+            saveloadmanager.delete_file(item.text())
             del item
+
+    def LoadGame(self, MainWindow):
+        currentIndex = self.listGame.currentRow()
+        item = self.listGame.item(currentIndex)
+        game = Game()
+        game.load(item.text())
+        game.run()
 
 
 
