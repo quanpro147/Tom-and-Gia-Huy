@@ -121,7 +121,7 @@ class saveloadsystem():
     def add_file_name(self, name_file):
         with open('Do_an/SaveLoad/saveload.txt', 'a') as f:
             f.write(name_file + '\n')
-    
+
     def check_file_name(self, name_file):
         with open('Do_an/SaveLoad/saveload.txt', 'r') as f:
             name_files = f.readlines()
@@ -131,13 +131,22 @@ class saveloadsystem():
                     return True
         return False
     
-    def readfile(path):
-        #doc cac file game co trong file txt
-        with open(path, 'r') as f:
-            l = f.readlines()
-            return [s.strip() for s in l]
+    def delete_file(self, name_file):
+        # xoa ten file trong file txt
+        with open('Do_an/SaveLoad/saveload.txt', 'r') as f:
+            name_files = f.readlines()
+            name_files.remove(name_file+'\n')
+        with open('Do_an/SaveLoad/saveload.txt', 'w') as f:
+            f.writelines(name_files)
+        # xoa data cua file
+        game_manager = self.load_data()
+        game_manager.pop(name_file)
+        if game_manager == {}:
+            game_manager = None
+        with open(self.folder + self.file_extension, 'wb') as f:
+            pickle.dump(game_manager, f)
         
-
+            
 
 class Game:
     def __init__(self, level = None, mode = None, choose = None):
@@ -185,8 +194,10 @@ class Game:
         play_again_button = Button(400, 150, play_again_img, 1)
         save_button_1 = Button(500, 300, save_img, 1)
         save_button_2 = Button(400, 200, save_img, 1)
-        accept_button = Button(600, 300, accept_img, 1)
-        cancel_button = Button(400, 300, cancel_img, 1)
+        accept_button_1 = Button(600, 350, accept_img, 1)
+        accept_button_2 = Button(600, 300, accept_img, 1)
+        cancel_button_1 = Button(400, 350, cancel_img, 1)
+        cancel_button_2 = Button(400, 300, cancel_img, 1)
         return {'resume': resume_button, 
                 'load': load_button,
                 'main_menu': menu_button,
@@ -197,8 +208,10 @@ class Game:
                 'play_again': play_again_button,
                 'save_1': save_button_1,
                 'save_2': save_button_2,
-                'accept': accept_button,
-                'cancel': cancel_button}
+                'accept_1': accept_button_1,
+                'accept_2': accept_button_2,
+                'cancel_1': cancel_button_1,
+                'cancel_2': cancel_button_2}
 
     # Player funtions
     def handle_move(self):
@@ -237,6 +250,7 @@ class Game:
         self.algorithm = algorithm
     
     def new_game(self):
+        if self.maze is not None: return
         if self.level == 'easy':
             self.maze = maze(10, 10)
         elif self.level == 'medium':
@@ -255,8 +269,8 @@ class Game:
         self.clock.tick(60)
 
     def save(self):
-        data = {'level': self.level,'mode': self.mode,'maze': self.maze,'alg': self.algorithm,'start': self.start,'end': self.end,'record': self.record,
-                'file_name': self.file_name, 'player': self.player}
+        data = {'level': self.level,'mode': self.mode,'maze': self.maze,'alg': self.algorithm,'start': self.maze.start,'end': self.maze.end,'record': self.record,
+                'file_name': self.file_name, 'player': self.player, 'tile': self.tile}
         if self.saveloadmanager.check_file_name(self.file_name):
             print('File has already exist')
         else:
@@ -277,6 +291,7 @@ class Game:
             self.record = data['record']
             self.file_name = data['file_name']
             self.player = data['player']
+            self.tile = data['tile']
             print('Load file succeeded')
 
     # Draw functions
@@ -511,7 +526,7 @@ class Game:
         elif self.mode == 'not_auto': # che do nguoi choi
             start = self.maze.start
             end = self.maze.end
-            self.player.row, self.player.col = start[0], start[1]
+            if self.player.row is None: self.player.row, self.player.col = start[0], start[1]
             pause = False
             menu_state = 'menu'
 
@@ -519,17 +534,12 @@ class Game:
                 self.draw()
                 # check event
                 if pause:
+                    self.record = _time
                     if menu_state == 'menu':
                         if self.buttons['resume'].draw(self.screen): # resume
                             pause = False
                         if self.buttons['save_1'].draw(self.screen): # save
-                            user_input = True
-                            self.draw_text('Enter name of file: {}'.format(self.file_name), 'black', 400, 250)
-                            if self.buttons['accept'].draw(self.screen):
-                                user_input = False
-                                self.save()
-                            if self.buttons['cancel'].draw(self.screen):
-                                user_input = False
+                            menu_state = 'save1'                        
                         if self.buttons['main_menu'].draw(self.screen): # main_menu
                             pass
                         if self.buttons['options'].draw(self.screen): # options
@@ -551,22 +561,33 @@ class Game:
                         self.draw_text(self.record_text(self.record), 'black', 400, 100)
                         if self.buttons['play_again'].draw(self.screen): # # play_again
                             pass
-                        if self.buttons['save'].draw(self.screen): # save
-                            menu_state = 'save'
+                        if self.buttons['save_2'].draw(self.screen): # save
+                            menu_state = 'save2'
 
-                    elif menu_state == 'save':
+                    elif menu_state == 'save1':
+                        self.draw_text('Enter name of file: {}'.format(self.file_name), 'black', 400, 250)
+                        user_input = True
+                        if self.buttons['accept_1'].draw(self.screen):
+                            user_input = False                            
+                            menu_state = 'menu'
+                            self.save()
+                        if self.buttons['cancel_1'].draw(self.screen):
+                            user_input = False
+                            menu_state = 'menu'
+
+                    elif menu_state == 'save2':
                         user_input = True
                         bg_img = pygame.image.load('Do_an/Assets/tom_catch_jerry.png').convert_alpha()
                         self.screen.blit(bg_img, (0, 0))
                         self.draw_text(self.record_text(self.record), 'black', 400, 100)
                         self.buttons['play_again'].draw(self.screen)
-                        self.buttons['save'].draw(self.screen)
+                        self.buttons['save_2'].draw(self.screen)
                         self.draw_text('Enter name of file: {}'.format(self.file_name), 'black', 400, 250)
-                        if self.buttons['accept'].draw(self.screen):
+                        if self.buttons['accept_2'].draw(self.screen):
                             user_input = False
                             menu_state = 'finish'
                             self.save()
-                        if self.buttons['cancel'].draw(self.screen):
+                        if self.buttons['cancel_2'].draw(self.screen):
                             user_input = False
                             self.file_name = ''
                             menu_state = 'finish'
@@ -580,7 +601,7 @@ class Game:
                             if user_input:                                       
                                 self.file_name = self.file_name[:-1]
                         else:
-                            if user_input == 'save':
+                            if user_input:
                                 self.file_name += event.unicode
                     if event.type == pygame.QUIT:
                         pygame.quit()
