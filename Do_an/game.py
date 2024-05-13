@@ -2,7 +2,7 @@ import pygame
 from pygame.time import get_ticks
 from maze import maze
 from algrithms import *
-from save_load import *
+import pickle
 import time
 
 class Button:
@@ -80,8 +80,59 @@ class Player:
         elif direction == 'left':
             self.col -= 1
 
+class saveloadsystem():
+    def __init__(self, file_extension, folder):
+        self.file_extension = file_extension
+        self.folder = folder
+    
+    def save_game(self, name_file, game):
+        """ Ham luu maze voi ten file vao game_manager """
+        self.add_file_name(name_file)
+        data = self.process_game_to_save(name_file, game)
+        with open(self.folder + self.file_extension, 'wb+') as f:          
+            pickle.dump(data, f)
+
+    def process_game_to_save(self,name_file, game):
+        """ Ham nay dung de them game muon luu vao game_manager """
+        try:
+            game_manager = self.load_data()
+            game_manager[name_file] = game
+            return game_manager
+        except EOFError:
+            return {name_file: game}
+        
+    def load_data(self):
+        """ Ham phu tro de lay maze_manager """
+        with open(self.folder + self.file_extension, 'rb') as f:
+            data = pickle.load(f)
+        return data
+        
+    def load_game(self, name_file):
+        """ Ham nay dung de load game tu ten file da luu """
+        if self.check_file_name(name_file):
+            game_manager = self.load_data()
+            for key, val in game_manager.items():
+                if key == name_file:
+                    return val
+        else:
+            # raise error
+            return False
+        
+    def add_file_name(self, name_file):
+        with open('Do_an/SaveLoad/saveload.txt', 'a') as f:
+            f.write(name_file + '\n')
+    
+    def check_file_name(self, name_file):
+        with open('Do_an/SaveLoad/saveload.txt', 'r') as f:
+            name_files = f.readlines()
+            for _name_file in name_files:
+                _name_file = _name_file[:-1]
+                if name_file == _name_file:
+                    return True
+        return False
+
 class Game:
-    def __init__(self, level, mode):
+    def __init__(self, level = None, mode = None):
         pygame.init()
         pygame.display.set_caption('Maze Game')
         self.WINDOW_SIZE = 1202, 802
@@ -99,6 +150,8 @@ class Game:
         self.record = 0
         self.rank = None
         self.file_name = ''
+        self.saveloadmanager = saveloadsystem('.save', 'Do_an/SaveLoad/game_manager')
+        self.completed = False
 
     def button(self):
         # load img
@@ -122,7 +175,8 @@ class Game:
         change_alg_button = Button(500, 450, change_alg_img, 1)
         back_button = Button(500, 550, back_img, 1)
         play_again_button = Button(400, 150, play_again_img, 1)
-        save_button = Button(400, 200, save_img, 1)
+        save_button_1 = Button(500, 300, save_img, 1)
+        save_button_2 = Button(400, 200, save_img, 1)
         accept_button = Button(600, 300, accept_img, 1)
         cancel_button = Button(400, 300, cancel_img, 1)
         return {'resume': resume_button, 
@@ -133,7 +187,8 @@ class Game:
                 'chang_alg': change_alg_button,
                 'back': back_button,
                 'play_again': play_again_button,
-                'save': save_button,
+                'save_1': save_button_1,
+                'save_2': save_button_2,
                 'accept': accept_button,
                 'cancel': cancel_button}
 
@@ -192,7 +247,30 @@ class Game:
         self.clock.tick(60)
 
     def save(self):
-        pass
+        data = {'level': self.level,'mode': self.mode,'maze': self.maze,'alg': self.algorithm,'start': self.start,'end': self.end,'record': self.record,
+                'file_name': self.file_name, 'player': self.player}
+        if self.saveloadmanager.check_file_name(self.file_name):
+            print('File has already exist')
+        else:
+            self.saveloadmanager.save_game(self.file_name, data)
+            print('Save file succeeded')
+
+    def load(self, file_name):
+        if not self.saveloadmanager.check_file_name(file_name):
+            print('Find not found')
+        else:
+            data = self.saveloadmanager.load_game(file_name)
+            self.level = data['level']
+            self.mode = data['mode']
+            self.maze = data['maze']
+            self.algorithm = data['alg']
+            self.start = data['start']
+            self.end = data['end']
+            self.record = data['record']
+            self.file_name = data['file_name']
+            self.player = data['player']
+            print('Load file succeeded')
+
     # Draw functions
     def draw_text(self, text, color, x, y):
         img = self.font.render(text, True, color)
@@ -225,24 +303,40 @@ class Game:
         return str('Time of completion: {}:{}:{}'.format(hou, min, sec))
     
     def ranking(self):
-        pass
-    
+        rank_game = [self.game]
+        game_manager = self.saveloadmanager.load_data()
+        # loc cac game co cung che do, do kho
+        for name_file, game in game_manager.items():
+            if game.completed and game.mode == 'not_auto' and game.level == self.level:
+                rank_game.append(game)
+        # sap xep theo thoi gian tang dan
+        for i in range(len(rank_game) - 1):
+            for j in range(1, len(rank_game)):
+                if rank_game[i] > rank_game[j]:
+                    rank_game[i], rank_game[j] = rank_game[j], rank_game[i]
+        # tra ve hang cua game hien tai
+        for i in range(len(rank_game)):
+            if self.game.file_name == rank_game[i].file_name:
+                self.rank = i+1
+            
     # Game funtions   
     def run(self):
 
         self.new_game()
         running = True
         running_dfs = True
-        _time = 0
+        _time = self.record
         timer = Timer(1000, self.font)
         timer.activate()
         pause = False
         menu_state = 'menu'
+        user_input = False
+        tmp_start = self.maze.start
+        end = self.maze.end
 
         if self.mode == 'auto': 
             while running:          
-                cur_cell = self.maze.start
-                end = self.maze.end
+                cur_cell = tmp_start
                 if self.algorithm == 'dfs': running_dfs = True
                 else: running_dfs = False
                 
@@ -276,7 +370,7 @@ class Game:
                                 elif self.algorithm == 'bfs': 
                                     self.set_algorithm('dfs')                                   
                                     running_dfs = True
-                                self.maze.start = cur_cell
+                                tmp_start = cur_cell
                                 for i in range(self.maze.num_rows):
                                         for j in range(self.maze.num_cols):
                                             self.maze.grid[i][j].is_visited = False 
@@ -320,7 +414,7 @@ class Game:
                         else:  
                             cur_cell = visited_cells.pop()    
                             path_dfs.pop() 
-                        time.sleep(0.1)
+                        time.sleep(0.07)
                         # visual algorithm
                         alg_text = 'Algorithm: {}'.format(self.algorithm)
                         self.draw_text(alg_text, 'black', 900, 100)
@@ -378,6 +472,10 @@ class Game:
                             timer.activate()
                         timer.draw(self.screen, _time)
 
+                        # visual algorithm
+                        alg_text = 'Algorithm: {}'.format(self.algorithm)
+                        self.draw_text(alg_text, 'black', 900, 100)
+
                         for i in paths:
                             self.draw_path(i)
                         path = paths[0] 
@@ -398,10 +496,8 @@ class Game:
                                     running = False
                                     flag = True
                             if flag: break                     
-                        # visual algorithm
-                        alg_text = 'Algorithm: {}'.format(self.algorithm)
-                        self.draw_text(alg_text, 'black', 900, 100)
-                        time.sleep(0.1)
+                        
+                        time.sleep(0.07)
                         self.update()
             time.sleep(3)
         elif self.mode == 'not_auto': # che do nguoi choi
@@ -418,8 +514,14 @@ class Game:
                     if menu_state == 'menu':
                         if self.buttons['resume'].draw(self.screen): # resume
                             pause = False
-                        if self.buttons['load'].draw(self.screen): # load
-                            pass
+                        if self.buttons['save_1'].draw(self.screen): # save
+                            user_input = True
+                            self.draw_text('Enter name of file: {}'.format(self.file_name), 'black', 400, 250)
+                            if self.buttons['accept'].draw(self.screen):
+                                user_input = False
+                                self.save()
+                            if self.buttons['cancel'].draw(self.screen):
+                                user_input = False
                         if self.buttons['main_menu'].draw(self.screen): # main_menu
                             pass
                         if self.buttons['options'].draw(self.screen): # options
@@ -443,7 +545,9 @@ class Game:
                             pass
                         if self.buttons['save'].draw(self.screen): # save
                             menu_state = 'save'
+
                     elif menu_state == 'save':
+                        user_input = True
                         bg_img = pygame.image.load('Do_an/Assets/tom_catch_jerry.png').convert_alpha()
                         self.screen.blit(bg_img, (0, 0))
                         self.draw_text(self.record_text(self.record), 'black', 400, 100)
@@ -451,19 +555,24 @@ class Game:
                         self.buttons['save'].draw(self.screen)
                         self.draw_text('Enter name of file: {}'.format(self.file_name), 'black', 400, 250)
                         if self.buttons['accept'].draw(self.screen):
-                            pass
-                        if self.buttons['cancel'].draw(self.screen):
+                            user_input = False
                             menu_state = 'finish'
+                            self.save()
+                        if self.buttons['cancel'].draw(self.screen):
+                            user_input = False
+                            self.file_name = ''
+                            menu_state = 'finish'
+
                 for event in pygame.event.get():
                     if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_SPACE:
                             if not pause: pause = True
                             else: pause = False
                         elif event.key == pygame.K_BACKSPACE:
-                            if menu_state == 'save':
+                            if user_input:                                       
                                 self.file_name = self.file_name[:-1]
                         else:
-                            if menu_state == 'save':
+                            if user_input == 'save':
                                 self.file_name += event.unicode
                     if event.type == pygame.QUIT:
                         pygame.quit()
@@ -484,6 +593,7 @@ class Game:
                     # process move (press w,a,s,d or up,down,right,left)
                     self.handle_move()
                     if (self.player.row, self.player.col) == end:
+                        self.completed = True
                         self.record = _time
                         pause = True
                         menu_state = 'finish'
