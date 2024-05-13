@@ -130,9 +130,17 @@ class saveloadsystem():
                 if name_file == _name_file:
                     return True
         return False
+    
+    def readfile(path):
+        #doc cac file game co trong file txt
+        with open(path, 'r') as f:
+            l = f.readlines()
+            return [s.strip() for s in l]
+        
+
 
 class Game:
-    def __init__(self, level = None, mode = None):
+    def __init__(self, level = None, mode = None, choose = None):
         pygame.init()
         pygame.display.set_caption('Maze Game')
         self.WINDOW_SIZE = 1202, 802
@@ -222,7 +230,7 @@ class Game:
 
     # Setting functions
     def set_start_end(self, start, end):
-        self.start = start
+        self.tmp_start = start
         self.end = end
 
     def set_algorithm(self, algorithm):
@@ -610,5 +618,5 @@ class Game:
                    
 
 if __name__ == '__main__':
-    game = Game('easy', 'not_auto')
+    game = Game('hard', 'auto')
     game.run()
