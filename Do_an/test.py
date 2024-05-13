@@ -4,5 +4,5 @@ from game import *
 # saveloadmanager.delete_file('quan1')
 
 game = Game()
-game.load('quan1')
+game.load('khoanee')
 game.run()
