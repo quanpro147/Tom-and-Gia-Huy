@@ -103,7 +103,7 @@ class saveloadsystem():
         
     def load_data(self):
         """ Ham phu tro de lay maze_manager """
-        with open(self.folder + self.file_extension, 'rb') as f:
+        with open( self.folder + self.file_extension, 'rb') as f:
             data = pickle.load(f)
         return data
         
@@ -131,6 +131,12 @@ class saveloadsystem():
                     return True
         return False
     
+    def readfile(path):
+        #doc cac file game co trong file txt
+        with open(path, 'r') as f:
+            l = f.readlines()
+            return [s.strip() for s in l]
+        
     def delete_file(self, name_file):
         # xoa ten file trong file txt
         with open('Do_an/SaveLoad/saveload.txt', 'r') as f:
@@ -147,7 +153,7 @@ class saveloadsystem():
             pickle.dump(game_manager, f)
         
 class Game:
-    def __init__(self, level = None, mode = None):
+    def __init__(self, level = None, mode = None, choose = None):
         pygame.init()
         pygame.display.set_caption('Maze Game')
         self.WINDOW_SIZE = 1202, 802
@@ -242,7 +248,7 @@ class Game:
 
     # Setting functions
     def set_start_end(self, start, end):
-        self.start = start
+        self.tmp_start = start
         self.end = end
 
     def set_algorithm(self, algorithm):
