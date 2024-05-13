@@ -3,7 +3,7 @@ from PyQt5.QtGui import QIcon
 from UI.user_interface.music import Sound
 from PyQt5.QtWidgets import *
 
-from UI.Menu.load_process import *
+from game import saveloadsystem
 
 
 class LoadWindow(object):
@@ -78,7 +78,7 @@ class LoadWindow(object):
         MainWindow.close()
 
     def loadfilegame(self):
-        self.oldgame = readfile(self.path)
+        self.oldgame = saveloadsystem.readfile(self.path)
         self.listGame.addItems(self.oldgame)
 
     def removeGame(self, MainWindow):
@@ -92,7 +92,7 @@ class LoadWindow(object):
 
         if question == QMessageBox.Yes:
             item = self.listGame.takeItem(currentIndex)
-            delete(item.text(self.path, item.text()))
+            saveloadsystem.delete_game(self.path, item.text())
             del item
 
 
