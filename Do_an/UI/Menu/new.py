@@ -140,10 +140,10 @@ class NewGame_Window(object):
         if self.human.isChecked():
             if self.ez.isChecked():
                 if self.random.isChecked():  
-                    game = Game('easy', 'not_auto', 'random')
+                    game = Game('easy', 'not_auto')
                     game.run()
                 else:
-                    game = Game('easy', 'not_auto', 'edit')
+                    game = Game('easy', 'not_auto', True)
                     game.run()
                     
             elif self.medium.isChecked():
@@ -151,16 +151,14 @@ class NewGame_Window(object):
                     game = Game('medium', 'not_auto')
                     game.run()
                 else:
-                    game = Game('medium', 'not_auto')
-                    #game.set_start_end()
+                    game = Game('medium', 'not_auto', True)
                     game.run()
             else:
                 if self.random.isChecked():  
                     game = Game('hard', 'not_auto')
                     game.run()
                 else:
-                    game = Game('hard', 'not_auto')
-                    #game.set_start_end()
+                    game = Game('hard', 'not_auto', True)
                     game.run()
         else:
             if self.ez.isChecked():
@@ -168,27 +166,22 @@ class NewGame_Window(object):
                     game = Game('easy', 'auto')
                     game.run()
                 else:
-                    game = Game('easy', 'auto')
-                    #game.set_start_end()
+                    game = Game('easy', 'auto', True)
                     game.run()
             elif self.medium.isChecked():
                 if self.random.isChecked():  
                     game = Game('medium', 'auto')
                     game.run()
                 else:
-                    game = Game('medium', 'auto')
-                    #game.set_start_end()
+                    game = Game('medium', 'auto', True)
                     game.run()
             else:
                 if self.random.isChecked():  
                     game = Game('hard', 'auto')
                     game.run()
                 else:
-                    game = Game('hard', 'auto')
-                    #game.set_start_end()
+                    game = Game('hard', 'auto', True)
                     game.run()
-
-
 
 
 
