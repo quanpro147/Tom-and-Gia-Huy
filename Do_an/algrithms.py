@@ -28,9 +28,6 @@ def depth_first_recursive_backtracker(maze, start_coor):
             row_cur, col_cur = visited_cells.pop()      # Pop previous visited cell (backtracking)
             path.append((row_cur, col_cur))   # Add coordinates to part of generation path
 
-    maze.grid[maze.start[0]][maze.start[1]].set_entry_exit("entry", maze.num_rows-1, maze.num_cols-1)
-    maze.grid[maze.end[0]][maze.end[1]].set_entry_exit("exit", maze.num_rows-1, maze.num_cols-1)
-
     for i in range(maze.num_rows):
         for j in range(maze.num_cols):
             maze.grid[i][j].is_visited = False      # Set all cells to unvisited before returning grid
@@ -114,34 +111,4 @@ def dfs(maze, start = None):
         for j in range(maze.num_cols):
             maze.grid[i][j].is_visited = False 
     return path
-
-# def hint(maze, cur, algorithms):
-#     """ 
-#     Ham nay dung de goi y duong di tiep theo
-#     Arg
-#     - maze: la me cung dang giai
-#     - cur: la vi tri hien tai cua nguoi choi
-#     Return: huong di tiep theo [top, right, bot, left]
-
-#     """
-#     if algorithms == 'dfs':
-#         path = dfs(maze, cur)
-#     elif algorithms == 'bfs':
-#         path = bfs(maze, cur)
-#     else:
-#         #raise error
-#         return False
-#     if len(path) < 2: return 
-#     else:
-#         next_cell = path[1]
-#         if next_cell[0] == cur[0]:
-#             if next_cell[1] - cur[1] == 1:
-#                 return 'right'
-#             else:
-#                 return 'left'
-#         elif next_cell[1] == cur[1]:
-#             if next_cell[0] - cur[0] == 1:
-#                 return 'bot'
-#             else:
-#                 return 'top'
 

@@ -54,27 +54,4 @@ class cell():
         
         return False
     
-    def set_entry_exit(self, entry_exit, row_limit, col_limit):
-        """
-        Function that sets the cell as an entry/exit cell by disabling the outer boundary wall.
-        First, we check if the entrance/exit is on the top row. Next, we check if it should
-        be on the bottom row. Finally, we check if it is on the left wall or the bottom row.
-
-        Args:
-            entry_exit: True to set this cell as an exit/entry. False to remove it as one
-            row_limit:
-            col_limit:
-
-        """
-        if self.row == 0:
-            self.walls["top"] = False
-        elif self.row == row_limit:
-            self.walls["bot"] = False
-        elif self.col == 0:
-            self.walls["left"] = False
-        elif self.col == col_limit:
-            self.walls["right"] = False
-
-        self.is_entry_exit = entry_exit
-    
     
