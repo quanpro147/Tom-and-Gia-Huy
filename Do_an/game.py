@@ -1,6 +1,6 @@
 import pygame
 from pygame.time import get_ticks
-from maze import maze
+from maze import *
 from algrithms import *
 import pickle
 import time
@@ -234,18 +234,13 @@ class Game:
 
     def handle_hint(self):
         cur = self.player.row, self.player.col
-        _hint = hint(self.maze, cur, self.algorithm)
+        if self.algorithm == 'dfs': 
+            hint = dfs(self.maze, cur)
+        elif self.algorithm == 'bfs':
+            hint = bfs(self.maze, cur)
         key = pygame.key.get_pressed()
         if key[pygame.K_h]:
-            if _hint == 'top':
-                return self.player.row-1, self.player.col
-            elif _hint == 'bot':
-                return self.player.row+1, self.player.col
-            elif _hint == 'right':
-                return self.player.row, self.player.col+1
-            elif _hint == 'left':
-                return self.player.row, self.player.col-1
-        else: return None
+            self.draw_hint(hint[:-1])
 
     # Setting functions
     def set_start_end(self, start, end):
@@ -258,7 +253,7 @@ class Game:
     def new_game(self):
         if self.maze is not None: return
         if self.level == 'easy':
-            self.maze = maze(10, 10)
+            self.maze = maze(20, 20)
         elif self.level == 'medium':
             self.maze = maze(40, 40)
         elif self.level == 'hard':
@@ -325,6 +320,11 @@ class Game:
             pygame.draw.rect(self.screen, 'darkviolet', (cell_y*self.tile + 2, cell_x*self.tile + 2, self.tile - 4, self.tile - 4)) 
         pygame.display.update()
 
+    def draw_hint(self, hint):
+        for cell_x, cell_y in hint:
+            pygame.draw.rect(self.screen, 'green', (cell_y*self.tile + 3, cell_x*self.tile + 3, self.tile - 6, self.tile - 6)) 
+        pygame.display.update()
+
     def draw(self):
         self.screen.fill('white')
         self.draw_maze()
@@ -337,7 +337,7 @@ class Game:
         for i in range(n): 
             self.draw_text_mini(games[i]['file_name'], 'black', 910, 450 + i*43)
             self.draw_text_mini(games[i]['level'], 'black', 1000, 450 + i*43)
-            self.draw_text_mini(self.record_text_mini(games[i]['record']), 'black', 1100, 450 + i*43)
+            self.draw_text_mini(self.record_text_mini(games[i]['record']), 'black', 1080, 450 + i*43)
     # Event funtions
     def record_text(self, _time):
         hou = _time//3600
@@ -671,16 +671,12 @@ class Game:
                     self.draw_cur((self.player.row, self.player.col))
 
                     # process hint(press H)
-                    hint_cell = self.handle_hint()    
-                    if hint_cell is not None:
-                            pygame.draw.rect(self.screen, (0, 255, 0), (hint_cell[1]*self.tile + 2, 
-                                                                        hint_cell[0]*self.tile + 2, self.tile - 4, self.tile - 4))
+                    self.handle_hint()    
                     
                 self.update()
                 time.sleep(0.1) 
                    
 
 if __name__ == '__main__':
-    game = Game('hard', 'auto')
-    game = Game('medium', 'not_auto')
+    game = Game('easy', 'not_auto')
     game.run()

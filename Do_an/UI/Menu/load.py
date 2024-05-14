@@ -1,10 +1,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QIcon
-from UI.user_interface.music import Sound
+from UI.user_interface import music
 from PyQt5.QtWidgets import *
-
-from game import saveloadsystem, Game
-
 
 class LoadWindow(object):
     def setupUi(self, MainWindow):

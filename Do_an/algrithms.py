@@ -115,33 +115,33 @@ def dfs(maze, start = None):
             maze.grid[i][j].is_visited = False 
     return path
 
-def hint(maze, cur, algorithms):
-    """ 
-    Ham nay dung de goi y duong di tiep theo
-    Arg
-    - maze: la me cung dang giai
-    - cur: la vi tri hien tai cua nguoi choi
-    Return: huong di tiep theo [top, right, bot, left]
+# def hint(maze, cur, algorithms):
+#     """ 
+#     Ham nay dung de goi y duong di tiep theo
+#     Arg
+#     - maze: la me cung dang giai
+#     - cur: la vi tri hien tai cua nguoi choi
+#     Return: huong di tiep theo [top, right, bot, left]
 
-    """
-    if algorithms == 'dfs':
-        path = dfs(maze, cur)
-    elif algorithms == 'bfs':
-        path = bfs(maze, cur)
-    else:
-        #raise error
-        return False
-    if len(path) < 2: return 
-    else:
-        next_cell = path[1]
-        if next_cell[0] == cur[0]:
-            if next_cell[1] - cur[1] == 1:
-                return 'right'
-            else:
-                return 'left'
-        elif next_cell[1] == cur[1]:
-            if next_cell[0] - cur[0] == 1:
-                return 'bot'
-            else:
-                return 'top'
+#     """
+#     if algorithms == 'dfs':
+#         path = dfs(maze, cur)
+#     elif algorithms == 'bfs':
+#         path = bfs(maze, cur)
+#     else:
+#         #raise error
+#         return False
+#     if len(path) < 2: return 
+#     else:
+#         next_cell = path[1]
+#         if next_cell[0] == cur[0]:
+#             if next_cell[1] - cur[1] == 1:
+#                 return 'right'
+#             else:
+#                 return 'left'
+#         elif next_cell[1] == cur[1]:
+#             if next_cell[0] - cur[0] == 1:
+#                 return 'bot'
+#             else:
+#                 return 'top'
 
