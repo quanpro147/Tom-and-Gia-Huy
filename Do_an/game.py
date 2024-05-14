@@ -166,7 +166,7 @@ class Game:
         self.mode = mode
         self.choose = choose
         self.maze = None
-        self.algorithm = 'dfs'
+        self.algorithm = 'bfs'
         self.tile = None
         self.font = pygame.font.Font('freesansbold.ttf', 32)
         self.font_mini = pygame.font.Font('freesansbold.ttf', 20)
@@ -180,8 +180,10 @@ class Game:
         self.completed = False
 
     def button(self):
+        Size_img = (160,40)
         # load img
         resume_img = pygame.image.load('Do_an/button/Resume.png').convert_alpha()
+                
         load_img = pygame.image.load('Do_an/button/LoadButton.png').convert_alpha()
         menu_img = pygame.image.load('Do_an/button/MenuButton.png').convert_alpha()
         options_img = pygame.image.load('Do_an/button/OptionsButton.png').convert_alpha()
@@ -192,23 +194,28 @@ class Game:
         save_img = pygame.image.load('Do_an/button/SaveButton.png').convert_alpha()
         accept_img = pygame.image.load('Do_an/button/AcceptButton.png').convert_alpha()
         cancel_img = pygame.image.load('Do_an/button/CancelButton.png').convert_alpha()
+        gameFrame_img = pygame.image.load('Do_an/button/gameFrame.png').convert_alpha()
+        a = [resume_img,load_img,menu_img,options_img,quit_img,save_img]
+        for i in range(len(a)):
+            a[i] = pygame.transform.scale(a[i],Size_img)
         # create button
-        resume_button = Button(500, 200, resume_img, 1)
-        load_button = Button(500, 300, load_img, 1)
-        menu_button = Button(500, 400, menu_img, 1)
-        options_button = Button(500, 500, options_img, 1)
-        quit_button = Button(500, 600, quit_img, 1)
+        resume_button = Button(500, 320, a[0], 1)
+        load_button = Button(500, 400, a[1], 1)
+        menu_button = Button(500, 240, a[2], 1)
+        options_button = Button(500, 480, a[3], 1)
+        quit_button = Button(500, 560, a[4], 1)
         change_alg_button = Button(500, 450, change_alg_img, 1)
         back_button = Button(500, 550, back_img, 1)
         play_again_button = Button(400, 150, play_again_img, 1)
-        save_button_1 = Button(500, 300, save_img, 1)
-        save_button_2 = Button(400, 200, save_img, 1)
+        save_button_1 = Button(500, 400, a[5], 1)
+        save_button_2 = Button(400, 200, a[5], 1)
         accept_button_1 = Button(600, 350, accept_img, 1)
         accept_button_2 = Button(600, 300, accept_img, 1)
         cancel_button_1 = Button(400, 350, cancel_img, 1)
         cancel_button_2 = Button(400, 300, cancel_img, 1)
         accept_button_3 = Button(1000, 300, accept_img, 1)
         cancel_button_3 = Button(850, 300, cancel_img, 1)
+        gameFrame = Button(350,120,gameFrame_img,1)
         return {'resume': resume_button, 
                 'load': load_button,
                 'main_menu': menu_button,
@@ -224,7 +231,8 @@ class Game:
                 'cancel_1': cancel_button_1,
                 'cancel_2': cancel_button_2,
                 'accept_3': accept_button_3,
-                'cancel_3': cancel_button_3}
+                'cancel_3': cancel_button_3,
+                'gameFrame':gameFrame}
 
     # Player funtions
     def handle_move(self):
@@ -648,6 +656,7 @@ class Game:
                 if pause:
                     self.record = _time
                     if menu_state == 'menu':
+                        self.buttons['gameFrame'].draw(self.screen)
                         if self.buttons['resume'].draw(self.screen): # resume
                             pause = False
                         if self.buttons['save_1'].draw(self.screen): # save
@@ -660,6 +669,7 @@ class Game:
                             running = False
 
                     elif menu_state == 'options':
+                        self.buttons['gameFrame'].draw(self.screen)
                         self.draw_text('{}'.format(self.algorithm), 'black', 500, 500)
                         if self.buttons['chang_alg'].draw(self.screen): # chang_alg
                             if self.algorithm == 'dfs': self.set_algorithm('bfs')
@@ -682,6 +692,7 @@ class Game:
                             menu_state = 'save2'
 
                     elif menu_state == 'save1':
+                        self.buttons['gameFrame'].draw(self.screen)
                         self.draw_text('Enter name of file: {}'.format(self.file_name), 'black', 400, 250)
                         user_input = True
                         if self.buttons['accept_1'].draw(self.screen):
@@ -712,8 +723,10 @@ class Game:
                 for event in pygame.event.get():
                     if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_SPACE:
-                            if not pause: pause = True
-                            else: pause = False
+                            if menu_state == 'menu':
+                                if not pause: pause = True
+                                else: pause = False 
+                            
                         elif event.key == pygame.K_BACKSPACE:
                             if user_input:                                       
                                 self.file_name = self.file_name[:-1]
