@@ -153,11 +153,8 @@ class saveloadsystem():
             game_manager = None
         with open(self.folder + self.file_extension, 'wb') as f:
             pickle.dump(game_manager, f)
-
-    
         
-            
-
+        
 class Game:
     def __init__(self, level = None, mode = None, choose = None):
         pygame.init()
@@ -171,6 +168,7 @@ class Game:
         self.algorithm = 'dfs'
         self.tile = None
         self.font = pygame.font.Font('freesansbold.ttf', 32)
+        self.font_mini = pygame.font.Font('freesansbold.ttf', 20)
         self.player = Player(None, None)
         self.buttons = self.button()
         self.start, self.end = None, None
@@ -280,7 +278,7 @@ class Game:
 
     def save(self):
         data = {'level': self.level,'mode': self.mode,'maze': self.maze,'alg': self.algorithm,'start': self.maze.start,'end': self.maze.end,'record': self.record,
-                'file_name': self.file_name, 'player': self.player, 'tile': self.tile}
+                'file_name': self.file_name, 'player': self.player, 'tile': self.tile, 'completed': self.completed}
         if self.saveloadmanager.check_file_name(self.file_name):
             print('File has already exist')
         else:
@@ -302,11 +300,16 @@ class Game:
             self.file_name = data['file_name']
             self.player = data['player']
             self.tile = data['tile']
+            self.completed = data['completed']
             print('Load file succeeded')
 
     # Draw functions
     def draw_text(self, text, color, x, y):
         img = self.font.render(text, True, color)
+        self.screen.blit(img, (x, y))
+
+    def draw_text_mini(self, text, color, x, y):
+        img = self.font_mini.render(text, True, color)
         self.screen.blit(img, (x, y))
 
     def draw_cur(self, cur_cell):
@@ -328,46 +331,75 @@ class Game:
         self.screen.fill('white')
         self.draw_maze()
     
+    def draw_rank(self, games):
+        rank_bg_img = pygame.image.load('Do_an/Assets/Background/rank_bg.jpg').convert_alpha()
+        rank_bg_img = pygame.transform.scale(rank_bg_img, (300, 400))
+        self.screen.blit(rank_bg_img, (850, 250))
+        n = min(5, len(games))
+        for i in range(n): 
+            self.draw_text_mini(games[i]['file_name'], 'black', 910, 450 + i*43)
+            self.draw_text_mini(games[i]['level'], 'black', 1000, 450 + i*43)
+            self.draw_text_mini(self.record_text_mini(games[i]['record']), 'black', 1100, 450 + i*43)
     # Event funtions
     def record_text(self, _time):
         hou = _time//3600
         min = (_time - hou*3600)//60
         sec = _time - hou*3600 - min*60
         return str('Time of completion: {}:{}:{}'.format(hou, min, sec))
+    def record_text_mini(self, _time):
+        hou = _time//3600
+        min = (_time - hou*3600)//60
+        sec = _time - hou*3600 - min*60
+        return str('{}:{}:{}'.format(hou, min, sec))
     
-    def ranking(self):
-        rank_game = [self.game]
-        game_manager = self.saveloadmanager.load_data()
-        # loc cac game co cung che do, do kho
+    def take_score(self):
+        games = []
+        try:
+            game_manager = self.saveloadmanager.load_data()
+        except EOFError:
+            return []
         for name_file, game in game_manager.items():
-            if game.completed and game.mode == 'not_auto' and game.level == self.level:
-                rank_game.append(game)
-        # sap xep theo thoi gian tang dan
-        for i in range(len(rank_game) - 1):
-            for j in range(1, len(rank_game)):
-                if rank_game[i] > rank_game[j]:
-                    rank_game[i], rank_game[j] = rank_game[j], rank_game[i]
+            if game['completed'] and game['mode'] == 'not_auto' and game['level'] == self.level:
+                games.append(game)
+        if len(games) == 1: return games
+        for i in range(len(games) - 1):
+            for j in range(1, len(games)):
+                if games[i]['record'] > games[j]['record']:
+                    games[i], games[j] = games[j], games[i]  
+        return games 
+        
+    def ranking(self, games):    
         # tra ve hang cua game hien tai
-        for i in range(len(rank_game)):
-            if self.game.file_name == rank_game[i].file_name:
-                self.rank = i+1
-            
+        if games == []: return [{'file_name': 'You', 'record': self.record, 'level': self.level}]
+        if self.record > games[-1]['record']:
+            games.append({'file_name': 'You', 'record': self.record, 'level': self.level})
+        else:
+            for i in range(len(games)):
+                if self.record <= games[i]['record']:
+                    games.insert(i, {'file_name': 'You', 'record': self.record, 'level': self.level})
+                    break
+        return games
+
     # Game funtions   
     def run(self):
 
         self.new_game()
+        # game loop var
         running = True
         running_dfs = True
+        # time var
         _time = self.record
         timer = Timer(1000, self.font)
         timer.activate()
+        # menu var
         pause = False
         menu_state = 'menu'
         user_input = False
-        tmp_start = self.maze.start
-        end = self.maze.end
+        
 
-        if self.mode == 'auto': 
+        if self.mode == 'auto':
+            tmp_start = self.maze.start
+            end = self.maze.end 
             while running:          
                 cur_cell = tmp_start
                 if self.algorithm == 'dfs': running_dfs = True
@@ -537,8 +569,6 @@ class Game:
             start = self.maze.start
             end = self.maze.end
             if self.player.row is None: self.player.row, self.player.col = start[0], start[1]
-            pause = False
-            menu_state = 'menu'
 
             while running:
                 self.draw()
@@ -569,7 +599,7 @@ class Game:
                         bg_img = pygame.image.load('Do_an/Assets/tom_catch_jerry.png').convert_alpha()
                         self.screen.blit(bg_img, (0, 0))
                         self.draw_text(self.record_text(self.record), 'black', 400, 100)
-                        if self.buttons['play_again'].draw(self.screen): # # play_again
+                        if self.buttons['play_again'].draw(self.screen): # play_again
                             pass
                         if self.buttons['save_2'].draw(self.screen): # save
                             menu_state = 'save2'
@@ -621,13 +651,17 @@ class Game:
                     # process and visual time
                     timer.update()
                     if not timer.active:
-                        _time += 1      
+                        _time += 1
+                        self.record = _time      
                         timer.activate()
                     timer.draw(self.screen, _time)
 
                     # visual algorithm
                     alg_text = 'Algorithm: {}'.format(self.algorithm)
                     self.draw_text(alg_text, 'black', 900, 100)
+                    # visual rank
+                    games = self.ranking(self.take_score())
+                    self.draw_rank(games)
 
                     # process move (press w,a,s,d or up,down,right,left)
                     self.handle_move()
@@ -650,4 +684,5 @@ class Game:
 
 if __name__ == '__main__':
     game = Game('hard', 'auto')
+    game = Game('medium', 'not_auto')
     game.run()
