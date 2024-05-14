@@ -101,6 +101,7 @@ class LoadWindow(object):
         currentIndex = self.listGame.currentRow()
         item = self.listGame.item(currentIndex)
         game = Game()
+        print(item.text())
         game.load(item.text())
         game.run()
 
