@@ -96,6 +96,8 @@ class saveloadsystem():
         """ Ham nay dung de them game muon luu vao game_manager """
         try:
             game_manager = self.load_data()
+            if game_manager is None:
+                return {name_file: game}
             game_manager[name_file] = game
             return game_manager
         except EOFError:
