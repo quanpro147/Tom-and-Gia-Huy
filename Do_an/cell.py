@@ -10,20 +10,19 @@ class cell():
         self.walls = {'top': True, 'bot': True, 'right': True, 'left': True}
         self.is_visited = False
         self.is_entry_exit = None
-        self.thickness = 3
+        self.thickness = 1
 
     def draw(self, screen, cell_size):
         """ This function use to draw wall if it appear """
-        x, y = self.x * cell_size, self.y * cell_size
-
+        x, y = self.x * cell_size, self.y * cell_size 
         if self.walls['top']:
-            pygame.draw.line(screen, pygame.Color('black'), (x, y), (x + cell_size, y), self.thickness)
+            pygame.draw.line(screen, pygame.Color('black'), (x, y), (x + cell_size, y), self.thickness + cell_size//20)
         if self.walls['right']:
-            pygame.draw.line(screen, pygame.Color('black'), (x + cell_size, y), (x + cell_size, y + cell_size), self.thickness)
+            pygame.draw.line(screen, pygame.Color('black'), (x + cell_size, y), (x + cell_size, y + cell_size), self.thickness + cell_size//20)
         if self.walls['bot']:
-            pygame.draw.line(screen, pygame.Color('black'), (x + cell_size, y + cell_size), (x , y + cell_size), self.thickness)
+            pygame.draw.line(screen, pygame.Color('black'), (x + cell_size, y + cell_size), (x , y + cell_size), self.thickness + cell_size//20)
         if self.walls['left']:
-            pygame.draw.line(screen, pygame.Color('black'), (x, y + cell_size), (x, y), self.thickness)
+            pygame.draw.line(screen, pygame.Color('black'), (x, y + cell_size), (x, y), self.thickness + cell_size//20)
     
     def remove_walls(self, neighbour_row, neighbour_col):
         """
