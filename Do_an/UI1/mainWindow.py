@@ -24,7 +24,7 @@ class MainWindow(QMainWindow):
         #background
         self.background = QLabel(self)
         self.background.setGeometry(QRect(0,0,1000,800))
-        self.background.setPixmap(QtGui.QPixmap("Do_an/UI/UI1/blue1.png"))
+        self.background.setPixmap(QtGui.QPixmap("Do_an/UI1/blue1.png"))
         # Stacked WIdget
         self.stWidget = QStackedWidget(self)
         self.stWidget.setGeometry(QRect(0,0,1000,800))
@@ -74,6 +74,8 @@ class MainWindow(QMainWindow):
         self.Register_window.sign_up_button.clicked.connect(self.Create_account)
         #Vao game
         self.New_Window.PlayButton.clicked.connect(self.play)
+        #Load Old game
+        self.Load_Window.Play_Button.clicked.connect(self.LoadGame)
     def login(self):
         self.sound.clickSound()
         filename = "Do_an/UI/user_interface/account.json"
@@ -178,9 +180,13 @@ class MainWindow(QMainWindow):
                     game = Game('hard', 'auto')
                     # game.set_start_end()
                     game.run()
-
-
-
+    def LoadGame(self):
+        currentIndex = self.Load_Window.listGame.currentRow()
+        item = self.Load_Window.listGame.item(currentIndex)
+        game = Game()
+        game.load(item.text())
+        self.close()
+        game.run()
 
 app = QApplication(sys.argv)
 login = MainWindow()

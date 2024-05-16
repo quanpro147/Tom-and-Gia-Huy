@@ -15,7 +15,6 @@ class MenuWidget(QWidget):
         # background
         self.background = QLabel(self)
         self.background.setGeometry(QRect(0, 0, 1000, 800))
-        self.background.setPixmap(QtGui.QPixmap("Do_an/UI/UI1/blue1.png"))
 
         # Label
         self.label = QLabel(self)
@@ -28,9 +27,9 @@ class MenuWidget(QWidget):
         self.play_button, self.load_button,self.help_button,self.about_button,self.quit_button = self.button()
         #volume button
         self.Vol_on_icon = QIcon()
-        self.Vol_on_icon.addFile("Do_an/UI/UI1/Icon/volume_on.png")
+        self.Vol_on_icon.addFile("Do_an/UI1/Icon/volume_on.png")
         self.Vol_off_icon = QIcon()
-        self.Vol_off_icon.addFile("Do_an/UI/UI1/Icon/volume_off.webp")
+        self.Vol_off_icon.addFile("Do_an/UI1/Icon/volume_off.webp")
         self.volume_button = QPushButton(self)
         self.volume_button.setGeometry(QRect(960,0,40,40))
         self.volume_button.setIcon(self.Vol_on_icon)

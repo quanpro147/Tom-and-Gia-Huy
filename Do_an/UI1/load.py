@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import*
 from PyQt5.QtCore import *
 from PyQt5 import QtGui,QtCore
 from PyQt5.QtGui import *
+from game import *
 import sys
 class LoadWidget(QWidget):
     def __init__(self):
@@ -36,6 +37,14 @@ class LoadWidget(QWidget):
         self.Back_Button.setGeometry(QRect(0, 0,100, 40))
         self.Back_Button.setIcon(Icon)
         self.Back_Button.setText("Back")
+        #Load file game
+        self.path = 'Do_an/SaveLoad/saveload.txt'
+        self.loadfilegame()
+
+
+    def loadfilegame(self):
+        self.oldgame = saveloadsystem.readfile(self.path)
+        self.listGame.addItems(self.oldgame)
 
 
 
