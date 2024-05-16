@@ -82,7 +82,7 @@ class Player:
         elif direction == 'left':
             self.col -= 1
 
-class saveloadsystem():
+class saveloadsystem:
     def __init__(self, file_extension, folder):
         self.file_extension = file_extension
         self.folder = folder
@@ -188,8 +188,11 @@ class Slider:
         self.label_rect = self.text.get_rect(center = (self.pos[0], self.slider_top_pos - 15))
         screen.blit(self.text, self.label_rect) 
 
+def flip(sprites):
+    return [pygame.transform.flip(sprite, True, False) for sprite in sprites]
+
 def load_sprite_sheets(dir1, dir2, width, height, direction=False):
-    path = join("Do_an","assets", dir1, dir2)
+    path = join("Do_an","Assets", dir1, dir2)
     images = [f for f in listdir(path) if isfile(join(path, f))]
     all_sprites = {}
 
@@ -197,7 +200,7 @@ def load_sprite_sheets(dir1, dir2, width, height, direction=False):
         sprite_sheet = pygame.image.load(join(path, image)).convert_alpha()
 
         sprites = []
-        for i in range(sprite_sheet.get_width() // width):
+        for i in range(int(sprite_sheet.get_width()//width)):
             surface = pygame.Surface((width, height), pygame.SRCALPHA, 32)
             rect = pygame.Rect(i * width, 0, width, height)
             surface.blit(sprite_sheet, (0, 0), rect)
@@ -212,42 +215,104 @@ def load_sprite_sheets(dir1, dir2, width, height, direction=False):
             all_sprites[image.replace(".png", "")] = sprites
 
     return all_sprites
+
 class Object(pygame.sprite.Sprite):
-    def __init__(self, x, y, width, height, dx, dy, name=None):
+    def __init__(self, x, y, width, height, dx, dy):
         super().__init__()
         self.rect = pygame.Rect(x, y, width, height)
-        self.image = pygame.Surface((width, height), pygame.SRCALPHA)
+        self.image = pygame.Surface((width, height))
         self.width = width
         self.height = height
-        self.name = name
         self.dx = dx
         self.dy = dy
     def draw(self, win, offset_x, offset_y):
         win.blit(self.image, (self.rect.x - offset_x, self.rect.y - offset_y))   
+
 class Jerry(Object):
-    ANIMATION_DELAY = 3
+    ANIMATION_DELAY = 4
 
     def __init__(self, x, y, width, height, dx, dy):
         super().__init__(x, y, width, height, dx, dy)
-        self.jerry = load_sprite_sheets("MainCharacters", "Jerry", width, height)
+        self.jerry = load_sprite_sheets("MainCharacters", "Jerry", 34, 58)
         self.image = self.jerry["idlle"][0]
+        self.image = pygame.transform.scale(self.image, (width, height))
         self.mask = pygame.mask.from_surface(self.image)
         self.animation_count = 0
         self.animation_name = "idlle"
-        self.name = "Jerry"
 
     def loop(self):
         sprites = self.jerry[self.animation_name]
         sprite_index = (self.animation_count //
                         self.ANIMATION_DELAY) % len(sprites)
-        self.image = sprites[sprite_index]
-        self.animation_count += 1
+        self.image = pygame.transform.scale(sprites[sprite_index], (self.width, self.height))
+        self.animation_count += 2
 
         self.rect = self.image.get_rect(topleft=(self.rect.x, self.rect.y))
         self.mask = pygame.mask.from_surface(self.image)
 
         if self.animation_count // self.ANIMATION_DELAY > len(sprites):
             self.animation_count = 0
+
+class Player_pro(pygame.sprite.Sprite):
+    ANIMATION_DELAY = 5
+    def __init__(self, x, y , width, height):
+        super().__init__()
+        self.rect = pygame.Rect(x, y, width, height)
+        self.x_vel = 0
+        self.y_vel = 0 
+        self.mask = None
+        self.direction = "left"
+        self.animation_count = 0
+        self.sprites = load_sprite_sheets("MainCharacters", "Tom", 56, 56)
+        self.width = width
+        self.height = height
+
+    def move(self, dx, dy):
+        self.rect.x += dx
+        self.rect.y += dy
+    def move_left(self, vel):
+        self.x_vel = -vel
+        if self.direction != "left":
+            self.direction = "left"
+            self.animation_count = 0
+    def move_right(self, vel):
+        self.x_vel = vel 
+        if self.direction != "right":
+            self.direction = "right"
+            self.animation_count = 0
+    def move_up(self, vel):
+        self.y_vel = -vel
+        if self.direction != "up":
+            self.direction = "up"
+            self.animation_count = 0
+    def move_down(self, vel):
+        self.y_vel = vel
+        if self.direction != "down":
+            self.direction = "down"
+            self.animation_count = 0
+
+    def loop(self, fps):
+        self.move(self.x_vel, self.y_vel)
+        self.update_sprite()
+        self.update()
+
+    def update_sprite(self):
+        sprite_sheet = "run"   
+        if self.x_vel != 0 or self.y_vel != 0:
+            sprite_sheet = "run"
+        sprite_sheet_name = sprite_sheet
+        sprites = self.sprites[sprite_sheet_name]
+        sprite_index = (self.animation_count //self.ANIMATION_DELAY) % len(sprites)
+        self.sprite = pygame.transform.scale(sprites[sprite_index], (self.width, self.height))
+        self.animation_count += 1
+        self.update()
+
+    def update(self):
+        self.rect = self.sprite.get_rect(topleft=(self.rect.x, self.rect.y))
+        #self.mask = pygame.mask.from_surface(self.sprite)
+    
+    def draw(self, win):
+        win.blit(self.sprite, (self.rect.x, self.rect.y))
 
 class Game:
     def __init__(self, level = None, mode = None, choose = False):
@@ -274,6 +339,7 @@ class Game:
         self.completed = False
         self.slider = Slider((590, 350), (200, 30), 0.5, 0, 100)
         self.delay = 50
+        #self.player_pro = Player_pro()
 
     def button(self):
         Size_img = (160,40)
@@ -481,14 +547,12 @@ class Game:
             next_cell = hint[i+1]      
             pygame.draw.line(self.screen, 'green', (cur_cell[1]*self.tile + self.tile//2, cur_cell[0]*self.tile + self.tile//2),
                                                  (next_cell[1]*self.tile + self.tile//2, next_cell[0]*self.tile + self.tile//2), 3)
-        
-                
+                   
     def draw(self):
         self.screen.fill('white')
         self.draw_tiles_map()
         self.draw_maze()
-        self.draw_end()
-    
+        
     def draw_rank(self, games):
         rank_bg_img = pygame.image.load('Do_an/Assets/Background/rank_bg.jpg').convert_alpha()
         rank_bg_img = pygame.transform.scale(rank_bg_img, (300, 400))
@@ -566,8 +630,8 @@ class Game:
         menu_state = 'menu'
         user_input = False
         # character
-        jerry = Jerry(self.end[1]*self.tile, self.end[0]*self.tile,self.tile*0.5, self.tile*0.75, 0, 0)
-
+        jerry = Jerry(self.end[1]*self.tile + 1, self.end[0]*self.tile + 1, self.tile*0.8, self.tile, 0, 0)
+        tom = Player_pro(self.start[1]*self.tile, self.start[0]*self.tile, self.tile, self.tile)
         # process random_entry_exit
         if self.choose:
             self.start = None
@@ -907,7 +971,10 @@ class Game:
 
             while running:
                 self.draw()
+                jerry.draw(self.screen, 0, 0)
                 jerry.loop()
+                tom.loop(60)
+                tom.draw(self.screen)
                 # check event
                 if pause:
                     self.record = _time
@@ -942,9 +1009,10 @@ class Game:
                         if self.buttons['play_again'].draw(self.screen): # play_again
                             running = False
                             self.transitions
-                            self.new_game()
                             self.record = 0
+                            self.maze = None
                             self.start, self.end = None, None
+                            self.new_game()
                             self.run()
                         if self.buttons['save_2'].draw(self.screen): # save
                             menu_state = 'save2'
@@ -1025,19 +1093,39 @@ class Game:
                     self.handle_hint()    
                     time.sleep(0.00075*self.delay) 
                 self.update()
-                
+
+    def handle_move_pro(self, player):
+        keys = pygame.key.get_pressed()
+        
+        if (keys[pygame.K_LEFT] or keys[pygame.K_a]) :
+            player.move_left(self.tile//5)
+        elif (keys[pygame.K_RIGHT] or keys[pygame.K_d]):
+            player.move_right(self.tile//5) 
+        elif (keys[pygame.K_DOWN] or keys[pygame.K_s]):
+            player.move_down(self.tile//5)
+        elif (keys[pygame.K_UP] or keys[pygame.K_w]):
+            player.move_up(self.tile//5)
+        return player
+    
     def test(self):
+        self.new_game()
         run = True
+        tom = Player_pro(self.start[1]*self.tile, self.start[0]*self.tile, self.tile, self.tile)
         while run:
+            self.draw()
             self.draw_tiles_map()
+            tom.loop(60)
+            tom.draw(self.screen)
+            tom = self.handle_move_pro(tom)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     run = False
-            pygame.display.update()
+            #time.sleep(0.01)
+            self.update()
         pygame.quit()
         
 if __name__ == '__main__':
-    game = Game('medium', 'not_auto')
-    game.run()
+    game = Game('easy', 'not_auto')
+    game.test()
     
 
