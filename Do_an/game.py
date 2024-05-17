@@ -42,6 +42,7 @@ class Timer:
         self.font = font
         self.start = 0
         self.time = time
+        self.pause = False
 
     def activate(self):
         self.active = True
@@ -53,9 +54,15 @@ class Timer:
 
     def update(self):
         if self.active:
-            cur_time = get_ticks()
-            if cur_time - self.start >= self.duration:
-                self.deactivate()
+            if self.pause:
+                cur_time = get_ticks()
+                if cur_time - self.tmp >= self.duration:
+                    self.pause = False
+                    self.deactivate()
+            else:
+                cur_time = get_ticks()
+                if cur_time - self.start >= self.duration:
+                    self.deactivate()
 
     def time_text(self, _time):
         hou = _time//3600
@@ -255,21 +262,24 @@ class Jerry(Object):
 
 class Player_pro(pygame.sprite.Sprite):
     ANIMATION_DELAY = 5
-    def __init__(self, x, y , width, height):
+    def __init__(self, x, y, row, col, size):
         super().__init__()
-        self.rect = pygame.Rect(x, y, width, height)
-        self.x_vel = 0
-        self.y_vel = 0 
+        self.x, self.y = x, y
+        self.rect = pygame.Rect(x, y, size, size)
+        self.x_vel = 0.0
+        self.y_vel = 0.0
         self.mask = None
-        self.direction = "left"
+        self.direction = None
         self.animation_count = 0
         self.sprites = load_sprite_sheets("MainCharacters", "Tom", 56, 56)
-        self.width = width
-        self.height = height
+        self.tile = size
+        self.row, self.col = row, col
 
-    def move(self, dx, dy):
-        self.rect.x += dx
-        self.rect.y += dy
+    def move(self, dx: float, dy: float):
+        self.x += dx
+        self.rect.x = self.x
+        self.y += dy
+        self.rect.y = self.y
     def move_left(self, vel):
         self.x_vel = -vel
         if self.direction != "left":
@@ -291,19 +301,17 @@ class Player_pro(pygame.sprite.Sprite):
             self.direction = "down"
             self.animation_count = 0
 
-    def loop(self, fps):
+    def loop(self):
         self.move(self.x_vel, self.y_vel)
         self.update_sprite()
         self.update()
 
     def update_sprite(self):
         sprite_sheet = "run"   
-        if self.x_vel != 0 or self.y_vel != 0:
-            sprite_sheet = "run"
         sprite_sheet_name = sprite_sheet
         sprites = self.sprites[sprite_sheet_name]
         sprite_index = (self.animation_count //self.ANIMATION_DELAY) % len(sprites)
-        self.sprite = pygame.transform.scale(sprites[sprite_index], (self.width, self.height))
+        self.sprite = pygame.transform.scale(sprites[sprite_index], (self.tile, self.tile))
         self.animation_count += 1
         self.update()
 
@@ -339,7 +347,6 @@ class Game:
         self.completed = False
         self.slider = Slider((590, 350), (200, 30), 0.5, 0, 100)
         self.delay = 50
-        #self.player_pro = Player_pro()
 
     def button(self):
         Size_img = (160,40)
@@ -535,7 +542,6 @@ class Game:
             if self.start == (cell_x, cell_y):
                 time.sleep(3)
     
-
     def draw_hint(self, hint):
         for cell_x, cell_y in hint:
             pygame.draw.rect(self.screen, 'green', (cell_y*self.tile + 3, cell_x*self.tile + 3, self.tile - 6, self.tile - 6))
@@ -625,21 +631,19 @@ class Game:
         _time = self.record
         timer = Timer(1000, self.font)
         timer.activate()
+        time_move = Timer(140, self.font)
+        time_move.activate()
         # menu var
         pause = False
         menu_state = 'menu'
         user_input = False
-        # character
-        jerry = Jerry(self.end[1]*self.tile + 1, self.end[0]*self.tile + 1, self.tile*0.8, self.tile, 0, 0)
-        tom = Player_pro(self.start[1]*self.tile, self.start[0]*self.tile, self.tile, self.tile)
         # process random_entry_exit
         if self.choose:
             self.start = None
             self.end = None
 
             while self.choose:
-                self.screen.fill('white')
-                self.draw_maze()            
+                self.draw()      
                 pos = pygame.mouse.get_pos()
 
                 if pos[0] > 0 and pos[0] < 800 and pos[1] > 0 and pos[1] < 800:
@@ -675,7 +679,8 @@ class Game:
                         pygame.quit()
                 self.update()
             self.transitions()
-
+        # character
+        jerry = Jerry(self.end[1]*self.tile + 1, self.end[0]*self.tile + 1, self.tile*0.8, self.tile, 0, 0)
         if self.mode == 'auto':
             tmp_start = self.start
             end = self.end 
@@ -973,8 +978,7 @@ class Game:
                 self.draw()
                 jerry.draw(self.screen, 0, 0)
                 jerry.loop()
-                tom.loop(60)
-                tom.draw(self.screen)
+
                 # check event
                 if pause:
                     self.record = _time
@@ -1003,7 +1007,7 @@ class Game:
                             menu_state = 'menu'
                     
                     elif menu_state == 'finish':
-                        bg_img = pygame.image.load('Do_an/Assets/tom_catch_jerry.png').convert_alpha()
+                        bg_img = pygame.image.load('Do_an/Assets/Background/tom_catch_jerry.png').convert_alpha()
                         self.screen.blit(bg_img, (0, 0))
                         self.draw_text(self.record_text(self.record), 'black', 400, 100)
                         if self.buttons['play_again'].draw(self.screen): # play_again
@@ -1064,7 +1068,6 @@ class Game:
                         quit()
                 
                 if not pause:
-                    # process and visual time
                     timer.update()
                     if not timer.active:
                         _time += 1
@@ -1096,36 +1099,56 @@ class Game:
 
     def handle_move_pro(self, player):
         keys = pygame.key.get_pressed()
-        
-        if (keys[pygame.K_LEFT] or keys[pygame.K_a]) :
-            player.move_left(self.tile//5)
-        elif (keys[pygame.K_RIGHT] or keys[pygame.K_d]):
-            player.move_right(self.tile//5) 
-        elif (keys[pygame.K_DOWN] or keys[pygame.K_s]):
-            player.move_down(self.tile//5)
-        elif (keys[pygame.K_UP] or keys[pygame.K_w]):
-            player.move_up(self.tile//5)
+        cur_row, cur_col = player.row, player.col
+        if (keys[pygame.K_LEFT] or keys[pygame.K_a]) and player.col > 0 and not self.maze.grid[cur_row][cur_col].walls['left']:
+            player.move_left(float(self.tile/9))
+        elif (keys[pygame.K_RIGHT] or keys[pygame.K_d]) and player.col < self.maze.num_cols-1 and not self.maze.grid[cur_row][cur_col].walls['right']:
+            player.move_right(float(self.tile/9))
+        elif (keys[pygame.K_DOWN] or keys[pygame.K_s]) and player.row < self.maze.num_rows-1 and not self.maze.grid[cur_row][cur_col].walls['bot']:
+            player.move_down(float(self.tile/9))
+        elif (keys[pygame.K_UP] or keys[pygame.K_w]) and player.row > 0 and not self.maze.grid[cur_row][cur_col].walls['top']:
+            player.move_up(float(self.tile/9))
         return player
     
     def test(self):
         self.new_game()
         run = True
-        tom = Player_pro(self.start[1]*self.tile, self.start[0]*self.tile, self.tile, self.tile)
+        tom = Player_pro(self.start[1]*self.tile, self.start[0]*self.tile, self.start[0], self.start[1], self.tile*0.9)
+        time_move = Timer(140, self.font)
+        time_move.activate()
         while run:
             self.draw()
-            self.draw_tiles_map()
-            tom.loop(60)
+            print(tom.x, tom.y)
+            tom.loop()    
             tom.draw(self.screen)
-            tom = self.handle_move_pro(tom)
+            time_move.update()
+            if not time_move.active:
+                tom.x_vel, tom.y_vel = 0, 0 
+                tom.x = round(tom.x)
+                tom.y = round(tom.y)  
+                if tom.x%self.tile != 0:
+                    if tom.direction == 'right':
+                        tom.x = (tom.x//self.tile + 1)*self.tile
+                    elif tom.direction == 'left':
+                        tom.x = (tom.x//self.tile)*self.tile
+                if tom.y%self.tile != 0:
+                    if tom.direction == 'up':
+                        tom.y = (tom.y//self.tile)*self.tile
+                    elif tom.direction == 'down':
+                        tom.y = (tom.y//self.tile + 1)*self.tile       
+                tom.row = tom.y//self.tile
+                tom.col = tom.x//self.tile 
+                print(tom.row, tom.col) 
+                tom = self.handle_move_pro(tom)                                    
+                time_move.activate()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     run = False
-            #time.sleep(0.01)
             self.update()
         pygame.quit()
         
 if __name__ == '__main__':
-    game = Game('easy', 'not_auto')
-    game.test()
+    game = Game('easy', 'not_auto', True)
+    game.run()
     
 
