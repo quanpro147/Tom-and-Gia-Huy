@@ -366,6 +366,7 @@ class Game:
 
     def button(self):
         Size_img = (160,40)
+        Size_img_IG = (80, 50)
         # load img
         resume_img = pygame.image.load('Do_an/button/Resume.png').convert_alpha()
                 
@@ -381,9 +382,15 @@ class Game:
         cancel_img = pygame.image.load('Do_an/button/CancelButton.png').convert_alpha()
         gameFrame_img = pygame.image.load('Do_an/button/gameFrame.png').convert_alpha()
         delay_img = pygame.image.load('Do_an/button/DelayButton.png').convert_alpha()
+        pause_img = pygame.image.load('Do_an/button/Pause_IG.png').convert_alpha()
+        mute_img = pygame.image.load('Do_an/button/mute_IG.png').convert_alpha()
+        hint_img = pygame.image.load('Do_an/button/hint_IG.png').convert_alpha()
         a = [resume_img,load_img,menu_img,options_img,quit_img,save_img]
+        b = [pause_img, mute_img, hint_img]
         for i in range(len(a)):
             a[i] = pygame.transform.scale(a[i],Size_img)
+        for i in range(len(b)):
+            b[i] = pygame.transform.scale(b[i], Size_img_IG)
         # create button
         resume_button = Button(500, 320, a[0], 1)
         load_button = Button(500, 400, a[1], 1)
@@ -403,6 +410,9 @@ class Game:
         cancel_button_3 = Button(850, 300, cancel_img, 1)
         gameFrame = Button(380,120,gameFrame_img,1)
         delay_button = Button(520, 260, delay_img, 1)
+        pause_button = Button(850, 700, pause_img, 1)
+        mute_button = Button(980, 700, mute_img, 1)
+        hint_button = Button(1100, 700, hint_img, 1)
         return {'resume': resume_button, 
                 'load': load_button,
                 'main_menu': menu_button,
@@ -420,15 +430,22 @@ class Game:
                 'accept_3': accept_button_3,
                 'cancel_3': cancel_button_3,
                 'gameFrame':gameFrame,
-                'delay': delay_button}
+                'delay': delay_button,
+                'pause': pause_button,
+                'mute' : mute_button,
+                'hint' : hint_button
+                }
 
     def tile_images(self):
         img_path = pygame.image.load('Do_an/Assets/Background/Green.png').convert_alpha()
         img_path = pygame.transform.scale(img_path, (self.tile, self.tile))
-        img_start = None
-        img_end = None
-        return {'path': img_path, 'start': img_start, 'end': img_end}
+        img_path_2 = pygame.image.load('Do_an/Assets/Background/Gray.png').convert_alpha()
+        img_path_2 = pygame.transform.scale(img_path_2, (40, 40))
+        img_path_3 = pygame.image.load('Do_an/Assets/Background/Yellow.png').convert_alpha()
+        img_path_3 = pygame.transform.scale(img_path_3, (40, 40))
 
+        return {'path': img_path, 'path_2': img_path_2,'path_3': img_path_3}
+    
     # Player funtions
     def handle_move(self):
         cur_row, cur_col = self.player.row, self.player.col
@@ -486,8 +503,8 @@ class Game:
         elif self.algorithm == 'bfs':
             hint = bfs(self.maze, cur)
         key = pygame.key.get_pressed()
-        if key[pygame.K_h]:
-            self.draw_hint(hint[:])
+        if self.buttons['hint'].draw(self.screen) or key[pygame.K_h]:
+            self.draw_hint_2(hint[:])
         
     # Setting functions
     def set_tile(self):
@@ -570,6 +587,16 @@ class Game:
             for j in range(self.maze.num_cols):
                 self.screen.blit(self.tile_imgs['path'], (j*self.tile, i*self.tile))
 
+    def draw_tiles_map_2(self):
+        for i in range(10):
+            for j in range(10):
+                self.screen.blit(self.tile_imgs['path_2'], (800 + j * 40, i * 40))
+
+    def draw_tiles_map_3(self):
+        for i in range(16):
+            for j in range(10):
+                self.screen.blit(self.tile_imgs['path_3'], (800 + j * 40, 160 + i * 40))
+
     def draw_text(self, text, color, x, y):
         img = self.font.render(text, True, color)
         self.screen.blit(img, (x, y))
@@ -610,6 +637,8 @@ class Game:
     def draw(self):
         self.screen.fill('white')
         self.draw_tiles_map()
+        self.draw_tiles_map_2()
+        self.draw_tiles_map_3()
         self.draw_maze()
         
     def draw_rank(self, games):
@@ -778,6 +807,12 @@ class Game:
                 while running_dfs:
                     self.draw()
                     jerry.draw(self.screen, 0, 0)
+                    if self.buttons['pause'].draw(self.screen): # pause
+                        pause = True
+                    if self.buttons['mute'].draw(self.screen): # pause
+                        pass
+                    if self.buttons['hint'].draw(self.screen): # pause
+                        self.handle_hint()
                     # check event
                     if pause:
                         if menu_state == 'menu':
@@ -820,7 +855,7 @@ class Game:
                                 menu_state = 'menu'
                         
                         elif menu_state == 'finish':
-                            bg_img = pygame.image.load('Do_an/Assets/Background/tom_catch_jerry.png').convert_alpha()
+                            bg_img = pygame.image.load('Do_an/Assets/Background/Background/tom_catch_jerry.png').convert_alpha()
                             self.screen.blit(bg_img, (0, 0))
                             self.draw_text(self.record_text(self.record), 'black', 400, 100)
                             if self.buttons['play_again'].draw(self.screen): # play_again
@@ -923,6 +958,12 @@ class Game:
                 while not running_dfs:
                     self.draw()
                     jerry.draw(self.screen, 0, 0)
+                    if self.buttons['pause'].draw(self.screen): # pause
+                        pause = True
+                    if self.buttons['mute'].draw(self.screen): # pause
+                        pass
+                    if self.buttons['hint'].draw(self.screen): # pause
+                        pass
                     # check event
                     if pause:
                         if menu_state == 'menu':
@@ -1074,6 +1115,10 @@ class Game:
             if self.player.row is None: self.player.row, self.player.col = start[0], start[1]
             while running:
                 self.draw()
+                if self.buttons['pause'].draw(self.screen): # pause
+                    pause = True
+                if self.buttons['mute'].draw(self.screen): # pause
+                    pass
                 jerry.draw(self.screen, 0, 0)
                 jerry.loop()
                 if self.player_name != 'Square':
