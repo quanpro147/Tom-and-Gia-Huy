@@ -6,6 +6,8 @@ import pickle
 import time
 from os import listdir 
 from os.path import isfile, join
+from tkinter import *
+from tkinter import messagebox
 
 class Button:
 	def __init__(self, x, y, image, scale):
@@ -36,7 +38,7 @@ class Button:
 		return action
     
 class Timer:
-    def __init__(self, duration, font):
+    def __init__(self, duration, font = None):
         self.duration = duration 
         self.active = False
         self.font = font
@@ -72,12 +74,16 @@ class Timer:
     
     def draw(self, screen, _time):
         text_suf = self.font.render(self.time_text(_time), True, 'black')
-        screen.blit(text_suf, (900, 50))     
+        screen.blit(text_suf, (900, 50)) 
+
+    def set_duration(self, new_duration):
+        self.duration = new_duration
 
 class Player:
-    def __init__(self, row, col):
+    def __init__(self, row, col, size):
         self.row = row
         self.col = col
+        self.size = size
 
     def move(self, direction):
         if direction == 'top':
@@ -88,6 +94,9 @@ class Player:
             self.col += 1
         elif direction == 'left':
             self.col -= 1
+
+    def draw(self, screen):
+        pygame.draw.rect(screen, (255, 0, 0), (self.col*self.size + 2, self.row*self.size + 2, self.size - 4, self.size - 4))
 
 class saveloadsystem:
     def __init__(self, file_extension, folder):
@@ -262,39 +271,42 @@ class Jerry(Object):
 
 class Player_pro(pygame.sprite.Sprite):
     ANIMATION_DELAY = 5
-    def __init__(self, x, y, row, col, size):
+    def __init__(self, x, y, size, name):
         super().__init__()
         self.x, self.y = x, y
         self.rect = pygame.Rect(x, y, size, size)
         self.x_vel = 0.0
         self.y_vel = 0.0
-        self.mask = None
-        self.direction = None
+        self.direction = 'left'
         self.animation_count = 0
-        self.sprites = load_sprite_sheets("MainCharacters", "Tom", 56, 56)
+        self.sprites = load_sprite_sheets("MainCharacters", name, 32, 32, 'True')
         self.tile = size
-        self.row, self.col = row, col
+        self.row, self.col = y//size, x//size
 
     def move(self, dx: float, dy: float):
         self.x += dx
         self.rect.x = self.x
         self.y += dy
         self.rect.y = self.y
+
     def move_left(self, vel):
         self.x_vel = -vel
         if self.direction != "left":
             self.direction = "left"
             self.animation_count = 0
+
     def move_right(self, vel):
         self.x_vel = vel 
         if self.direction != "right":
             self.direction = "right"
             self.animation_count = 0
+
     def move_up(self, vel):
         self.y_vel = -vel
         if self.direction != "up":
             self.direction = "up"
             self.animation_count = 0
+
     def move_down(self, vel):
         self.y_vel = vel
         if self.direction != "down":
@@ -307,9 +319,10 @@ class Player_pro(pygame.sprite.Sprite):
         self.update()
 
     def update_sprite(self):
-        sprite_sheet_name = "idle" 
+        sprite_sheet = "idle" 
         if self.x_vel or self.y_vel:   
-            sprite_sheet_name = 'run' + "_" + self.direction
+            sprite_sheet = 'run'
+        sprite_sheet_name = sprite_sheet + "_" + self.direction
         sprites = self.sprites[sprite_sheet_name]
         sprite_index = (self.animation_count //self.ANIMATION_DELAY) % len(sprites)
         self.sprite = pygame.transform.scale(sprites[sprite_index], (self.tile, self.tile))
@@ -318,13 +331,12 @@ class Player_pro(pygame.sprite.Sprite):
 
     def update(self):
         self.rect = self.sprite.get_rect(topleft=(self.rect.x, self.rect.y))
-        #self.mask = pygame.mask.from_surface(self.sprite)
     
     def draw(self, win):
         win.blit(self.sprite, (self.rect.x, self.rect.y))
 
 class Game:
-    def __init__(self, level = None, mode = None, choose = False):
+    def __init__(self, level = None, mode = None, choose = False, player_name = 'Square'):
         pygame.init()
         pygame.display.set_caption('Maze Game')
         self.WINDOW_SIZE = 1202, 802
@@ -333,12 +345,13 @@ class Game:
         self.level = level
         self.mode = mode
         self.choose = choose
+        self.player_name = player_name
+        self.player = None
         self.maze = None
         self.algorithm = 'dfs'
         self.tile = None
         self.font = pygame.font.Font('freesansbold.ttf', 32)
         self.font_mini = pygame.font.Font('freesansbold.ttf', 20)
-        self.player = Player(None, None)
         self.buttons = self.button()
         self.start, self.end = None, None
         self.record = 0
@@ -349,6 +362,7 @@ class Game:
         self.slider = Slider((590, 350), (200, 30), 0.5, 0, 100)
         self.delay = 50
         self.is_saved = False
+        
 
     def button(self):
         Size_img = (160,40)
@@ -414,7 +428,7 @@ class Game:
         img_start = None
         img_end = None
         return {'path': img_path, 'start': img_start, 'end': img_end}
-    
+
     # Player funtions
     def handle_move(self):
         cur_row, cur_col = self.player.row, self.player.col
@@ -428,6 +442,41 @@ class Game:
         elif (key[pygame.K_DOWN] or key[pygame.K_s]) and self.player.row < self.maze.num_rows-1 and not self.maze.grid[cur_row][cur_col].walls['bot']:
             self.player.move('bot')
 
+    def handle_move_pro(self):
+
+        self.player.x_vel, self.player.y_vel = 0, 0 
+        self.player.x = round(self.player.x)
+        self.player.y = round(self.player.y)  
+        if self.player.x%self.tile != 0:
+            if self.player.direction == 'right':
+                self.player.x = (self.player.x//self.tile + 1)*self.tile
+            elif self.player.direction == 'left':
+                self.player.x = (self.player.x//self.tile)*self.tile
+        if self.player.y%self.tile != 0:
+            if self.player.direction == 'up':
+                self.player.y = (self.player.y//self.tile)*self.tile
+            elif self.player.direction == 'down':
+                self.player.y = (self.player.y//self.tile + 1)*self.tile       
+        self.player.row = self.player.y//self.tile
+        self.player.col = self.player.x//self.tile 
+        keys = pygame.key.get_pressed()
+
+        if self.level == 'hard':
+            vel = self.tile/3
+        elif self.level == 'medium':
+            vel = self.tile/6
+        else:
+            vel = self.tile/8
+        cur_row, cur_col = self.player.row, self.player.col
+        if (keys[pygame.K_LEFT] or keys[pygame.K_a]) and self.player.col > 0 and not self.maze.grid[cur_row][cur_col].walls['left']:
+            self.player.move_left(float(vel))
+        elif (keys[pygame.K_RIGHT] or keys[pygame.K_d]) and self.player.col < self.maze.num_cols-1 and not self.maze.grid[cur_row][cur_col].walls['right']:
+            self.player.move_right(float(vel))
+        elif (keys[pygame.K_DOWN] or keys[pygame.K_s]) and self.player.row < self.maze.num_rows-1 and not self.maze.grid[cur_row][cur_col].walls['bot']:
+            self.player.move_down(float(vel))
+        elif (keys[pygame.K_UP] or keys[pygame.K_w]) and self.player.row > 0 and not self.maze.grid[cur_row][cur_col].walls['top']:
+            self.player.move_up(float(vel))
+    
     def handle_hint(self):
         self.maze.start = self.start
         self.maze.end = self.end
@@ -438,7 +487,7 @@ class Game:
             hint = bfs(self.maze, cur)
         key = pygame.key.get_pressed()
         if key[pygame.K_h]:
-            self.draw_hint_2(hint[:])
+            self.draw_hint(hint[:])
         
     # Setting functions
     def set_tile(self):
@@ -489,16 +538,16 @@ class Game:
     def save(self):
         data = {'level': self.level, 'choose': self.choose, 'mode': self.mode,'maze': self.maze,'alg': self.algorithm,
                 'start': self.start,'end': self.end, 'record': self.record, 'file_name': self.file_name,
-                'player': self.player, 'completed': self.completed, 'is_saved': True}
+                'player': self.player_name, 'completed': self.completed, 'is_saved': True}
         if self.saveloadmanager.check_file_name(self.file_name):
-            print('File has already exist')
+            self.message('File name has already exist')
         else:
             self.saveloadmanager.save_game(self.file_name, data)
-            print('Save file succeeded')
+            self.message('Save file succeeded')
 
     def load(self, file_name):
         if not self.saveloadmanager.check_file_name(file_name):
-            print('Find not found')
+            self.message('Find not found')
         else:
             data = self.saveloadmanager.load_game(file_name)
             self.level = data['level']
@@ -510,10 +559,10 @@ class Game:
             self.end = data['end']
             self.record = data['record']
             self.file_name = data['file_name']
-            self.player = data['player']
+            self.player_name = data['player']
             self.completed = data['completed'] 
             self.is_saved = data['is_saved']   
-            print('Load file succeeded')
+            self.message('Load file succeeded')
 
     # Draw functions
     def draw_tiles_map(self):
@@ -549,12 +598,8 @@ class Game:
             pygame.draw.rect(self.screen, 'yellow', (cell_y*self.tile + 2, cell_x*self.tile + 2, self.tile - 4, self.tile - 4))
             if self.start == (cell_x, cell_y):
                 time.sleep(3)
-    
-    def draw_hint(self, hint):
-        for cell_x, cell_y in hint:
-            pygame.draw.rect(self.screen, 'green', (cell_y*self.tile + 3, cell_x*self.tile + 3, self.tile - 6, self.tile - 6))
             
-    def draw_hint_2(self, hint):
+    def draw_hint(self, hint):
         
         for i in range(len(hint)-1):
             cur_cell = hint[i]
@@ -582,6 +627,16 @@ class Game:
         pygame.draw.rect(self.screen, (0, 0, 255), (cell_choose[1]*self.tile + 2, cell_choose[0]*self.tile + 2, self.tile - 4, self.tile - 4))
 
     # Event funtions
+    def message(self, text):
+        mess = Tk()
+        mess.geometry('0x0')
+        mess.eval('tk::PlaceWindow %s center' %mess.winfo_toplevel())
+        mess.withdraw()
+        mess.deiconify()
+        mess.destroy()
+        messagebox.showinfo('Notification', text)
+        mess.quit()
+
     def record_text(self, _time):
         hou = _time//3600
         min = (_time - hou*3600)//60
@@ -630,6 +685,18 @@ class Game:
             fade_counter += 2
 
     # Game funtions 
+    def set_player(self, name):
+        if name == 'Frog': 
+            self.player = Player_pro(self.start[1]*self.tile, self.start[0]*self.tile, self.tile, 'Frog')
+        elif name == 'Blueman': 
+            self.player = Player_pro(self.start[1]*self.tile, self.start[0]*self.tile, self.tile, 'Blueman')
+        elif name == 'Tom': 
+            self.player = Player_pro(self.start[1]*self.tile, self.start[0]*self.tile, self.tile, 'Tom')
+        elif name == 'MaskDude':
+            self.player = Player_pro(self.start[1]*self.tile, self.start[0]*self.tile, self.tile, 'MaskDude')
+        else: 
+            self.player = Player(self.start[0], self.start[1], self.tile)
+        
     def set_maze_visit(self):
         for i in range(self.maze.num_rows):
             for j in range(self.maze.num_cols):
@@ -644,7 +711,7 @@ class Game:
         _time = self.record
         timer = Timer(1000, self.font)
         timer.activate()
-        time_move = Timer(140, self.font)
+        time_move = Timer(60)
         time_move.activate()
         # menu var
         pause = False
@@ -691,6 +758,7 @@ class Game:
                 self.update()
         self.transitions()
         # character
+        self.set_player(self.player_name)
         jerry = Jerry(self.end[1]*self.tile + 1, self.end[0]*self.tile + 1, self.tile*0.9, self.tile, 0, 0)
         if self.mode == 'auto':
             tmp_start = self.start
@@ -1004,12 +1072,12 @@ class Game:
             start = self.start
             end = self.end
             if self.player.row is None: self.player.row, self.player.col = start[0], start[1]
-
             while running:
                 self.draw()
                 jerry.draw(self.screen, 0, 0)
                 jerry.loop()
-
+                if self.player_name != 'Square':
+                    self.player.loop()
                 # check event
                 if pause:
                     self.record = _time
@@ -1101,6 +1169,21 @@ class Game:
                         quit()
                 
                 if not pause:
+                    # process move (press w,a,s,d or up,down,right,left)
+                    self.player.draw(self.screen)
+                    if self.player_name == 'Square':
+                        self.handle_move()
+                    else:
+                        time_move.update()
+                        if not time_move.active:
+                            self.handle_move_pro()                                    
+                            time_move.activate()
+                    if (self.player.row, self.player.col) == end:
+                        self.completed = True
+                        self.record = _time
+                        pause = True
+                        menu_state = 'finish'
+                    # process timer
                     timer.update()
                     if not timer.active:
                         _time += 1
@@ -1116,77 +1199,55 @@ class Game:
                         games = self.ranking(self.take_score())
                         self.draw_rank(games)
 
-                    # process move (press w,a,s,d or up,down,right,left)
-                    self.handle_move()
-                    if (self.player.row, self.player.col) == end:
-                        self.completed = True
-                        self.record = _time
-                        pause = True
-                        menu_state = 'finish'
-                    self.draw_cur((self.player.row, self.player.col))
-
                     # process hint(press H)
-                    self.handle_hint()    
-                    time.sleep(0.0012*self.delay) 
+                    self.handle_hint()
+                    if self.player_name == 'Square':    
+                        time.sleep(0.0012*self.delay) 
+                time_move.set_duration(1.2*self.delay)
                 self.update()
-
-    def handle_move_pro(self, player):
-        keys = pygame.key.get_pressed()
-        cur_row, cur_col = player.row, player.col
-        if (keys[pygame.K_LEFT] or keys[pygame.K_a]) and player.col > 0 and not self.maze.grid[cur_row][cur_col].walls['left']:
-            player.move_left(float(self.tile/9))
-        elif (keys[pygame.K_RIGHT] or keys[pygame.K_d]) and player.col < self.maze.num_cols-1 and not self.maze.grid[cur_row][cur_col].walls['right']:
-            player.move_right(float(self.tile/9))
-        elif (keys[pygame.K_DOWN] or keys[pygame.K_s]) and player.row < self.maze.num_rows-1 and not self.maze.grid[cur_row][cur_col].walls['bot']:
-            player.move_down(float(self.tile/9))
-        elif (keys[pygame.K_UP] or keys[pygame.K_w]) and player.row > 0 and not self.maze.grid[cur_row][cur_col].walls['top']:
-            player.move_up(float(self.tile/9))
-        return player
     
     def test(self):
         self.new_game()
         run = True
-        tom = Player_pro(self.start[1]*self.tile, self.start[0]*self.tile, self.start[0], self.start[1], self.tile*0.9)
-        time_move = Timer(140, self.font)
+        self.set_player('MaskDude')
+        menu_state = 'menu'
+        pause = False
+        time_move = Timer(75)
         time_move.activate()
         while run:
             self.draw()
-            tom.loop()    
-            tom.draw(self.screen)
-            time_move.update()
-            if not time_move.active:
-                tom.x_vel, tom.y_vel = 0, 0 
-                tom.x = round(tom.x)
-                tom.y = round(tom.y)  
-                if tom.x%self.tile != 0:
-                    if tom.direction == 'right':
-                        tom.x = (tom.x//self.tile + 1)*self.tile
-                    elif tom.direction == 'left':
-                        tom.x = (tom.x//self.tile)*self.tile
-                if tom.y%self.tile != 0:
-                    if tom.direction == 'up':
-                        tom.y = (tom.y//self.tile)*self.tile
-                    elif tom.direction == 'down':
-                        tom.y = (tom.y//self.tile + 1)*self.tile       
-                tom.row = tom.y//self.tile
-                tom.col = tom.x//self.tile 
-                print(tom.row, tom.col) 
-                tom = self.handle_move_pro(tom)                                    
-                time_move.activate()
+            if not pause:
+                self.player.loop()    
+                self.player.draw(self.screen)
+                time_move.update()
+                if not time_move.active:
+                    self.handle_move_pro()                                    
+                    time_move.activate()
+            elif pause:
+                if menu_state == 'menu':
+                    self.buttons['delay'].draw(self.screen)
+                    self.delay = self.set_delay()  
+
             for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    run = False
+                    if event.type == pygame.QUIT:
+                        run = False
+                    if event.type == pygame.KEYDOWN:
+                            if event.key == pygame.K_SPACE:
+                                if menu_state == 'menu':
+                                    if not pause: pause = True
+                                    else: pause = False 
+            time_move.set_duration(self.delay*1.5)
             self.update()
         pygame.quit()
         
 if __name__ == '__main__':
-    # game = Game('easy', 'not_auto', True)
-    # game.run()
+    game = Game('hard', 'not_auto', False, 'MaskDude')
+    game.run()
     # game = Game()
     # game.load('quan2')
     # game.run()
-    game = Game('medium', 'not_auto')
-    game.test()
+    # game = Game('easy', 'not_auto')
+    # game.test()
     
     
 
