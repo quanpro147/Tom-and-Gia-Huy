@@ -457,8 +457,8 @@ class Game:
     
     def slider(self):
         delay_slider = Slider((590, 350), (200, 30), 0.5, 0, 100)
-        music_slider = Slider((650, 364), (200, 30), 0.5, 0, 100)
-        sound_effect_slider = Slider((650, 464), (200, 30), 0.5, 0, 100)
+        music_slider = Slider((650, 364), (150, 30), 0.5, 0, 100)
+        sound_effect_slider = Slider((650, 464), (150, 30), 0.5, 0, 100)
         return {'delay': delay_slider, 'music': music_slider, 'sound_effect': sound_effect_slider}
     
     # Player funtions
@@ -494,11 +494,11 @@ class Game:
         keys = pygame.key.get_pressed()
 
         if self.level == 'hard':
-            vel = self.tile/3
+            vel = self.tile/1
         elif self.level == 'medium':
             vel = self.tile/6
         else:
-            vel = self.tile/8
+            vel = self.tile/7
         cur_row, cur_col = self.player.row, self.player.col
         if (keys[pygame.K_LEFT] or keys[pygame.K_a]) and self.player.col > 0 and not self.maze.grid[cur_row][cur_col].walls['left']:
             self.player.move_left(float(vel))
@@ -777,11 +777,13 @@ class Game:
         music.set_volume(0.5)
         music_vol = 50
         sound_effect_vol = 50
+        user_turnoff = False
         # time var
         _time = self.record
         timer = Timer(1000, self.font)
         timer.activate()
-        time_move = Timer(60)
+        if self.level != 'hard': time_move = Timer(20 + self.delay*0.9)
+        else: time_move = Timer(self.delay)
         time_move.activate()
         # menu var
         if self.is_saved: pause = True
@@ -854,9 +856,11 @@ class Game:
                     if music.get_busy():
                         if self.buttons['vol_on'].draw(self.screen): # volume on
                             music.pause()
+                            user_turnoff = False
                     else:
                         if self.buttons['vol_off'].draw(self.screen): # volume off
                             music.unpause()
+                            user_turnoff = True
                     if self.buttons['hint'].draw(self.screen): # pause
                         self.handle_hint()
                     # check event
@@ -867,6 +871,7 @@ class Game:
                             if self.buttons['resume'].draw(self.screen): # resume
                                 self.sound['ting'].play()
                                 pause = False
+                                music.unpause()
                             if self.buttons['save_1'].draw(self.screen): # save
                                 self.sound['ting'].play()
                                 menu_state = 'save_1'
@@ -1212,12 +1217,15 @@ class Game:
                 self.draw()
                 if self.buttons['pause'].draw(self.screen): # pause
                     pause = True
+                    music.pause()
                 if music.get_busy():
                     if self.buttons['vol_on'].draw(self.screen): # volume on
                         music.pause()
+                        user_turnoff = False
                 else:
                     if self.buttons['vol_off'].draw(self.screen): # volume off
                         music.unpause()
+                        user_turnoff = True
                 if self.buttons['hint'].draw(self.screen):
                     self.handle_hint()
                 jerry.draw(self.screen, 0, 0)
@@ -1232,6 +1240,7 @@ class Game:
                         if self.buttons['resume'].draw(self.screen): # resume
                             self.sound['ting'].play()
                             pause = False
+                            if user_turnoff: music.unpause()
                         if self.buttons['save_1'].draw(self.screen): # save
                             self.sound['ting'].play()
                             menu_state = 'save1'                        
@@ -1274,6 +1283,7 @@ class Game:
                         self.sliders['sound_effect'].draw(self.screen)
                         sound_effect_vol = self.set_volume(self.sliders['sound_effect'])
                         if self.buttons['back'].draw(self.screen): # back
+                            self.sound['ting'].play()
                             menu_state = 'options'
 
                     elif menu_state == 'finish':
@@ -1281,6 +1291,7 @@ class Game:
                         self.screen.blit(bg_img, (0, 0))
                         self.draw_text(self.record_text(self.record), 'black', 400, 100)
                         if self.buttons['play_again'].draw(self.screen): # play_again
+                            self.sound['ting'].play()
                             running = False
                             self.transitions
                             self.record = 0
@@ -1289,6 +1300,7 @@ class Game:
                             self.new_game()
                             self.run()
                         if self.buttons['save_2'].draw(self.screen): # save
+                            self.sound['ting'].play()
                             menu_state = 'save2'
 
                     elif menu_state == 'save1':
@@ -1330,8 +1342,12 @@ class Game:
                     if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_SPACE:
                             if menu_state == 'menu':
-                                if not pause: pause = True
-                                else: pause = False 
+                                if not pause: 
+                                    pause = True
+                                    music.pause()
+                                else: 
+                                    pause = False 
+                                    if user_turnoff: music.unpause()
                             
                         elif event.key == pygame.K_BACKSPACE:
                             if user_input:                                       
@@ -1387,7 +1403,10 @@ class Game:
                         time.sleep(0.0012*self.delay)
                 music.set_volume(music_vol*0.01) 
                 self.sound['ting'].set_volume(sound_effect_vol*0.01)
-                time_move.set_duration(1.2*self.delay)
+                if self.level == 'hard':
+                    time_move.set_duration(self.delay)
+                else:
+                    time_move.set_duration(self.delay*0.9 + 20)
                 self.update()
     
     def test(self):
@@ -1420,12 +1439,16 @@ class Game:
                                 if menu_state == 'menu':
                                     if not pause: pause = True
                                     else: pause = False 
-            time_move.set_duration(self.delay*1.5)
+            time_move.set_duration(20 + self.delay*0.9)
             self.update()
         pygame.quit()
         
 if __name__ == '__main__':
+<<<<<<< HEAD
+    game = Game('easy', 'not_auto', True, 'Frog')
+=======
     game = Game('easy', 'not_auto', True)
+>>>>>>> dc95aa460b3123f00b57076c9433de4397b4dd15
     game.run()
     # game = Game()
     # game.load('quan2')
