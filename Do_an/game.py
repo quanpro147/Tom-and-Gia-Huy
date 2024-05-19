@@ -1117,10 +1117,44 @@ class Game:
             tom.loop(60)
             tom.draw(self.screen)
             tom = self.handle_move_pro(tom)
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     run = False
             #time.sleep(0.01)
+            if pos[0] > 0 and pos[0] < 800 and pos[1] > 0 and pos[1] < 800:
+                cell_choosen = pos[1] // self.tile, pos[0] // self.tile
+                self.draw_choose_cell(cell_choosen)
+
+            if self.start is None:
+                if pygame.mouse.get_pressed()[0] and cell_choosen is not None:
+                    self.start = cell_choosen
+                self.draw_text('Choose start: ', 'black', 850, 100)
+
+            if self.end is None and self.start is not None:
+                self.draw_cur(self.start)
+                if pygame.mouse.get_pressed()[0] and cell_choosen != self.start:
+                    self.end = cell_choosen
+                self.draw_text('Start: {}'.format(self.start), 'black', 850, 100)
+                self.draw_text('Choose end: ', 'black', 850, 200)
+
+            if self.start is not None and self.end is not None:
+                self.draw_cur(self.start)
+                self.draw_end()
+                self.draw_text('Start: {}'.format(self.start), 'black', 850, 100)
+                self.draw_text('End: {}'.format(self.end), 'black', 850, 200)
+                if self.buttons['cancel_3'].draw(self.screen):
+                    self.start = None
+                    self.end = None
+                    cell_choosen = None
+                if self.buttons['accept_3'].draw(self.screen):
+                    break
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+            self.update()
+            self.transitions()
             self.update()
         pygame.quit()
         

@@ -10,9 +10,11 @@ import sys
 from algrithms import *
 from maze import *
 import random
+
 global app
 import time
 import copy
+from login import LoginWidget
 
 class Rect(QWidget):
     def __init__(self, init_x, init_y, rect_size=38):
@@ -20,14 +22,15 @@ class Rect(QWidget):
         self.rect_x = init_x
         self.rect_y = init_y
 
+
 class RectWidget(QWidget):
     def __init__(self, init_x, init_y, rect_size=38):
         super().__init__()
         self.setMouseTracking(True)
         self.rect_x = init_x
         self.rect_y = init_y
-        self.col = self.rect_x//40
-        self.row = self.rect_y//40
+        self.col = self.rect_x // 40
+        self.row = self.rect_y // 40
         self.rect_size = rect_size
         self.dragging = True
         self.start = []
@@ -35,15 +38,17 @@ class RectWidget(QWidget):
         self.start1 = []
         self.listPoint = []
         self.drawHint = False
-    def setListPoint(self,listPoint):
+        self.Move = True
+
+    def setListPoint(self, listPoint):
         self.listPoint = listPoint
 
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.setBrush(QColor(204, 255, 255))
         painter.drawRect(self.rect_x, self.rect_y, self.rect_size, self.rect_size)
-        if(self.drawHint):
-            painter.setPen(Qt.red)
+        if (self.drawHint):
+            painter.setPen(Qt.Green)
             for i in range(len(self.listPoint) - 1):
                 x1 = self.listPoint[i][1]
                 y1 = self.listPoint[i][0]
@@ -52,35 +57,37 @@ class RectWidget(QWidget):
                 painter.drawLine(x1 * 40 + 20, y1 * 40 + 20, x2 * 40 + 20, y2 * 40 + 20)
 
     def move_rect(self, dx, dy):
-        self.rect_x += dx
-        self.rect_y += dy
-        self.update()
+        if(self.Move):
+            self.rect_x += dx
+            self.rect_y += dy
+            self.update()
 
     def mousePressEvent(self, event):
         self.start = [int(self.rect_x), int(self.rect_y)]
         self.start1 = self.start[::-1]
         self.Index = [self.start[0] // 40, self.start[0] // 40]
-        #print(self.start)
-        #print(self.start1)
+        # print(self.start)
+        # print(self.start1)
         self.dragging = False
 
     def mouseMoveEvent(self, event):
         if self.dragging:
             self.rect_x = event.x() - event.x() % 40
             self.rect_y = event.y() - event.y() % 40
-            self.col = self.rect_x//40
-            self.row = self.rect_y//40
+            self.col = self.rect_x // 40
+            self.row = self.rect_y // 40
             self.update()
 
     def get_rect_position(self):
         return [self.rect_x, self.rect_y]
+
     def index_pos(self):
         col = self.col
         row = self.row
-        return  [col,row]
+        return [col, row]
 
 
-class MainWindow(QMainWindow):
+class Game_Window(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setMinimumSize(1000, 900)
@@ -89,10 +96,16 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.rect_widget)
         self.running = True
         self.path_solve = []
-        self.end = (19,19)
-
+        self.end = (19, 19)
+        self.stWidget = QStackedWidget(self)
+        self.stWidget.setGeometry(QRect(0,0,1000,800))
+        self.wigdet2 = LoginWidget()
+        self.stWidget.addWidget(self.wigdet2)
+        self.setting = False
+        self.stWidget.hide()
+        self.Hide_window = True
+        self.stWidget.setCurrentIndex(0)
         # background
-
 
         self.Maze = maze(20, 20)
         self.Maze.generate_maze()
@@ -100,12 +113,12 @@ class MainWindow(QMainWindow):
         self.list_sqr = []
 
     def keyPressEvent(self, event):
-        #x, y = self.rect_widget.get_rect_position()
-        #col = self.rect_widget.col
-        #row = self.rect_widget.row
-        #print(f'Current position: ({x}, {y})')
-        #print(f'Current position: ({col}, {row})')
-        #print(self.Grid[y // 40][x // 40].walls)
+        # x, y = self.rect_widget.get_rect_position()
+        # col = self.rect_widget.col
+        # row = self.rect_widget.row
+        # print(f'Current position: ({x}, {y})')
+        # print(f'Current position: ({col}, {row})')
+        # print(self.Grid[y // 40][x // 40].walls)
 
         if event.key() == Qt.Key_Up:
             self.move_up()
@@ -115,7 +128,7 @@ class MainWindow(QMainWindow):
         elif event.key() == Qt.Key_Left:
             self.move_left()
         elif event.key() == Qt.Key_Right:
-             self.move_right()
+            self.move_right()
         elif event.key() == Qt.Key_R:
             self.bot_play()
         elif event.key() == Qt.Key_Q:
@@ -124,14 +137,25 @@ class MainWindow(QMainWindow):
         elif event.key() == Qt.Key_E:
             self.rect_widget.drawHint = True
             self.rect_widget.update()
+        elif event.key() == Qt.Key_Escape:
+            if(self.setting):
+                self.rect_widget.Move = True
+                self.setting = False
+                self.stWidget.hide()
+            else:
+                self.rect_widget.Move = False
+                self.stWidget.show()
+                self.setting = True
 
-        #self.bot_play()
+
+        # self.bot_play()
 
     def print_maze(self):
         for i in range(len(self.Maze.grid)):
             for j in range(len(self.Maze.grid[0])):
-                print(self.Maze.grid[i][j].is_visited,end = ' ')
+                print(self.Maze.grid[i][j].is_visited, end=' ')
             print()
+
     def bot_play(self):
         self.running = True
         self.remove_path()
@@ -149,7 +173,7 @@ class MainWindow(QMainWindow):
         Maze.grid[cur_cell[0]][cur_cell[1]].is_visited = True
 
         tmp_path = []
-        #solution_path = dfs(self.Maze, tmp_start)
+        # solution_path = dfs(self.Maze, tmp_start)
         while self.running:
             neighbour_list = Maze.find_neighbours(cur_cell[0], cur_cell[1])
             neighbour_list = Maze.validate_neighbours_generate(neighbour_list)
@@ -170,15 +194,17 @@ class MainWindow(QMainWindow):
                     path_dfs.pop()
                     self.move_coor(cur_cell)
                 QApplication.processEvents()
-                time.sleep(0.1)
+                time.sleep(0.01)
             else:
                 self.running = False
         self.path_solve = path_dfs.copy()
         self.rect_widget.setListPoint(path_dfs)
         self.remove_path()
-        self.rect_widget.move_rect(tmp_start[1]*40-self.rect_widget.rect_x,tmp_start[0]*40-self.rect_widget.rect_y)
+        self.rect_widget.move_rect(tmp_start[1] * 40 - self.rect_widget.rect_x,
+                                   tmp_start[0] * 40 - self.rect_widget.rect_y)
+
     def remove_path(self):
-        while(self.list_sqr !=[]):
+        while (self.list_sqr != []):
             self.list_sqr[-1].setStyleSheet("background-color:None")
             self.list_sqr.pop()
 
@@ -186,22 +212,24 @@ class MainWindow(QMainWindow):
         if event.key() == Qt.Key_E:
             self.rect_widget.drawHint = False
             self.rect_widget.update()
-    #def draw_hint(self):
-        #qp = QPainter(self)
-        #pen = QPen(Qt.black, 2, Qt.SolidLine)
-        #qp.setPen(pen)
+
+    # def draw_hint(self):
+    # qp = QPainter(self)
+    # pen = QPen(Qt.black, 2, Qt.SolidLine)
+    # qp.setPen(pen)
 
     def position(self):
         print(f"row: {self.rect_widget.row}")
         print(f"col {self.rect_widget.col}")
 
-    def draw_sqr(self,row,col):
+    def draw_sqr(self, row, col):
         a = QLabel(self)
-        a.setGeometry(QRect(col* 40 + 5, row * 40 + 5, 30, 30))
+        a.setGeometry(QRect(col * 40 + 5, row * 40 + 5, 30, 30))
         self.list_sqr.append(a)
         self.list_sqr[-1].setStyleSheet("background-color:green;")
         self.list_sqr[-1].show()
-    def drawpath(self,path):
+
+    def drawpath(self, path):
         path_dfs = self.rect_widget.start
 
     def paintEvent(self, event):
@@ -224,81 +252,89 @@ class MainWindow(QMainWindow):
         x = event.x()
         y = event.y()
         print(f"Mouse Coordinates: ({x}, {y})")
+
     def move_up(self):
-        x, y = self.rect_widget.get_rect_position()
+        if(self.rect_widget.Move):
+            x, y = self.rect_widget.get_rect_position()
 
-        if (y > 0 and not self.Grid[y // 40][x // 40].walls['top']):
-            self.rect_widget.row -= 1
-            if (self.list_sqr != []):
-                rect = self.list_sqr[-1].geometry()
-                X = rect.x() - 5
-                Y = rect.y() - 5
+            if (y > 0 and not self.Grid[y // 40][x // 40].walls['top']):
+                self.rect_widget.row -= 1
+                if (self.list_sqr != []):
+                    rect = self.list_sqr[-1].geometry()
+                    X = rect.x() - 5
+                    Y = rect.y() - 5
 
-                if (X == self.rect_widget.rect_x and Y == self.rect_widget.rect_y - 40):
-                    self.list_sqr[-1].setStyleSheet("background-color:None")
-                    self.list_sqr.pop()
+                    if (X == self.rect_widget.rect_x and Y == self.rect_widget.rect_y - 40):
+                        self.list_sqr[-1].setStyleSheet("background-color:None")
+                        self.list_sqr.pop()
+                    else:
+                        self.draw_sqr(y // 40, x // 40)
                 else:
                     self.draw_sqr(y // 40, x // 40)
-            else:
-                self.draw_sqr(y // 40, x // 40)
-            self.rect_widget.move_rect(0, -40)
-            self.update()
+                self.rect_widget.move_rect(0, -40)
+                self.update()
 
     def move_down(self):
-        x, y = self.rect_widget.get_rect_position()
-        if (y < 800 - 40 and not self.Grid[y // 40][x // 40].walls['bot']):
-            self.rect_widget.row += 1
-            if (self.list_sqr != []):
-                rect = self.list_sqr[-1].geometry()
-                X = rect.x() - 5
-                Y = rect.y() - 5
+        if (self.rect_widget.Move):
+            x, y = self.rect_widget.get_rect_position()
+            if (y < 800 - 40 and not self.Grid[y // 40][x // 40].walls['bot']):
+                self.rect_widget.row += 1
+                if (self.list_sqr != []):
+                    rect = self.list_sqr[-1].geometry()
+                    X = rect.x() - 5
+                    Y = rect.y() - 5
 
-                if (X == self.rect_widget.rect_x and Y == self.rect_widget.rect_y + 40):
-                    self.list_sqr[-1].setStyleSheet("background-color:None")
-                    self.list_sqr.pop()
+                    if (X == self.rect_widget.rect_x and Y == self.rect_widget.rect_y + 40):
+                        self.list_sqr[-1].setStyleSheet("background-color:None")
+                        self.list_sqr.pop()
+                    else:
+                        self.draw_sqr(y // 40, x // 40)
                 else:
                     self.draw_sqr(y // 40, x // 40)
-            else:
-                self.draw_sqr(y // 40, x // 40)
-            self.rect_widget.move_rect(0, 40)
-            self.update()
+                self.rect_widget.move_rect(0, 40)
+                self.update()
+
     def move_left(self):
-        x, y = self.rect_widget.get_rect_position()
-        if (x > 0 and not self.Grid[y // 40][x // 40].walls['left']):
-            self.rect_widget.col -= 1
-            if (self.list_sqr != []):
-                rect = self.list_sqr[-1].geometry()
-                X = rect.x() - 5
-                Y = rect.y() - 5
+        if (self.rect_widget.Move):
+            x, y = self.rect_widget.get_rect_position()
+            if (x > 0 and not self.Grid[y // 40][x // 40].walls['left']):
+                self.rect_widget.col -= 1
+                if (self.list_sqr != []):
+                    rect = self.list_sqr[-1].geometry()
+                    X = rect.x() - 5
+                    Y = rect.y() - 5
 
-                if (X == self.rect_widget.rect_x - 40 and Y == self.rect_widget.rect_y):
-                    self.list_sqr[-1].setStyleSheet("background-color:None")
-                    self.list_sqr.pop()
+                    if (X == self.rect_widget.rect_x - 40 and Y == self.rect_widget.rect_y):
+                        self.list_sqr[-1].setStyleSheet("background-color:None")
+                        self.list_sqr.pop()
+                    else:
+                        self.draw_sqr(y // 40, x // 40)
                 else:
                     self.draw_sqr(y // 40, x // 40)
-            else:
-                self.draw_sqr(y // 40, x // 40)
-            self.rect_widget.move_rect(-40, 0)
-            self.update()
+                self.rect_widget.move_rect(-40, 0)
+                self.update()
+
     def move_right(self):
-        x, y = self.rect_widget.get_rect_position()
-        if (x < 800 - 40 and not self.Grid[y // 40][x // 40].walls['right']):
-            self.rect_widget.col += 1
-            if (self.list_sqr != []):
-                rect = self.list_sqr[-1].geometry()
-                X = rect.x() - 5
-                Y = rect.y() - 5
+        if (self.rect_widget.Move):
+            x, y = self.rect_widget.get_rect_position()
+            if (x < 800 - 40 and not self.Grid[y // 40][x // 40].walls['right']):
+                self.rect_widget.col += 1
+                if (self.list_sqr != []):
+                    rect = self.list_sqr[-1].geometry()
+                    X = rect.x() - 5
+                    Y = rect.y() - 5
 
-                if (X == self.rect_widget.rect_x + 40 and Y == self.rect_widget.rect_y):
-                    self.list_sqr[-1].setStyleSheet("background-color:None")
-                    self.list_sqr.pop()
+                    if (X == self.rect_widget.rect_x + 40 and Y == self.rect_widget.rect_y):
+                        self.list_sqr[-1].setStyleSheet("background-color:None")
+                        self.list_sqr.pop()
+                    else:
+                        self.draw_sqr(y // 40, x // 40)
+
                 else:
                     self.draw_sqr(y // 40, x // 40)
+                self.rect_widget.move_rect(40, 0)
+                self.update()
 
-            else:
-                self.draw_sqr(y // 40, x // 40)
-            self.rect_widget.move_rect(40, 0)
-            self.update()
     def move_up1(self):
         x, y = self.rect_widget.get_rect_position()
 
@@ -320,6 +356,7 @@ class MainWindow(QMainWindow):
                 self.rect_widget.move_rect(0, -40)
 
             self.update()
+
     def move_down1(self):
         x, y = self.rect_widget.get_rect_position()
         if (y < 800 - 40 and not self.Grid[y // 40][x // 40].walls['bot']):
@@ -339,6 +376,7 @@ class MainWindow(QMainWindow):
                 self.draw_sqr(y // 40, x // 40)
                 self.rect_widget.move_rect(0, 40)
             self.update()
+
     def move_left1(self):
         x, y = self.rect_widget.get_rect_position()
         if (x > 0 and not self.Grid[y // 40][x // 40].walls['left']):
@@ -358,6 +396,7 @@ class MainWindow(QMainWindow):
                 self.draw_sqr(y // 40, x // 40)
                 self.rect_widget.move_rect(-40, 0)
             self.update()
+
     def move_right1(self):
         x, y = self.rect_widget.get_rect_position()
         if (x < 800 - 40 and not self.Grid[y // 40][x // 40].walls['right']):
@@ -378,7 +417,8 @@ class MainWindow(QMainWindow):
                 self.draw_sqr(y // 40, x // 40)
                 self.rect_widget.move_rect(40, 0)
             self.update()
-    def move_coor(self,cur_cell):
+
+    def move_coor(self, cur_cell):
         if (self.rect_widget.row == cur_cell[0] + 1):
             self.move_up()
         elif (self.rect_widget.row == cur_cell[0] - 1):
@@ -394,14 +434,9 @@ class MainWindow(QMainWindow):
         event.accept()
 
 
-
-        
-
 def main():
     app = QApplication(sys.argv)
-    login = MainWindow()
+    login = Game_Window()
     login.show()
     sys.exit(app.exec_())
 
-
-main()
