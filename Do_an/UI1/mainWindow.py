@@ -16,10 +16,12 @@ from music import Sound
 from data_process import check_account,add_user
 from Newgame import NewGame
 from game import *
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setFixedSize(1000,800)
+        self.gameWindow = None
 
         #background
         self.background = QLabel(self)
@@ -50,7 +52,7 @@ class MainWindow(QMainWindow):
         #setup Sound
         self.sound = Sound()
         self.sound.setUp()
-        # login
+        # login -> Menu
         self.Login_window.login_button.clicked.connect(self.login)
         # login -> register
         self.Login_window.sign_up_button.clicked.connect(self.register)
@@ -76,6 +78,8 @@ class MainWindow(QMainWindow):
         self.New_Window.PlayButton.clicked.connect(self.play)
         #Load Old game
         self.Load_Window.Play_Button.clicked.connect(self.LoadGame)
+        #
+        self.Menu_Window.log_out_button.clicked.connect(self.LOG_OUT)
     def login(self):
         self.sound.clickSound()
         filename = "Do_an/UI/user_interface/account.json"
@@ -84,29 +88,36 @@ class MainWindow(QMainWindow):
 
         # Thực hiện kiểm tra tên người dùng và mật khẩu ở đây
         if check_account(filename, username, password) == 1:
+            self.Login_window.User_name.clear()
+            self.Login_window.Password.clear()
             self.stWidget.setCurrentIndex(2)
             self.Menu_Window.change_Vol()
         else:
             QMessageBox.warning(self, "Lỗi", "Tên người dùng hoặc mật khẩu không đúng!")
     def register(self):
         self.sound.clickSound()
-        self.sound.pause_bgSound()
+        self.Login_window.User_name.clear()
+        self.Login_window.Password.clear()
         self.stWidget.setCurrentIndex(1)
+    def LOG_OUT(self):
+        self.stWidget.setCurrentIndex(0)
     def LOG_IN(self):
         self.sound.clickSound()
-        self.sound.pause_bgSound()
+        self.Register_window.User_name.clear()
+        self.Register_window.Password.clear()
+        
         self.stWidget.setCurrentIndex(0)
     def Load(self):
         self.sound.clickSound()
-        self.sound.pause_bgSound()
+        
         self.stWidget.setCurrentIndex(3)
     def about(self):
         self.sound.clickSound()
-        self.sound.pause_bgSound()
+        
         self.stWidget.setCurrentIndex(4)
     def back(self):
         self.sound.clickSound()
-        self.sound.pause_bgSound()
+        
         self.stWidget.setCurrentIndex(2)
     def quit(self):
         self.close()
@@ -126,71 +137,93 @@ class MainWindow(QMainWindow):
             QMessageBox.information(self, "Thông Báo", "Đăng Ký Thành Công!")
             self.stWidget.setCurrentIndex(0)
     def newgame(self):
+        
         self.stWidget.setCurrentIndex(5)
+        
 
     def play(self):
+        self.Menu_Window.off_volume()
+        #self.close()
         self.close()
+        a = -1
         if self.New_Window.human.isChecked():
             if self.New_Window.ez.isChecked():
                 if self.New_Window.random.isChecked():
-                    game = Game('easy', 'not_auto', 'random')
-                    game.run()
+                    self.gameWindow = Game_Window()
+                    self.close()
+                    self.gameWindow.show()
                 else:
-                    game = Game('easy', 'not_auto', 'edit')
-                    game.run()
+                    self.gameWindow = Game_Window()
+                    self.close()
+                    self.gameWindow.show()
 
             elif self.New_Window.medium.isChecked():
                 if self.New_Window.random.isChecked():
-                    game = Game('medium', 'not_auto')
-                    game.run()
+                    self.gameWindow = Game_Window()
+                    self.close()
+                    self.gameWindow.show()
                 else:
-                    game = Game('medium', 'not_auto')
-                    # game.set_start_end()
-                    game.run()
+                    self.gameWindow = Game_Window()
+                    self.close()
+                    self.gameWindow.show()
             else:
                 if self.New_Window.random.isChecked():
-                    game = Game('hard', 'not_auto')
-                    game.run()
+                    self.gameWindow = Game_Window()
+                    self.close()
+                    self.gameWindow.show()
                 else:
-                    game = Game('hard', 'not_auto')
-                    # game.set_start_end()
-                    game.run()
+                    self.gameWindow = Game_Window()
+                    self.close()
+                    self.gameWindow.show()
         else:
             if self.New_Window.ez.isChecked():
                 if self.New_Window.random.isChecked():
-                    game = Game('easy', 'auto')
-                    game.run()
+                    self.gameWindow = Game_Window()
+                    self.close()
+                    self.gameWindow.show()
                 else:
-                    game = Game('easy', 'auto')
-                    # game.set_start_end()
-                    game.run()
+                    self.gameWindow = Game_Window()
+                    self.close()
+                    self.gameWindow.show()
             elif self.New_Window.medium.isChecked():
                 if self.random.isChecked():
-                    game = Game('medium', 'auto')
-                    game.run()
+                    self.gameWindow = Game_Window()
+                    self.close()
+                    self.gameWindow.show()
                 else:
-                    game = Game('medium', 'auto')
-                    # game.set_start_end()
-                    game.run()
+                    self.gameWindow = Game_Window()
+                    self.close()
+                    self.gameWindow.show()
             else:
                 if self.New_Window.random.isChecked():
-                    game = Game('hard', 'auto')
-                    game.run()
+                    self.gameWindow = Game_Window()
+                    self.close()
+                    self.gameWindow.show()
                 else:
-                    game = Game('hard', 'auto')
-                    # game.set_start_end()
-                    game.run()
+                    self.gameWindow = Game_Window()
+                    self.close()
+                    self.gameWindow.show()
+        print(a)
+        #self.show()
+            
     def LoadGame(self):
+        
         currentIndex = self.Load_Window.listGame.currentRow()
+        
         item = self.Load_Window.listGame.item(currentIndex)
         game = Game()
+        
         game.load(item.text())
+        self.Menu_Window.sound.off_volume()
         self.close()
+        
         game.run()
+        
 
 app = QApplication(sys.argv)
 login = MainWindow()
 login.show()
 sys.exit(app.exec_())
+
 
 
