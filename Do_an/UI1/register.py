@@ -18,7 +18,7 @@ class RegisterWidget(QWidget):
 
         # Label
         self.label = QLabel(self)
-        self.label.setGeometry(200, 100, 600, 100)
+        self.label.setGeometry(200, 50, 600, 100)
         self.label.setStyleSheet(
             "font: 32pt \"Segoe Print\";\n"
             "border-radius:0px")
@@ -37,31 +37,32 @@ class RegisterWidget(QWidget):
         # self.pass_icon_button.setIcon(pass_icon)
         # login button
         self.sign_up_button = QPushButton(self)
-        self.sign_up_button.setGeometry(QRect(380, 500, 240, 40))
+        self.sign_up_button.setGeometry(QRect(380, 450, 240, 40))
         self.sign_up_button.setStyleSheet(
-            u"background-color:qradialgradient(cx: 0.1, cy: 0.2, radius: 1, fx: 1, fy: 1, stop: 0 rgba(97, 186, 255, 255), stop: 0.901 rgba(166, 239, 253, 255));\n"
+            u"background-color:rgb(82,204, 206);\n"
             "border-radius:10px;column-gap: 5px;\n"
-            "border :2px solid gray;\n"
+            "border :2px solid yellow;\n"
             "font: bold 8pt \"Segoe Print\";"
         )
-        self.sign_up_button.setText("sign up")
+        #qradialgradient(cx: 0.1, cy: 0.2, radius: 1, fx: 1, fy: 1, stop: 0 rgba(97, 186, 255, 255), stop: 0.901 rgba(166, 239, 253, 255))
+        self.sign_up_button.setText("SIGN UP")
         # LOG IN Button
         self.login_button = QPushButton(self)
         self.login_button.setObjectName(u"pushButton_3")
-        self.login_button.setGeometry(QRect(460 + 100, 560, 80, 40))
+        self.login_button.setGeometry(QRect(460 + 100, 510, 80, 40))
         self.login_button.setCursor(QCursor(Qt.PointingHandCursor))
         style = 0
         self.login_button.setStyleSheet("font: 75 10pt \"Segoe Print\";text-decoration: underline;border: 0px")
         self.login_button.setText("Login")
         # create "Dont have an account ?"
         self.label_2 = QLabel(self)
-        self.label_2.setGeometry(QRect(260 + 100, 560, 200, 40))
+        self.label_2.setGeometry(QRect(260 + 100, 510, 200, 40))
         self.label_2.setStyleSheet("font: 9pt \"Segoe Print\";border :0px solid black")
         self.label_2.setText("Already have an account?")
         # User_name
         self.User_name = QLineEdit(self)
         self.User_name.setObjectName(u"lineEdit")
-        self.User_name.setGeometry(QRect(290 + 100, 310, 220, 40))
+        self.User_name.setGeometry(QRect(290 + 100, 260, 220, 40))
         self.User_name.setStyleSheet(u"border:1px solid black;\n"
                                      "border-bottom:2px solid rgba(105, 118, 132, 255);\n"
                                      "background-color:rgba(39, 89, 245, 0.13);font: 10pt \"Segoe Script\";")
@@ -69,10 +70,20 @@ class RegisterWidget(QWidget):
         # password
         self.Password = QLineEdit(self)
         self.Password.setObjectName(u"lineEdit_2")
-        self.Password.setGeometry(QRect(290 + 100, 390, 220, 40))
+        self.Password.setGeometry(QRect(290 + 100, 340, 220, 40))
         self.Password.setStyleSheet(u"border:1px solid black;\n"
                                     "border-bottom:2px solid rgba(105, 118, 132, 255);\n"
                                     "background-color:rgba(39, 89, 245, 0.13);font: 10pt \"Segoe Script\";")
         self.Password.setPlaceholderText("password")
         self.Password.setEchoMode(QLineEdit.Password)
 
+        self.acc_icon = QIcon("Do_an/UI1/Icon/username.jpg")
+        self.pass_icon = QIcon("Do_an/UI1/Icon/password.jpg")
+        #
+        self.accButton = QPushButton(self)
+        self.accButton.setGeometry(QRect(350,260,40,40))
+        self.accButton.setIcon(self.acc_icon)
+        #
+        self.PassButton = QPushButton(self)
+        self.PassButton.setGeometry(QRect(350,340,40,40))
+        self.PassButton.setIcon(self.pass_icon)

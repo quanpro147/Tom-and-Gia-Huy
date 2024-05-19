@@ -79,9 +79,10 @@ class maze():
 
         """
         neigh_list = []
-        for x, y in neighbour_indices:
-            if not self.grid[x][y].is_visited:
-                neigh_list.append((x, y))
+        if(neighbour_indices != None):
+            for x, y in neighbour_indices:
+                if not self.grid[x][y].is_visited:
+                    neigh_list.append((x, y))
 
         if len(neigh_list) > 0:
             return neigh_list

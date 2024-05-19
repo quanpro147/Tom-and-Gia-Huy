@@ -43,7 +43,7 @@ class AboutWidget(QWidget):
         self.Label5.setStyleSheet("font: bold 16pt \"Constantia\"")
         #Back_Button
         Icon = QIcon()
-        Icon.addFile('Do_an/UI/UI1/Icon/Back.webp')
+        Icon.addFile('Do_an/UI1/Icon/Back.webp')
         self.Back_Button = QPushButton(self)
         self.Back_Button.setGeometry(QRect(0, 0,100, 40))
         self.Back_Button.setIcon(Icon)
