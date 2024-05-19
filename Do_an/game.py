@@ -245,7 +245,7 @@ class Object(pygame.sprite.Sprite):
         win.blit(self.image, (self.rect.x - offset_x, self.rect.y - offset_y))   
 
 class Jerry(Object):
-    ANIMATION_DELAY = 4
+    ANIMATION_DELAY = 6
 
     def __init__(self, x, y, width, height, dx, dy):
         super().__init__(x, y, width, height, dx, dy)
@@ -270,16 +270,20 @@ class Jerry(Object):
             self.animation_count = 0
 
 class Player_pro(pygame.sprite.Sprite):
-    ANIMATION_DELAY = 5
+    ANIMATION_DELAY = 6
     def __init__(self, x, y, size, name):
         super().__init__()
         self.x, self.y = x, y
         self.rect = pygame.Rect(x, y, size, size)
+        self.name = name
         self.x_vel = 0.0
         self.y_vel = 0.0
         self.direction = 'left'
         self.animation_count = 0
-        self.sprites = load_sprite_sheets("MainCharacters", name, 32, 32, 'True')
+        if name == 'Tom':
+            self.sprites = load_sprite_sheets("MainCharacters", name, 56, 56, 'True')
+        else:
+            self.sprites = load_sprite_sheets("MainCharacters", name, 32, 32, 'True')
         self.tile = size
         self.row, self.col = y//size, x//size
 
@@ -319,7 +323,8 @@ class Player_pro(pygame.sprite.Sprite):
         self.update()
 
     def update_sprite(self):
-        sprite_sheet = "idle" 
+        if self.name == 'Tom': sprite_sheet = "run" 
+        else: sprite_sheet = "idle" 
         if self.x_vel or self.y_vel:   
             sprite_sheet = 'run'
         sprite_sheet_name = sprite_sheet + "_" + self.direction
@@ -448,12 +453,17 @@ class Game:
     def tile_images(self):
         img_path = pygame.image.load('Do_an/Assets/Background/Green.png').convert_alpha()
         img_path = pygame.transform.scale(img_path, (self.tile, self.tile))
+        img_path_4 = pygame.image.load('Do_an/Assets/Background/grey_path.png').convert_alpha()
+        img_path_4 = pygame.transform.scale(img_path_4, (self.tile, self.tile))
+        img_path_5 = pygame.image.load('Do_an/Assets/Background/water_path.png').convert_alpha()
+        img_path_5 = pygame.transform.scale(img_path_5, (self.tile, self.tile))
+        img_path_6 = pygame.image.load('Do_an/Assets/Background/green_path.png').convert_alpha()
+        img_path_6 = pygame.transform.scale(img_path_6, (self.tile, self.tile))
         img_path_2 = pygame.image.load('Do_an/Assets/Background/Gray.png').convert_alpha()
         img_path_2 = pygame.transform.scale(img_path_2, (40, 40))
         img_path_3 = pygame.image.load('Do_an/Assets/Background/Yellow.png').convert_alpha()
         img_path_3 = pygame.transform.scale(img_path_3, (40, 40))
-
-        return {'path': img_path, 'path_2': img_path_2,'path_3': img_path_3}
+        return {'path': img_path, 'path_2': img_path_2,'path_3': img_path_3, 'path_4': img_path_4, 'path_5': img_path_5,  'path_6': img_path_6}
     
     def slider(self):
         delay_slider = Slider((590, 350), (200, 30), 0.5, 0, 100)
@@ -585,7 +595,7 @@ class Game:
     def save(self):
         data = {'level': self.level, 'choose': self.choose, 'mode': self.mode,'maze': self.maze,'alg': self.algorithm,
                 'start': self.start,'end': self.end, 'record': self.record, 'file_name': self.file_name,
-                'player': self.player_name, 'completed': self.completed, 'is_saved': True}
+                'player': self.player_name, 'completed': self.completed, 'is_saved': True, 'delay': self.delay}
         if self.saveloadmanager.check_file_name(self.file_name):
             self.message('File name has already exist')
         else:
@@ -595,6 +605,7 @@ class Game:
     def load(self, file_name):
         if not self.saveloadmanager.check_file_name(file_name):
             self.message('Find not found')
+            return False
         else:
             data = self.saveloadmanager.load_game(file_name)
             self.level = data['level']
@@ -608,8 +619,10 @@ class Game:
             self.file_name = data['file_name']
             self.player_name = data['player']
             self.completed = data['completed'] 
-            self.is_saved = data['is_saved']   
+            self.is_saved = data['is_saved']
+            self.delay = data['delay']   
             self.message('Load file succeeded')
+            return True
 
     # Draw functions
     def draw_tiles_map(self):
@@ -626,6 +639,20 @@ class Game:
         for i in range(16):
             for j in range(10):
                 self.screen.blit(self.tile_imgs['path_3'], (800 + j * 40, 160 + i * 40))
+
+    def draw_tiles_map_4(self):
+        for i in range(self.maze.num_rows):
+            for j in range(self.maze.num_cols):
+                self.screen.blit(self.tile_imgs['path_4'], (j*self.tile, i*self.tile))
+
+    def draw_tiles_map_5(self):
+        for i in range(self.maze.num_rows):
+            for j in range(self.maze.num_cols):
+                self.screen.blit(self.tile_imgs['path_5'], (j*self.tile, i*self.tile))
+    def draw_tiles_map_6(self):
+        for i in range(self.maze.num_rows):
+            for j in range(self.maze.num_cols):
+                self.screen.blit(self.tile_imgs['path_6'], (j*self.tile, i*self.tile))
 
     def draw_text(self, text, color, x, y):
         img = self.font.render(text, True, color)
@@ -666,7 +693,7 @@ class Game:
                    
     def draw(self):
         self.screen.fill('white')
-        self.draw_tiles_map()
+        self.draw_tiles_map_6()
         self.draw_tiles_map_2()
         self.draw_tiles_map_3()
         self.draw_maze()
@@ -797,6 +824,7 @@ class Game:
             while self.choose:
                 self.draw()     
                 pos = pygame.mouse.get_pos()
+                cell_choosen = None
                 if pos[0] > 0 and pos[0] < 800 and pos[1] > 0 and pos[1] < 800:
                     cell_choosen = pos[1]//self.tile, pos[0]//self.tile
                     self.draw_choose_cell(cell_choosen)
@@ -855,14 +883,15 @@ class Game:
                         pause = True
                     if music.get_busy():
                         if self.buttons['vol_on'].draw(self.screen): # volume on
-                            music.pause()
-                            user_turnoff = False
+                            if not pause:
+                                music.pause()
+                                user_turnoff = False
                     else:
                         if self.buttons['vol_off'].draw(self.screen): # volume off
-                            music.unpause()
-                            user_turnoff = True
-                    if self.buttons['hint'].draw(self.screen): # pause
-                        self.handle_hint()
+                            if not pause:
+                                music.unpause()
+                                user_turnoff = True
+                    self.buttons['hint'].draw(self.screen)
                     # check event
                     if pause:
                         if menu_state == 'menu':
@@ -874,7 +903,7 @@ class Game:
                                 music.unpause()
                             if self.buttons['save_1'].draw(self.screen): # save
                                 self.sound['ting'].play()
-                                menu_state = 'save_1'
+                                menu_state = 'save1'
                             if self.buttons['main_menu'].draw(self.screen): # main_menu
                                 self.sound['ting'].play()
                             if self.buttons['options'].draw(self.screen): # options
@@ -909,6 +938,9 @@ class Game:
                             self.buttons['delay'].draw(self.screen)
                             self.delay = self.set_delay()
                             self.draw_text('{}'.format(self.algorithm), 'black', 560, 470)
+                            if self.buttons['sound'].draw(self.screen): # sound
+                                self.sound['ting'].play()
+                                menu_state = 'sound'
                             if self.buttons['chang_alg'].draw(self.screen): # chang_alg
                                 self.sound['ting'].play()
                                 self.set_algorithm('bfs') 
@@ -918,6 +950,18 @@ class Game:
                             if self.buttons['back'].draw(self.screen): # back
                                 self.sound['ting'].play()
                                 menu_state = 'menu'
+
+                        elif menu_state == 'sound':
+                            self.buttons['gameFrame'].draw(self.screen)
+                            self.draw_text('Music', 'black', 400, 350)
+                            self.draw_text('Sound effect', 'black', 400, 450)
+                            self.sliders['music'].draw(self.screen)
+                            music_vol = self.set_volume(self.sliders['music'])
+                            self.sliders['sound_effect'].draw(self.screen)
+                            sound_effect_vol = self.set_volume(self.sliders['sound_effect'])
+                            if self.buttons['back'].draw(self.screen): # back
+                                self.sound['ting'].play()
+                                menu_state = 'options'
                         
                         elif menu_state == 'finish':
                             bg_img = pygame.image.load('Do_an/Assets/Background/tom_catch_jerry.png').convert_alpha()
@@ -968,7 +1012,7 @@ class Game:
                                     self.file_name = self.file_name[:-1]
                             else:
                                 if user_input:
-                                    self.file_name += event.unicode
+                                    if len(self.file_name) < 8: self.file_name += event.unicode
                         if event.type == pygame.QUIT:
                             pygame.quit()
                             quit()
@@ -1028,16 +1072,19 @@ class Game:
                     self.draw()
                     jerry.draw(self.screen, 0, 0)
                     if self.buttons['pause'].draw(self.screen): # pause
-                        self.sound['ting'].play()
-                        pause = True
+                        if not pause: 
+                            self.sound['ting'].play()
+                            pause = True
                     if music.get_busy():
                         if self.buttons['vol_on'].draw(self.screen): # volume on
-                            self.sound['ting'].play()
-                            music.pause()
+                            if not pause: 
+                                self.sound['ting'].play()
+                                music.pause()
                     else:
                         if self.buttons['vol_off'].draw(self.screen): # volume off
-                            self.sound['ting'].play()
-                            music.unpause()
+                            if not pause: 
+                                self.sound['ting'].play()
+                                music.unpause()
                     self.buttons['hint'].draw(self.screen)
                     # check event
                     if pause:
@@ -1085,6 +1132,9 @@ class Game:
                             self.buttons['delay'].draw(self.screen)
                             self.delay = self.set_delay()
                             self.draw_text('{}'.format(self.algorithm), 'black', 560, 470)
+                            if self.buttons['sound'].draw(self.screen): # sound
+                                self.sound['ting'].play()
+                                menu_state = 'sound'
                             if self.buttons['chang_alg'].draw(self.screen): # chang_alg
                                 self.sound['ting'].play()
                                 self.set_algorithm('dfs')
@@ -1094,6 +1144,18 @@ class Game:
                             if self.buttons['back'].draw(self.screen): # back
                                 self.sound['ting'].play()
                                 menu_state = 'menu'
+
+                        elif menu_state == 'sound':
+                            self.buttons['gameFrame'].draw(self.screen)
+                            self.draw_text('Music', 'black', 400, 350)
+                            self.draw_text('Sound effect', 'black', 400, 450)
+                            self.sliders['music'].draw(self.screen)
+                            music_vol = self.set_volume(self.sliders['music'])
+                            self.sliders['sound_effect'].draw(self.screen)
+                            sound_effect_vol = self.set_volume(self.sliders['sound_effect'])
+                            if self.buttons['back'].draw(self.screen): # back
+                                self.sound['ting'].play()
+                                menu_state = 'options'
                         
                         elif menu_state == 'finish':
                             bg_img = pygame.image.load('Do_an/Assets/Background/tom_catch_jerry.png').convert_alpha()
@@ -1144,7 +1206,8 @@ class Game:
                                     self.file_name = self.file_name[:-1]
                             else:
                                 if user_input:
-                                    self.file_name += event.unicode
+                                    if len(self.file_name) < 8:
+                                        self.file_name += event.unicode
                         if event.type == pygame.QUIT:
                             mess = Tk()
                             mess.geometry('0x0')
@@ -1195,7 +1258,8 @@ class Game:
                         else: 
                             for i in paths:
                                 self.draw_path(i)
-                            tmp_path.append(solution_path.pop())                         
+                            if solution_path.pop() != end:
+                               tmp_path.append(solution_path.pop())                         
                             self.draw_solution(tmp_path)
                             if solution_path == []:
                                 running = False
@@ -1220,14 +1284,17 @@ class Game:
                     music.pause()
                 if music.get_busy():
                     if self.buttons['vol_on'].draw(self.screen): # volume on
-                        music.pause()
-                        user_turnoff = False
+                        if not pause:
+                            music.pause()
+                            user_turnoff = False
                 else:
                     if self.buttons['vol_off'].draw(self.screen): # volume off
-                        music.unpause()
-                        user_turnoff = True
+                        if not pause:
+                            music.unpause()
+                            user_turnoff = True
                 if self.buttons['hint'].draw(self.screen):
-                    self.handle_hint()
+                    if not pause:
+                        self.handle_hint()
                 jerry.draw(self.screen, 0, 0)
                 jerry.loop()
                 if self.player_name != 'Square':
@@ -1354,7 +1421,8 @@ class Game:
                                 self.file_name = self.file_name[:-1]
                         else:
                             if user_input:
-                                self.file_name += event.unicode
+                                if len(self.file_name) < 8:
+                                    self.file_name += event.unicode
                     if event.type == pygame.QUIT:
                         self.sound['ting'].play()
                         mess = Tk()
@@ -1401,6 +1469,7 @@ class Game:
                     self.handle_hint()
                     if self.player_name == 'Square':    
                         time.sleep(0.0012*self.delay)
+                                    
                 music.set_volume(music_vol*0.01) 
                 self.sound['ting'].set_volume(sound_effect_vol*0.01)
                 if self.level == 'hard':
@@ -1444,11 +1513,11 @@ class Game:
         pygame.quit()
         
 if __name__ == '__main__':
-    game = Game('easy', 'not_auto', True, 'Frog')
+    game = Game('easy', 'not_auto', True, 'Tom')
     game.run()
     # game = Game()
-    # game.load('quan2')
-    # game.run()
+    # if game.load('quan3'):
+    #     game.run()
     # game = Game('easy', 'not_auto')
     # game.test()
     
