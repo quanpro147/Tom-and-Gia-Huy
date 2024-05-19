@@ -1,5 +1,2 @@
-abc
-efdd
-avvvcc
-12345
+quan1
 quan2

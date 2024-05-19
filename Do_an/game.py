@@ -6,6 +6,8 @@ import pickle
 import time
 from os import listdir 
 from os.path import isfile, join
+from tkinter import *
+from tkinter import messagebox
 
 class Button:
 	def __init__(self, x, y, image, scale):
@@ -36,12 +38,13 @@ class Button:
 		return action
     
 class Timer:
-    def __init__(self, duration, font):
+    def __init__(self, duration, font = None):
         self.duration = duration 
         self.active = False
         self.font = font
         self.start = 0
         self.time = time
+        self.pause = False
 
     def activate(self):
         self.active = True
@@ -53,9 +56,15 @@ class Timer:
 
     def update(self):
         if self.active:
-            cur_time = get_ticks()
-            if cur_time - self.start >= self.duration:
-                self.deactivate()
+            if self.pause:
+                cur_time = get_ticks()
+                if cur_time - self.tmp >= self.duration:
+                    self.pause = False
+                    self.deactivate()
+            else:
+                cur_time = get_ticks()
+                if cur_time - self.start >= self.duration:
+                    self.deactivate()
 
     def time_text(self, _time):
         hou = _time//3600
@@ -65,12 +74,16 @@ class Timer:
     
     def draw(self, screen, _time):
         text_suf = self.font.render(self.time_text(_time), True, 'black')
-        screen.blit(text_suf, (900, 50))     
+        screen.blit(text_suf, (900, 50)) 
+
+    def set_duration(self, new_duration):
+        self.duration = new_duration
 
 class Player:
-    def __init__(self, row, col):
+    def __init__(self, row, col, size):
         self.row = row
         self.col = col
+        self.size = size
 
     def move(self, direction):
         if direction == 'top':
@@ -81,6 +94,9 @@ class Player:
             self.col += 1
         elif direction == 'left':
             self.col -= 1
+
+    def draw(self, screen):
+        pygame.draw.rect(screen, (255, 0, 0), (self.col*self.size + 2, self.row*self.size + 2, self.size - 4, self.size - 4))
 
 class saveloadsystem:
     def __init__(self, file_extension, folder):
@@ -255,68 +271,74 @@ class Jerry(Object):
 
 class Player_pro(pygame.sprite.Sprite):
     ANIMATION_DELAY = 5
-    def __init__(self, x, y , width, height):
+    def __init__(self, x, y, size, name):
         super().__init__()
-        self.rect = pygame.Rect(x, y, width, height)
-        self.x_vel = 0
-        self.y_vel = 0 
-        self.mask = None
-        self.direction = "left"
+        self.x, self.y = x, y
+        self.rect = pygame.Rect(x, y, size, size)
+        self.x_vel = 0.0
+        self.y_vel = 0.0
+        self.direction = 'left'
         self.animation_count = 0
-        self.sprites = load_sprite_sheets("MainCharacters", "Tom", 56, 56)
-        self.width = width
-        self.height = height
+        self.sprites = load_sprite_sheets("MainCharacters", name, 32, 32, 'True')
+        self.tile = size
+        self.row, self.col = y//size, x//size
 
-    def move(self, dx, dy):
-        self.rect.x += dx
-        self.rect.y += dy
+    def move(self, dx: float, dy: float):
+        self.x += dx
+        self.rect.x = self.x
+        self.y += dy
+        self.rect.y = self.y
+
     def move_left(self, vel):
         self.x_vel = -vel
         if self.direction != "left":
             self.direction = "left"
             self.animation_count = 0
+
     def move_right(self, vel):
         self.x_vel = vel 
         if self.direction != "right":
             self.direction = "right"
             self.animation_count = 0
+
     def move_up(self, vel):
         self.y_vel = -vel
         if self.direction != "up":
             self.direction = "up"
             self.animation_count = 0
+
     def move_down(self, vel):
         self.y_vel = vel
         if self.direction != "down":
             self.direction = "down"
             self.animation_count = 0
 
-    def loop(self, fps):
+    def loop(self):
         self.move(self.x_vel, self.y_vel)
         self.update_sprite()
         self.update()
 
     def update_sprite(self):
-        sprite_sheet = "run"   
-        if self.x_vel != 0 or self.y_vel != 0:
-            sprite_sheet = "run"
-        sprite_sheet_name = sprite_sheet
+        sprite_sheet = "idle" 
+        if self.x_vel or self.y_vel:   
+            sprite_sheet = 'run'
+        sprite_sheet_name = sprite_sheet + "_" + self.direction
         sprites = self.sprites[sprite_sheet_name]
         sprite_index = (self.animation_count //self.ANIMATION_DELAY) % len(sprites)
-        self.sprite = pygame.transform.scale(sprites[sprite_index], (self.width, self.height))
+        self.sprite = pygame.transform.scale(sprites[sprite_index], (self.tile, self.tile))
         self.animation_count += 1
         self.update()
 
     def update(self):
         self.rect = self.sprite.get_rect(topleft=(self.rect.x, self.rect.y))
-        #self.mask = pygame.mask.from_surface(self.sprite)
     
     def draw(self, win):
         win.blit(self.sprite, (self.rect.x, self.rect.y))
 
 class Game:
-    def __init__(self, level = None, mode = None, choose = False):
+    def __init__(self, level = None, mode = None, choose = False, player_name = 'Square'):
         pygame.init()
+        pygame.mixer.init()
         pygame.display.set_caption('Maze Game')
         self.WINDOW_SIZE = 1202, 802
         self.screen = pygame.display.set_mode(self.WINDOW_SIZE)
@@ -324,12 +346,13 @@ class Game:
         self.level = level
         self.mode = mode
         self.choose = choose
+        self.player_name = player_name
+        self.player = None
         self.maze = None
         self.algorithm = 'dfs'
         self.tile = None
         self.font = pygame.font.Font('freesansbold.ttf', 32)
         self.font_mini = pygame.font.Font('freesansbold.ttf', 20)
-        self.player = Player(None, None)
         self.buttons = self.button()
         self.start, self.end = None, None
         self.record = 0
@@ -337,12 +360,14 @@ class Game:
         self.file_name = ''
         self.saveloadmanager = saveloadsystem('.save', 'Do_an/SaveLoad/game_manager')
         self.completed = False
-        self.slider = Slider((590, 350), (200, 30), 0.5, 0, 100)
+        self.sliders = self.slider()
         self.delay = 50
-        #self.player_pro = Player_pro()
+        self.is_saved = False
+        self.sound = self.sound_effect() 
 
     def button(self):
         Size_img = (160,40)
+        Size_img_IG = (80, 50)
         # load img
         resume_img = pygame.image.load('Do_an/button/Resume.png').convert_alpha()
                 
@@ -358,9 +383,18 @@ class Game:
         cancel_img = pygame.image.load('Do_an/button/CancelButton.png').convert_alpha()
         gameFrame_img = pygame.image.load('Do_an/button/gameFrame.png').convert_alpha()
         delay_img = pygame.image.load('Do_an/button/DelayButton.png').convert_alpha()
+        pause_img = pygame.image.load('Do_an/button/Pause_IG.png').convert_alpha()
+        mute_img = pygame.image.load('Do_an/button/mute_IG.png').convert_alpha()
+        hint_img = pygame.image.load('Do_an/button/hint_IG.png').convert_alpha()
+        vol_on_img = pygame.image.load('Do_an/button/volume_on.png').convert_alpha()
+        vol_off_img = pygame.image.load('Do_an/button/volume_off.png').convert_alpha()
+        sound_img = pygame.image.load('Do_an/button/SoundButton.png').convert_alpha()
         a = [resume_img,load_img,menu_img,options_img,quit_img,save_img]
+        b = [pause_img, mute_img, hint_img]
         for i in range(len(a)):
             a[i] = pygame.transform.scale(a[i],Size_img)
+        for i in range(len(b)):
+            b[i] = pygame.transform.scale(b[i], Size_img_IG)
         # create button
         resume_button = Button(500, 320, a[0], 1)
         load_button = Button(500, 400, a[1], 1)
@@ -369,17 +403,23 @@ class Game:
         quit_button = Button(500, 560, a[4], 1)
         change_alg_button = Button(500, 430, change_alg_img, 1)
         back_button = Button(530, 520, back_img, 1)
-        play_again_button = Button(400, 150, play_again_img, 1)
+        play_again_button = Button(900, 400, play_again_img, 1)
         save_button_1 = Button(500, 400, a[5], 1)
-        save_button_2 = Button(400, 200, a[5], 1)
+        save_button_2 = Button(900, 450, a[5], 1)
         accept_button_1 = Button(600, 350, accept_img, 1)
+        cancel_button_1 = Button(430, 350, cancel_img, 1)
         accept_button_2 = Button(600, 300, accept_img, 1)
-        cancel_button_1 = Button(400, 350, cancel_img, 1)
         cancel_button_2 = Button(400, 300, cancel_img, 1)
         accept_button_3 = Button(1000, 300, accept_img, 1)
         cancel_button_3 = Button(850, 300, cancel_img, 1)
         gameFrame = Button(380,120,gameFrame_img,1)
         delay_button = Button(520, 260, delay_img, 1)
+        pause_button = Button(850, 700, pause_img, 1)
+        mute_button = Button(980, 700, mute_img, 1)
+        hint_button = Button(1100, 700, hint_img, 1)
+        vol_on_button = Button(980, 700, vol_on_img, 1)
+        vol_off_button = Button(980, 700, vol_off_img, 1)
+        sound_button = Button(520, 380, sound_img, 1)
         return {'resume': resume_button, 
                 'load': load_button,
                 'main_menu': menu_button,
@@ -397,14 +437,29 @@ class Game:
                 'accept_3': accept_button_3,
                 'cancel_3': cancel_button_3,
                 'gameFrame':gameFrame,
-                'delay': delay_button}
+                'delay': delay_button,
+                'pause': pause_button,
+                'mute' : mute_button,
+                'hint' : hint_button,
+                'vol_on': vol_on_button,
+                'vol_off': vol_off_button,
+                'sound': sound_button}
 
     def tile_images(self):
         img_path = pygame.image.load('Do_an/Assets/Background/Green.png').convert_alpha()
         img_path = pygame.transform.scale(img_path, (self.tile, self.tile))
-        img_start = None
-        img_end = None
-        return {'path': img_path, 'start': img_start, 'end': img_end}
+        img_path_2 = pygame.image.load('Do_an/Assets/Background/Gray.png').convert_alpha()
+        img_path_2 = pygame.transform.scale(img_path_2, (40, 40))
+        img_path_3 = pygame.image.load('Do_an/Assets/Background/Yellow.png').convert_alpha()
+        img_path_3 = pygame.transform.scale(img_path_3, (40, 40))
+
+        return {'path': img_path, 'path_2': img_path_2,'path_3': img_path_3}
+    
+    def slider(self):
+        delay_slider = Slider((590, 350), (200, 30), 0.5, 0, 100)
+        music_slider = Slider((650, 364), (150, 30), 0.5, 0, 100)
+        sound_effect_slider = Slider((650, 464), (150, 30), 0.5, 0, 100)
+        return {'delay': delay_slider, 'music': music_slider, 'sound_effect': sound_effect_slider}
     
     # Player funtions
     def handle_move(self):
@@ -419,6 +474,41 @@ class Game:
         elif (key[pygame.K_DOWN] or key[pygame.K_s]) and self.player.row < self.maze.num_rows-1 and not self.maze.grid[cur_row][cur_col].walls['bot']:
             self.player.move('bot')
 
+    def handle_move_pro(self):
+
+        self.player.x_vel, self.player.y_vel = 0, 0 
+        self.player.x = round(self.player.x)
+        self.player.y = round(self.player.y)  
+        if self.player.x%self.tile != 0:
+            if self.player.direction == 'right':
+                self.player.x = (self.player.x//self.tile + 1)*self.tile
+            elif self.player.direction == 'left':
+                self.player.x = (self.player.x//self.tile)*self.tile
+        if self.player.y%self.tile != 0:
+            if self.player.direction == 'up':
+                self.player.y = (self.player.y//self.tile)*self.tile
+            elif self.player.direction == 'down':
+                self.player.y = (self.player.y//self.tile + 1)*self.tile       
+        self.player.row = self.player.y//self.tile
+        self.player.col = self.player.x//self.tile 
+        keys = pygame.key.get_pressed()
+
+        if self.level == 'hard':
+            vel = self.tile/1
+        elif self.level == 'medium':
+            vel = self.tile/6
+        else:
+            vel = self.tile/7
+        cur_row, cur_col = self.player.row, self.player.col
+        if (keys[pygame.K_LEFT] or keys[pygame.K_a]) and self.player.col > 0 and not self.maze.grid[cur_row][cur_col].walls['left']:
+            self.player.move_left(float(vel))
+        elif (keys[pygame.K_RIGHT] or keys[pygame.K_d]) and self.player.col < self.maze.num_cols-1 and not self.maze.grid[cur_row][cur_col].walls['right']:
+            self.player.move_right(float(vel))
+        elif (keys[pygame.K_DOWN] or keys[pygame.K_s]) and self.player.row < self.maze.num_rows-1 and not self.maze.grid[cur_row][cur_col].walls['bot']:
+            self.player.move_down(float(vel))
+        elif (keys[pygame.K_UP] or keys[pygame.K_w]) and self.player.row > 0 and not self.maze.grid[cur_row][cur_col].walls['top']:
+            self.player.move_up(float(vel))
+    
     def handle_hint(self):
         self.maze.start = self.start
         self.maze.end = self.end
@@ -428,30 +518,51 @@ class Game:
         elif self.algorithm == 'bfs':
             hint = bfs(self.maze, cur)
         key = pygame.key.get_pressed()
-        if key[pygame.K_h]:
-            self.draw_hint_2(hint[:])
+        if self.buttons['hint'].draw(self.screen) or key[pygame.K_h]:
+            self.draw_hint(hint[:])
         
-    # Setting functions
-    def set_delay(self):
-        
+    # Setting functions      
+    def set_tile(self):
+        if self.level == 'easy': self.tile = 40
+        elif self.level == 'medium': self.tile = 20
+        else: self.tile = 8
+    
+    def set_delay(self):   
         #get mouse position
         pos = pygame.mouse.get_pos()
         #check mouseover and clicked conditions
-        if self.slider.container_rect.collidepoint(pos):
-            if pygame.mouse.get_pressed()[0] and not self.slider.clicked:
-                if pos[0] < self.slider.slider_left_pos:
-                    pos[0] = self.slider.slider_left_pos
-                if pos[0] > self.slider.slider_right_pos:
-                    pos[0] = self.slider.slider_right_pos
-                self.slider.button_rect.centerx = pos[0]
-        self.slider.draw(self.screen)
-        self.slider.display_value(self.screen, self.font_mini)
-        return self.slider.get_value()
+        if self.sliders['delay'].container_rect.collidepoint(pos):
+            if pygame.mouse.get_pressed()[0] and not self.sliders['delay'].clicked:
+                if pos[0] < self.sliders['delay'].slider_left_pos:
+                    pos[0] = self.sliders['delay'].slider_left_pos
+                if pos[0] > self.sliders['delay'].slider_right_pos:
+                    pos[0] = self.sliders['delay'].slider_right_pos
+                self.sliders['delay'].button_rect.centerx = pos[0]
+        self.sliders['delay'].draw(self.screen)
+        self.sliders['delay'].display_value(self.screen, self.font_mini)
+        return self.sliders['delay'].get_value()
+    
+    def set_volume(self, slider):
+        #get mouse position
+        pos = pygame.mouse.get_pos()
+        #check mouseover and clicked conditions
+        if slider.container_rect.collidepoint(pos):
+            if pygame.mouse.get_pressed()[0] and not slider.clicked:
+                if pos[0] < slider.slider_left_pos:
+                    pos[0] = slider.slider_left_pos
+                if pos[0] > slider.slider_right_pos:
+                    pos[0] = slider.slider_right_pos
+                slider.button_rect.centerx = pos[0]
+        slider.draw(self.screen)
+        slider.display_value(self.screen, self.font_mini)
+        return slider.get_value()
         
     def set_algorithm(self, algorithm):
         self.algorithm = algorithm
     
     def new_game(self):
+        self.set_tile()
+        self.tile_imgs = self.tile_images()
         if self.maze is not None: return
         if self.level == 'easy':
             self.maze = maze(20, 20)
@@ -466,45 +577,55 @@ class Game:
             self.maze.end = self.end
         else:
             self.start, self.end = self.maze.start, self.maze.end
-        self.tile = 800//self.maze.num_rows
-        self.tile_imgs = self.tile_images()
-
+        
     def update(self):
         pygame.display.update()
         self.clock.tick(60)
 
     def save(self):
-        data = {'level': self.level,'mode': self.mode,'maze': self.maze,'alg': self.algorithm,'start': self.maze.start,'end': self.maze.end,'record': self.record,
-                'file_name': self.file_name, 'player': self.player, 'tile': self.tile, 'completed': self.completed}
+        data = {'level': self.level, 'choose': self.choose, 'mode': self.mode,'maze': self.maze,'alg': self.algorithm,
+                'start': self.start,'end': self.end, 'record': self.record, 'file_name': self.file_name,
+                'player': self.player_name, 'completed': self.completed, 'is_saved': True}
         if self.saveloadmanager.check_file_name(self.file_name):
-            print('File has already exist')
+            self.message('File name has already exist')
         else:
             self.saveloadmanager.save_game(self.file_name, data)
-            print('Save file succeeded')
+            self.message('Save file succeeded')
 
     def load(self, file_name):
         if not self.saveloadmanager.check_file_name(file_name):
-            print('Find not found')
+            self.message('Find not found')
         else:
             data = self.saveloadmanager.load_game(file_name)
             self.level = data['level']
             self.mode = data['mode']
+            self.choose = data['choose']
             self.maze = data['maze']
             self.algorithm = data['alg']
             self.start = data['start']
             self.end = data['end']
             self.record = data['record']
             self.file_name = data['file_name']
-            self.player = data['player']
-            self.tile = data['tile']
-            self.completed = data['completed']
-            print('Load file succeeded')
+            self.player_name = data['player']
+            self.completed = data['completed'] 
+            self.is_saved = data['is_saved']   
+            self.message('Load file succeeded')
 
     # Draw functions
     def draw_tiles_map(self):
         for i in range(self.maze.num_rows):
             for j in range(self.maze.num_cols):
                 self.screen.blit(self.tile_imgs['path'], (j*self.tile, i*self.tile))
+
+    def draw_tiles_map_2(self):
+        for i in range(10):
+            for j in range(10):
+                self.screen.blit(self.tile_imgs['path_2'], (800 + j * 40, i * 40))
+
+    def draw_tiles_map_3(self):
+        for i in range(16):
+            for j in range(10):
+                self.screen.blit(self.tile_imgs['path_3'], (800 + j * 40, 160 + i * 40))
 
     def draw_text(self, text, color, x, y):
         img = self.font.render(text, True, color)
@@ -534,13 +655,8 @@ class Game:
             pygame.draw.rect(self.screen, 'yellow', (cell_y*self.tile + 2, cell_x*self.tile + 2, self.tile - 4, self.tile - 4))
             if self.start == (cell_x, cell_y):
                 time.sleep(3)
-    
-
-    def draw_hint(self, hint):
-        for cell_x, cell_y in hint:
-            pygame.draw.rect(self.screen, 'green', (cell_y*self.tile + 3, cell_x*self.tile + 3, self.tile - 6, self.tile - 6))
             
-    def draw_hint_2(self, hint):
+    def draw_hint(self, hint):
         
         for i in range(len(hint)-1):
             cur_cell = hint[i]
@@ -551,6 +667,8 @@ class Game:
     def draw(self):
         self.screen.fill('white')
         self.draw_tiles_map()
+        self.draw_tiles_map_2()
+        self.draw_tiles_map_3()
         self.draw_maze()
         
     def draw_rank(self, games):
@@ -568,6 +686,20 @@ class Game:
         pygame.draw.rect(self.screen, (0, 0, 255), (cell_choose[1]*self.tile + 2, cell_choose[0]*self.tile + 2, self.tile - 4, self.tile - 4))
 
     # Event funtions
+    def sound_effect(self):
+        ting_effect = pygame.mixer.Sound('Do_an/Assets/Sound/ting.mp3')
+        return {'ting': ting_effect}
+    
+    def message(self, text):
+        mess = Tk()
+        mess.geometry('0x0')
+        mess.eval('tk::PlaceWindow %s center' %mess.winfo_toplevel())
+        mess.withdraw()
+        mess.deiconify()
+        mess.destroy()
+        messagebox.showinfo('Notification', text)
+        mess.quit()
+
     def record_text(self, _time):
         hou = _time//3600
         min = (_time - hou*3600)//60
@@ -615,33 +747,56 @@ class Game:
             pygame.display.update()
             fade_counter += 2
 
-    # Game funtions   
+    # Game funtions 
+    def set_player(self, name):
+        if name == 'Frog': 
+            self.player = Player_pro(self.start[1]*self.tile, self.start[0]*self.tile, self.tile, 'Frog')
+        elif name == 'Blueman': 
+            self.player = Player_pro(self.start[1]*self.tile, self.start[0]*self.tile, self.tile, 'Blueman')
+        elif name == 'Tom': 
+            self.player = Player_pro(self.start[1]*self.tile, self.start[0]*self.tile, self.tile, 'Tom')
+        elif name == 'MaskDude':
+            self.player = Player_pro(self.start[1]*self.tile, self.start[0]*self.tile, self.tile, 'MaskDude')
+        else: 
+            self.player = Player(self.start[0], self.start[1], self.tile)
+        
+    def set_maze_visit(self):
+        for i in range(self.maze.num_rows):
+            for j in range(self.maze.num_cols):
+                self.maze.grid[i][j].is_visited = False 
+
     def run(self):
         self.new_game()
         # game loop var
         running = True
         running_dfs = True
+        # sound
+        music = pygame.mixer.music
+        music.load('Do_an/Assets/Sound/GamePlay_music.mp3')
+        music.play(loops = -1)
+        music.set_volume(0.5)
+        music_vol = 50
+        sound_effect_vol = 50
+        user_turnoff = False
         # time var
         _time = self.record
         timer = Timer(1000, self.font)
         timer.activate()
+        if self.level != 'hard': time_move = Timer(20 + self.delay*0.9)
+        else: time_move = Timer(self.delay)
+        time_move.activate()
         # menu var
-        pause = False
+        if self.is_saved: pause = True
+        else: pause = False
         menu_state = 'menu'
         user_input = False
-        # character
-        jerry = Jerry(self.end[1]*self.tile + 1, self.end[0]*self.tile + 1, self.tile*0.8, self.tile, 0, 0)
-        tom = Player_pro(self.start[1]*self.tile, self.start[0]*self.tile, self.tile, self.tile)
         # process random_entry_exit
-        if self.choose:
+        if self.choose and not self.is_saved:
             self.start = None
             self.end = None
-
             while self.choose:
-                self.screen.fill('white')
-                self.draw_maze()            
+                self.draw()     
                 pos = pygame.mouse.get_pos()
-
                 if pos[0] > 0 and pos[0] < 800 and pos[1] > 0 and pos[1] < 800:
                     cell_choosen = pos[1]//self.tile, pos[0]//self.tile
                     self.draw_choose_cell(cell_choosen)
@@ -674,12 +829,14 @@ class Game:
                     if event.type == pygame.QUIT:
                         pygame.quit()
                 self.update()
-            self.transitions()
-
+        self.transitions()
+        # character
+        self.set_player(self.player_name)
+        jerry = Jerry(self.end[1]*self.tile + 1, self.end[0]*self.tile + 1, self.tile*0.9, self.tile, 0, 0)
         if self.mode == 'auto':
             tmp_start = self.start
             end = self.end 
-            solution_path = dfs(self.maze, self.start)
+            solution_path = dfs(self.maze, self.start, self.end)
             run_solution = False
             tmp_path = []
             while running:          
@@ -693,31 +850,57 @@ class Game:
                     visited_cells = []
                 while running_dfs:
                     self.draw()
+                    jerry.draw(self.screen, 0, 0)
+                    if self.buttons['pause'].draw(self.screen): # pause
+                        pause = True
+                    if music.get_busy():
+                        if self.buttons['vol_on'].draw(self.screen): # volume on
+                            music.pause()
+                            user_turnoff = False
+                    else:
+                        if self.buttons['vol_off'].draw(self.screen): # volume off
+                            music.unpause()
+                            user_turnoff = True
+                    if self.buttons['hint'].draw(self.screen): # pause
+                        self.handle_hint()
                     # check event
                     if pause:
                         if menu_state == 'menu':
+                            
                             self.buttons['gameFrame'].draw(self.screen)
                             if self.buttons['resume'].draw(self.screen): # resume
+                                self.sound['ting'].play()
                                 pause = False
+                                music.unpause()
                             if self.buttons['save_1'].draw(self.screen): # save
+                                self.sound['ting'].play()
                                 menu_state = 'save_1'
                             if self.buttons['main_menu'].draw(self.screen): # main_menu
-                                pass
+                                self.sound['ting'].play()
                             if self.buttons['options'].draw(self.screen): # options
+                                self.sound['ting'].play()
                                 menu_state = 'options'
-                            if self.buttons['quit'].draw(self.screen): # quit                               
+                            if self.buttons['quit'].draw(self.screen): # quit 
+                                self.sound['ting'].play()                              
                                 running = False
-                                break
+                                mess = Tk()
+                                mess.geometry('0x0')
+                                mess.eval('tk::PlaceWindow %s center' %mess.winfo_toplevel())
+                                mess.withdraw()
+                                if messagebox.askyesno('Question', 'Do you really want to quit game?'): break
+                                mess.quit()
 
                         elif menu_state == 'save1':
                             self.buttons['gameFrame'].draw(self.screen)
                             self.draw_text('Enter name of file: {}'.format(self.file_name), 'black', 400, 250)
                             user_input = True
                             if self.buttons['accept_1'].draw(self.screen):
+                                self.sound['ting'].play()
                                 user_input = False                            
                                 menu_state = 'menu'
                                 self.save()
                             if self.buttons['cancel_1'].draw(self.screen):
+                                self.sound['ting'].play()
                                 user_input = False
                                 menu_state = 'menu'
 
@@ -727,20 +910,21 @@ class Game:
                             self.delay = self.set_delay()
                             self.draw_text('{}'.format(self.algorithm), 'black', 560, 470)
                             if self.buttons['chang_alg'].draw(self.screen): # chang_alg
+                                self.sound['ting'].play()
                                 self.set_algorithm('bfs') 
                                 running_dfs = False
                                 tmp_start = cur_cell
-                                for i in range(self.maze.num_rows):
-                                        for j in range(self.maze.num_cols):
-                                            self.maze.grid[i][j].is_visited = False 
+                                self.set_maze_visit()
                             if self.buttons['back'].draw(self.screen): # back
+                                self.sound['ting'].play()
                                 menu_state = 'menu'
                         
                         elif menu_state == 'finish':
-                            bg_img = pygame.image.load('Do_an/Assets/tom_catch_jerry.png').convert_alpha()
+                            bg_img = pygame.image.load('Do_an/Assets/Background/tom_catch_jerry.png').convert_alpha()
                             self.screen.blit(bg_img, (0, 0))
                             self.draw_text(self.record_text(self.record), 'black', 400, 100)
                             if self.buttons['play_again'].draw(self.screen): # play_again
+                                self.sound['ting'].play()
                                 running = False
                                 self.transitions
                                 self.new_game()
@@ -748,22 +932,26 @@ class Game:
                                 self.start, self.end = None, None
                                 self.run()
                             if self.buttons['save_2'].draw(self.screen): # save
+                                self.sound['ting'].play()
                                 menu_state = 'save2'
 
                         elif menu_state == 'save2':
                             self.buttons['gameFrame'].draw(self.screen)
                             user_input = True
-                            bg_img = pygame.image.load('Do_an/Assets/tom_catch_jerry.png').convert_alpha()
+                            bg_img = pygame.image.load('Do_an/Assets/Background/tom_catch_jerry.png').convert_alpha()
                             self.screen.blit(bg_img, (0, 0))
                             self.draw_text(self.record_text(self.record), 'black', 400, 100)
                             self.buttons['play_again'].draw(self.screen)
                             self.buttons['save_2'].draw(self.screen)
                             self.draw_text('Enter name of file: {}'.format(self.file_name), 'black', 400, 250)
                             if self.buttons['accept_2'].draw(self.screen):
+                                self.sound['ting'].play()
                                 user_input = False
                                 menu_state = 'finish'
+                                self.set_maze_visit()
                                 self.save()
                             if self.buttons['cancel_2'].draw(self.screen):
+                                self.sound['ting'].play()
                                 user_input = False
                                 self.file_name = ''
                                 menu_state = 'finish'
@@ -771,8 +959,16 @@ class Game:
                     for event in pygame.event.get():
                         if event.type == pygame.KEYDOWN:
                             if event.key == pygame.K_SPACE:
-                                if not pause: pause = True
+                                if menu_state == 'menu':
+                                    if not pause: pause = True
+                                    else: pause = False 
                                 
+                            elif event.key == pygame.K_BACKSPACE:
+                                if user_input:                                       
+                                    self.file_name = self.file_name[:-1]
+                            else:
+                                if user_input:
+                                    self.file_name += event.unicode
                         if event.type == pygame.QUIT:
                             pygame.quit()
                             quit()
@@ -830,31 +1026,57 @@ class Game:
                     flag = False
                 while not running_dfs:
                     self.draw()
+                    jerry.draw(self.screen, 0, 0)
+                    if self.buttons['pause'].draw(self.screen): # pause
+                        self.sound['ting'].play()
+                        pause = True
+                    if music.get_busy():
+                        if self.buttons['vol_on'].draw(self.screen): # volume on
+                            self.sound['ting'].play()
+                            music.pause()
+                    else:
+                        if self.buttons['vol_off'].draw(self.screen): # volume off
+                            self.sound['ting'].play()
+                            music.unpause()
+                    self.buttons['hint'].draw(self.screen)
                     # check event
                     if pause:
                         if menu_state == 'menu':
                             self.buttons['gameFrame'].draw(self.screen)
                             if self.buttons['resume'].draw(self.screen): # resume
+                                self.sound['ting'].play()
                                 pause = False
                             if self.buttons['save_1'].draw(self.screen): # load
+                                self.sound['ting'].play()
                                 menu_state = 'save_1'
                             if self.buttons['main_menu'].draw(self.screen): # main_menu
+                                self.sound['ting'].play()
                                 pass
                             if self.buttons['options'].draw(self.screen): # options
+                                self.sound['ting'].play()
                                 menu_state = 'options'
                             if self.buttons['quit'].draw(self.screen): # quit
-                                running = False
-                                break
-
+                                self.sound['ting'].play()
+                                mess = Tk()
+                                mess.geometry('0x0')
+                                mess.eval('tk::PlaceWindow %s center' %mess.winfo_toplevel())
+                                mess.withdraw()
+                                if messagebox.askyesno('Question', 'Do you really want to quit game?'): 
+                                    running = False
+                                    break
+                                mess.quit()
+                                
                         elif menu_state == 'save1':
                             self.buttons['gameFrame'].draw(self.screen)
                             self.draw_text('Enter name of file: {}'.format(self.file_name), 'black', 400, 250)
                             user_input = True
                             if self.buttons['accept_1'].draw(self.screen):
+                                self.sound['ting'].play()
                                 user_input = False                            
                                 menu_state = 'menu'
                                 self.save()
                             if self.buttons['cancel_1'].draw(self.screen):
+                                self.sound['ting'].play()
                                 user_input = False
                                 menu_state = 'menu'
 
@@ -864,17 +1086,21 @@ class Game:
                             self.delay = self.set_delay()
                             self.draw_text('{}'.format(self.algorithm), 'black', 560, 470)
                             if self.buttons['chang_alg'].draw(self.screen): # chang_alg
+                                self.sound['ting'].play()
                                 self.set_algorithm('dfs')
                                 tmp_start = cur_cell
+                                self.set_maze_visit()
                                 running_dfs = True
                             if self.buttons['back'].draw(self.screen): # back
+                                self.sound['ting'].play()
                                 menu_state = 'menu'
                         
                         elif menu_state == 'finish':
-                            bg_img = pygame.image.load('Do_an/Assets/tom_catch_jerry.png').convert_alpha()
+                            bg_img = pygame.image.load('Do_an/Assets/Background/tom_catch_jerry.png').convert_alpha()
                             self.screen.blit(bg_img, (0, 0))
                             self.draw_text(self.record_text(self.record), 'black', 400, 100)
                             if self.buttons['play_again'].draw(self.screen): # play_again
+                                self.sound['ting'].play()
                                 running = False
                                 self.transitions
                                 self.new_game()
@@ -882,22 +1108,26 @@ class Game:
                                 self.start, self.end = None, None
                                 self.run()
                             if self.buttons['save_2'].draw(self.screen): # save
+                                self.sound['ting'].play()
                                 menu_state = 'save2'
 
                         elif menu_state == 'save2':
                             self.buttons['gameFrame'].draw(self.screen)
                             user_input = True
-                            bg_img = pygame.image.load('Do_an/Assets/tom_catch_jerry.png').convert_alpha()
+                            bg_img = pygame.image.load('Do_an/Assets/Background/tom_catch_jerry.png').convert_alpha()
                             self.screen.blit(bg_img, (0, 0))
                             self.draw_text(self.record_text(self.record), 'black', 400, 100)
                             self.buttons['play_again'].draw(self.screen)
                             self.buttons['save_2'].draw(self.screen)
                             self.draw_text('Enter name of file: {}'.format(self.file_name), 'black', 400, 250)
                             if self.buttons['accept_2'].draw(self.screen):
+                                self.sound['ting'].play()
                                 user_input = False
                                 menu_state = 'finish'
+                                self.set_maze_visit()
                                 self.save()
                             if self.buttons['cancel_2'].draw(self.screen):
+                                self.sound['ting'].play()
                                 user_input = False
                                 self.file_name = ''
                                 menu_state = 'finish'
@@ -905,11 +1135,26 @@ class Game:
                     for event in pygame.event.get():
                         if event.type == pygame.KEYDOWN:
                             if event.key == pygame.K_SPACE:
-                                if not pause: pause = True 
+                                if menu_state == 'menu':
+                                    if not pause: pause = True
+                                    else: pause = False 
+                                
+                            elif event.key == pygame.K_BACKSPACE:
+                                if user_input:                                       
+                                    self.file_name = self.file_name[:-1]
+                            else:
+                                if user_input:
+                                    self.file_name += event.unicode
                         if event.type == pygame.QUIT:
-                            pygame.quit()
-                            quit()
-                    
+                            mess = Tk()
+                            mess.geometry('0x0')
+                            mess.eval('tk::PlaceWindow %s center' %mess.winfo_toplevel())
+                            mess.withdraw()
+                            if messagebox.askyesno('Question', 'Do you really want to quit game?'): 
+                                pygame.quit()
+                                quit()
+                            mess.quit()
+                                     
                     if not pause:
                         # upload time
                         timer.update()
@@ -968,45 +1213,85 @@ class Game:
             start = self.start
             end = self.end
             if self.player.row is None: self.player.row, self.player.col = start[0], start[1]
-
             while running:
                 self.draw()
+                if self.buttons['pause'].draw(self.screen): # pause
+                    pause = True
+                    music.pause()
+                if music.get_busy():
+                    if self.buttons['vol_on'].draw(self.screen): # volume on
+                        music.pause()
+                        user_turnoff = False
+                else:
+                    if self.buttons['vol_off'].draw(self.screen): # volume off
+                        music.unpause()
+                        user_turnoff = True
+                if self.buttons['hint'].draw(self.screen):
+                    self.handle_hint()
                 jerry.draw(self.screen, 0, 0)
                 jerry.loop()
-                tom.loop(60)
-                tom.draw(self.screen)
+                if self.player_name != 'Square':
+                    self.player.loop()
                 # check event
                 if pause:
                     self.record = _time
                     if menu_state == 'menu':
                         self.buttons['gameFrame'].draw(self.screen)
                         if self.buttons['resume'].draw(self.screen): # resume
+                            self.sound['ting'].play()
                             pause = False
+                            if user_turnoff: music.unpause()
                         if self.buttons['save_1'].draw(self.screen): # save
+                            self.sound['ting'].play()
                             menu_state = 'save1'                        
                         if self.buttons['main_menu'].draw(self.screen): # main_menu
+                            self.sound['ting'].play()
                             pass
                         if self.buttons['options'].draw(self.screen): # options
+                            self.sound['ting'].play()
                             menu_state = 'options'
                         if self.buttons['quit'].draw(self.screen): # quit
-                            running = False
+                            self.sound['ting'].play()
+                            mess = Tk()
+                            mess.geometry('0x0')
+                            mess.eval('tk::PlaceWindow %s center' %mess.winfo_toplevel())
+                            mess.withdraw()
+                            if messagebox.askyesno('Question', 'Do you really want to quit game?'): 
+                                running = False
+                                break
+                            mess.quit()                     
 
                     elif menu_state == 'options':                   
                         self.buttons['gameFrame'].draw(self.screen)
                         self.buttons['delay'].draw(self.screen)
                         self.delay = self.set_delay()
                         self.draw_text('{}'.format(self.algorithm), 'black', 560, 470)
+                        if self.buttons['sound'].draw(self.screen): # sound
+                            menu_state = 'sound'
                         if self.buttons['chang_alg'].draw(self.screen): # chang_alg
                             if self.algorithm == 'dfs': self.set_algorithm('bfs')
                             elif self.algorithm == 'bfs': self.set_algorithm('dfs')
                         if self.buttons['back'].draw(self.screen): # back
                             menu_state = 'menu'
                     
+                    elif menu_state == 'sound':
+                        self.buttons['gameFrame'].draw(self.screen)
+                        self.draw_text('Music', 'black', 400, 350)
+                        self.draw_text('Sound effect', 'black', 400, 450)
+                        self.sliders['music'].draw(self.screen)
+                        music_vol = self.set_volume(self.sliders['music'])
+                        self.sliders['sound_effect'].draw(self.screen)
+                        sound_effect_vol = self.set_volume(self.sliders['sound_effect'])
+                        if self.buttons['back'].draw(self.screen): # back
+                            self.sound['ting'].play()
+                            menu_state = 'options'
+
                     elif menu_state == 'finish':
-                        bg_img = pygame.image.load('Do_an/Assets/tom_catch_jerry.png').convert_alpha()
+                        bg_img = pygame.image.load('Do_an/Assets/Background/tom_catch_jerry.png').convert_alpha()
                         self.screen.blit(bg_img, (0, 0))
                         self.draw_text(self.record_text(self.record), 'black', 400, 100)
                         if self.buttons['play_again'].draw(self.screen): # play_again
+                            self.sound['ting'].play()
                             running = False
                             self.transitions
                             self.record = 0
@@ -1015,33 +1300,40 @@ class Game:
                             self.new_game()
                             self.run()
                         if self.buttons['save_2'].draw(self.screen): # save
+                            self.sound['ting'].play()
                             menu_state = 'save2'
 
                     elif menu_state == 'save1':
                         self.buttons['gameFrame'].draw(self.screen)
-                        self.draw_text('Enter name of file: {}'.format(self.file_name), 'black', 400, 250)
+                        self.draw_text('Enter name of file:', 'black', 430, 250)
+                        self.draw_text('{}'.format(self.file_name), 'black', 460, 280)
                         user_input = True
                         if self.buttons['accept_1'].draw(self.screen):
+                            self.sound['ting'].play()
                             user_input = False                            
                             menu_state = 'menu'
                             self.save()
                         if self.buttons['cancel_1'].draw(self.screen):
+                            self.sound['ting'].play()
                             user_input = False
                             menu_state = 'menu'
 
                     elif menu_state == 'save2':
                         user_input = True
-                        bg_img = pygame.image.load('Do_an/Assets/tom_catch_jerry.png').convert_alpha()
+                        bg_img = pygame.image.load('Do_an/Assets/Background/tom_catch_jerry.png').convert_alpha()
                         self.screen.blit(bg_img, (0, 0))
                         self.draw_text(self.record_text(self.record), 'black', 400, 100)
                         self.buttons['play_again'].draw(self.screen)
                         self.buttons['save_2'].draw(self.screen)
                         self.draw_text('Enter name of file: {}'.format(self.file_name), 'black', 400, 250)
                         if self.buttons['accept_2'].draw(self.screen):
+                            self.sound['ting'].play()
                             user_input = False
                             menu_state = 'finish'
+                            self.set_maze_visit()
                             self.save()
                         if self.buttons['cancel_2'].draw(self.screen):
+                            self.sound['ting'].play()
                             user_input = False
                             self.file_name = ''
                             menu_state = 'finish'
@@ -1050,8 +1342,12 @@ class Game:
                     if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_SPACE:
                             if menu_state == 'menu':
-                                if not pause: pause = True
-                                else: pause = False 
+                                if not pause: 
+                                    pause = True
+                                    music.pause()
+                                else: 
+                                    pause = False 
+                                    if user_turnoff: music.unpause()
                             
                         elif event.key == pygame.K_BACKSPACE:
                             if user_input:                                       
@@ -1060,11 +1356,32 @@ class Game:
                             if user_input:
                                 self.file_name += event.unicode
                     if event.type == pygame.QUIT:
-                        pygame.quit()
-                        quit()
-                
+                        self.sound['ting'].play()
+                        mess = Tk()
+                        mess.geometry('0x0')
+                        mess.eval('tk::PlaceWindow %s center' %mess.winfo_toplevel())
+                        mess.withdraw()
+                        if messagebox.askyesno('Question', 'Do you really want to quit game?'): 
+                            pygame.quit()
+                            quit()
+                        mess.quit()                  
+                         
                 if not pause:
-                    # process and visual time
+                    # process move (press w,a,s,d or up,down,right,left)
+                    self.player.draw(self.screen)
+                    if self.player_name == 'Square':
+                        self.handle_move()
+                    else:
+                        time_move.update()
+                        if not time_move.active:
+                            self.handle_move_pro()                                    
+                            time_move.activate()
+                    if (self.player.row, self.player.col) == end:
+                        self.completed = True
+                        self.record = _time
+                        pause = True
+                        menu_state = 'finish'
+                    # process timer
                     timer.update()
                     if not timer.active:
                         _time += 1
@@ -1080,86 +1397,60 @@ class Game:
                         games = self.ranking(self.take_score())
                         self.draw_rank(games)
 
-                    # process move (press w,a,s,d or up,down,right,left)
-                    self.handle_move()
-                    if (self.player.row, self.player.col) == end:
-                        self.completed = True
-                        self.record = _time
-                        pause = True
-                        menu_state = 'finish'
-                    self.draw_cur((self.player.row, self.player.col))
-
                     # process hint(press H)
-                    self.handle_hint()    
-                    time.sleep(0.00075*self.delay) 
+                    self.handle_hint()
+                    if self.player_name == 'Square':    
+                        time.sleep(0.0012*self.delay)
+                music.set_volume(music_vol*0.01) 
+                self.sound['ting'].set_volume(sound_effect_vol*0.01)
+                if self.level == 'hard':
+                    time_move.set_duration(self.delay)
+                else:
+                    time_move.set_duration(self.delay*0.9 + 20)
                 self.update()
-
-    def handle_move_pro(self, player):
-        keys = pygame.key.get_pressed()
-        
-        if (keys[pygame.K_LEFT] or keys[pygame.K_a]) :
-            player.move_left(self.tile//5)
-        elif (keys[pygame.K_RIGHT] or keys[pygame.K_d]):
-            player.move_right(self.tile//5) 
-        elif (keys[pygame.K_DOWN] or keys[pygame.K_s]):
-            player.move_down(self.tile//5)
-        elif (keys[pygame.K_UP] or keys[pygame.K_w]):
-            player.move_up(self.tile//5)
-        return player
     
     def test(self):
         self.new_game()
         run = True
-        tom = Player_pro(self.start[1]*self.tile, self.start[0]*self.tile, self.tile, self.tile)
+        self.set_player('MaskDude')
+        menu_state = 'menu'
+        pause = False
+        time_move = Timer(75)
+        time_move.activate()
         while run:
             self.draw()
-            self.draw_tiles_map()
-            tom.loop(60)
-            tom.draw(self.screen)
-            tom = self.handle_move_pro(tom)
+            if not pause:
+                self.player.loop()    
+                self.player.draw(self.screen)
+                time_move.update()
+                if not time_move.active:
+                    self.handle_move_pro()                                    
+                    time_move.activate()
+            elif pause:
+                if menu_state == 'menu':
+                    self.buttons['delay'].draw(self.screen)
+                    self.delay = self.set_delay()  
 
             for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    run = False
-            #time.sleep(0.01)
-            if pos[0] > 0 and pos[0] < 800 and pos[1] > 0 and pos[1] < 800:
-                cell_choosen = pos[1] // self.tile, pos[0] // self.tile
-                self.draw_choose_cell(cell_choosen)
-
-            if self.start is None:
-                if pygame.mouse.get_pressed()[0] and cell_choosen is not None:
-                    self.start = cell_choosen
-                self.draw_text('Choose start: ', 'black', 850, 100)
-
-            if self.end is None and self.start is not None:
-                self.draw_cur(self.start)
-                if pygame.mouse.get_pressed()[0] and cell_choosen != self.start:
-                    self.end = cell_choosen
-                self.draw_text('Start: {}'.format(self.start), 'black', 850, 100)
-                self.draw_text('Choose end: ', 'black', 850, 200)
-
-            if self.start is not None and self.end is not None:
-                self.draw_cur(self.start)
-                self.draw_end()
-                self.draw_text('Start: {}'.format(self.start), 'black', 850, 100)
-                self.draw_text('End: {}'.format(self.end), 'black', 850, 200)
-                if self.buttons['cancel_3'].draw(self.screen):
-                    self.start = None
-                    self.end = None
-                    cell_choosen = None
-                if self.buttons['accept_3'].draw(self.screen):
-                    break
-
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-            self.update()
-            self.transitions()
+                    if event.type == pygame.QUIT:
+                        run = False
+                    if event.type == pygame.KEYDOWN:
+                            if event.key == pygame.K_SPACE:
+                                if menu_state == 'menu':
+                                    if not pause: pause = True
+                                    else: pause = False 
+            time_move.set_duration(20 + self.delay*0.9)
             self.update()
         pygame.quit()
         
 if __name__ == '__main__':
-    game = Game('easy', 'not_auto')
-    game.test()
+    game = Game('easy', 'not_auto', True, 'Frog')
+    game.run()
+    # game = Game()
+    # game.load('quan2')
+    # game.run()
+    # game = Game('easy', 'not_auto')
+    # game.test()
+    
     
 

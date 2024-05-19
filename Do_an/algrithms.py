@@ -53,10 +53,10 @@ def unblock_neighbours(maze, row_cur, col_cur, neighbours):
         if len(unblock) > 0: return unblock
         else: return None
         
-def bfs(maze, start = None):
+def bfs(maze, start = None, end = None):
 
     if start is None: start = maze.start # lay pos start va end
-    end = maze.end
+    if end is None: end = maze.end
     paths = [[]] # tao duong di co san o start
     paths[0].append(start)
     cur_cell = start
@@ -84,10 +84,10 @@ def bfs(maze, start = None):
 
     return paths[-1]
 
-def dfs(maze, start = None):
+def dfs(maze, start = None, end = None):
 
     if start is None: start = maze.start
-    end = maze.end
+    if end is None: end = maze.end
     cur_cell = start            
     path = [cur_cell]              
     maze.grid[cur_cell[0]][cur_cell[1]].is_visited = True     
