@@ -341,7 +341,7 @@ class Player_pro(pygame.sprite.Sprite):
         win.blit(self.sprite, (self.rect.x, self.rect.y))
 
 class Game:
-    def __init__(self, level = None, mode = None, choose = False, player_name = 'Square'):
+    def __init__(self, level = None, mode = None, choose = False, player_name = 'Square', map = 'green'):
         pygame.init()
         pygame.mixer.init()
         pygame.display.set_caption('Maze Game')
@@ -351,6 +351,7 @@ class Game:
         self.level = level
         self.mode = mode
         self.choose = choose
+        self.map = map
         self.player_name = player_name
         self.player = None
         self.maze = None
@@ -463,7 +464,7 @@ class Game:
         img_path_2 = pygame.transform.scale(img_path_2, (40, 40))
         img_path_3 = pygame.image.load('Do_an/Assets/Background/Yellow.png').convert_alpha()
         img_path_3 = pygame.transform.scale(img_path_3, (40, 40))
-        return {'path': img_path, 'path_2': img_path_2,'path_3': img_path_3, 'path_4': img_path_4, 'path_5': img_path_5,  'path_6': img_path_6}
+        return {'path': img_path, 'path_2': img_path_2,'path_3': img_path_3, 'grey': img_path_4, 'blue': img_path_5,  'green': img_path_6}
     
     def slider(self):
         delay_slider = Slider((590, 350), (200, 30), 0.5, 0, 100)
@@ -628,7 +629,7 @@ class Game:
     def draw_tiles_map(self):
         for i in range(self.maze.num_rows):
             for j in range(self.maze.num_cols):
-                self.screen.blit(self.tile_imgs['path'], (j*self.tile, i*self.tile))
+                self.screen.blit(self.tile_imgs[self.map], (j*self.tile, i*self.tile))
 
     def draw_tiles_map_2(self):
         for i in range(10):
@@ -639,20 +640,6 @@ class Game:
         for i in range(16):
             for j in range(10):
                 self.screen.blit(self.tile_imgs['path_3'], (800 + j * 40, 160 + i * 40))
-
-    def draw_tiles_map_4(self):
-        for i in range(self.maze.num_rows):
-            for j in range(self.maze.num_cols):
-                self.screen.blit(self.tile_imgs['path_4'], (j*self.tile, i*self.tile))
-
-    def draw_tiles_map_5(self):
-        for i in range(self.maze.num_rows):
-            for j in range(self.maze.num_cols):
-                self.screen.blit(self.tile_imgs['path_5'], (j*self.tile, i*self.tile))
-    def draw_tiles_map_6(self):
-        for i in range(self.maze.num_rows):
-            for j in range(self.maze.num_cols):
-                self.screen.blit(self.tile_imgs['path_6'], (j*self.tile, i*self.tile))
 
     def draw_text(self, text, color, x, y):
         img = self.font.render(text, True, color)
@@ -693,7 +680,7 @@ class Game:
                    
     def draw(self):
         self.screen.fill('white')
-        self.draw_tiles_map_6()
+        self.draw_tiles_map()
         self.draw_tiles_map_2()
         self.draw_tiles_map_3()
         self.draw_maze()
