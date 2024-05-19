@@ -1444,11 +1444,7 @@ class Game:
         pygame.quit()
         
 if __name__ == '__main__':
-<<<<<<< HEAD
     game = Game('easy', 'not_auto', True, 'Frog')
-=======
-    game = Game('easy', 'not_auto', True)
->>>>>>> dc95aa460b3123f00b57076c9433de4397b4dd15
     game.run()
     # game = Game()
     # game.load('quan2')
