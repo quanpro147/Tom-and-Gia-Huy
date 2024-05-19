@@ -383,9 +383,9 @@ class Game:
         quit_button = Button(500, 560, a[4], 1)
         change_alg_button = Button(500, 430, change_alg_img, 1)
         back_button = Button(530, 520, back_img, 1)
-        play_again_button = Button(400, 150, play_again_img, 1)
+        play_again_button = Button(900, 400, play_again_img, 1)
         save_button_1 = Button(500, 400, a[5], 1)
-        save_button_2 = Button(400, 200, a[5], 1)
+        save_button_2 = Button(900, 450, a[5], 1)
         accept_button_1 = Button(600, 350, accept_img, 1)
         accept_button_2 = Button(600, 300, accept_img, 1)
         cancel_button_1 = Button(400, 350, cancel_img, 1)
@@ -729,10 +729,9 @@ class Game:
                     self.draw()
                     if self.buttons['pause'].draw(self.screen): # pause
                         pause = True
-                    if self.buttons['mute'].draw(self.screen): # pause
+                    if self.buttons['mute'].draw(self.screen): # mute
                         pass
-                    if self.buttons['hint'].draw(self.screen): # pause
-                        self.handle_hint()
+                    self.buttons['hint'].draw(self.screen) # hint
                     # check event
                     if pause:
                         if menu_state == 'menu':
@@ -1021,6 +1020,7 @@ class Game:
                     pause = True
                 if self.buttons['mute'].draw(self.screen): # pause
                     pass
+                self.buttons['mute'].draw(self.screen)
                 jerry.draw(self.screen, 0, 0)
                 jerry.loop()
 
@@ -1193,7 +1193,7 @@ class Game:
         pygame.quit()
         
 if __name__ == '__main__':
-    game = Game('easy', 'not_auto', False)
+    game = Game('easy', 'not_auto', True)
     game.run()
     
 
