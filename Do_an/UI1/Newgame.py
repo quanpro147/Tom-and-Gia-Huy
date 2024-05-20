@@ -14,11 +14,13 @@ class NewGame(QWidget):
         #Playbutton
         self.PlayButton = QPushButton(self)
         self.PlayButton.setGeometry(QRect(600,650,200,50))
+        self.PlayButton.setStyleSheet("QPushButton{background-color:rgb(82,204, 206);border-radius:25px ;border: 3px solid green;color:white;font: bold 10pt \"MS Shell Dlg 2\"}\n QPushButton:hover{background-color: rgb(3, 57, 108);border-radius:25px ;border :3px solid green;color:white;font: bold 10pt \"MS Shell Dlg 2\"}")
         self.PlayButton.setText("PLAY")
         #Backbutton
         self.BackButton = QPushButton(self)
         self.BackButton.setGeometry(QRect(200, 650, 200, 50))
         self.BackButton.setText("Back")
+        self.BackButton.setStyleSheet("QPushButton{background-color:rgb(82,204, 206);border-radius:25px ;border: 3px solid green;color:white;font: bold 10pt \"MS Shell Dlg 2\"}\n QPushButton:hover{background-color: rgb(3, 57, 108);border-radius:25px ;border :3px solid green;color:white;font: bold 10pt \"MS Shell Dlg 2\"}")
 
         self.Box_1 = QtWidgets.QGroupBox(self)
         self.Box_1.setGeometry(QtCore.QRect(200, 100, 600, 100))
