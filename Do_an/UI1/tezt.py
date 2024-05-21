@@ -170,7 +170,7 @@ class MainWindow(QMainWindow):
                     path_dfs.pop()
                     self.move_coor(cur_cell)
                 QApplication.processEvents()
-                time.sleep(0.1)
+                time.sleep(0.01)
             else:
                 self.running = False
         self.path_solve = path_dfs.copy()

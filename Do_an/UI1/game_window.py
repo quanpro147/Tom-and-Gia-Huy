@@ -439,4 +439,5 @@ def main():
     login = Game_Window()
     login.show()
     sys.exit(app.exec_())
+main()
 
