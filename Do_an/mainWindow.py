@@ -152,10 +152,15 @@ class MainWindow(QMainWindow):
         self.close()
         a1 = self.New_Window.difficult
         a2 = self.New_Window.mode
-        a3 = self.New_Window.optionKey
+        a3 = self.New_Window.option
         a4 = self.New_Window.skin
         a5 = self.New_Window.PygameKey
-        game = Game(a1,a2,a3,a4,a5)
+        if(a4 == "Default"):
+            a4 = "Square"
+        if(a2 == "auto"):
+            game = Game(a1,a2,a3,'Square','green')
+        else:
+            game = Game(a1,a2,a3,a4,a5)
         game.run()
         #self.show()
             
