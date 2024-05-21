@@ -505,7 +505,7 @@ class Game:
         keys = pygame.key.get_pressed()
 
         if self.level == 'hard':
-            vel = self.tile/1
+            vel = self.tile/3
         elif self.level == 'medium':
             vel = self.tile/6
         else:
@@ -665,10 +665,10 @@ class Game:
             pygame.draw.rect(self.screen, 'darkviolet', (cell_y*self.tile + 2, cell_x*self.tile + 2, self.tile - 4, self.tile - 4)) 
 
     def draw_solution(self, solution):
+        solution = solution[1:]
         for cell_x, cell_y in solution:
             pygame.draw.rect(self.screen, 'yellow', (cell_y*self.tile + 2, cell_x*self.tile + 2, self.tile - 4, self.tile - 4))
-            if self.start == (cell_x, cell_y):
-                time.sleep(3)
+            if (cell_x, cell_y) == self.start: time.sleep(3)
             
     def draw_hint(self, hint):
         
@@ -961,6 +961,7 @@ class Game:
                                 self.new_game()
                                 self.record = 0
                                 self.start, self.end = None, None
+                                self.set_maze_visit()
                                 self.run()
                             if self.buttons['save_2'].draw(self.screen): # save
                                 self.sound['ting'].play()
@@ -1155,7 +1156,9 @@ class Game:
                                 self.new_game()
                                 self.record = 0
                                 self.start, self.end = None, None
+                                self.set_maze_visit()
                                 self.run()
+                            
                             if self.buttons['save_2'].draw(self.screen): # save
                                 self.sound['ting'].play()
                                 menu_state = 'save2'
@@ -1245,8 +1248,7 @@ class Game:
                         else: 
                             for i in paths:
                                 self.draw_path(i)
-                            if solution_path.pop() != end:
-                               tmp_path.append(solution_path.pop())                         
+                            tmp_path.append(solution_path.pop())                         
                             self.draw_solution(tmp_path)
                             if solution_path == []:
                                 running = False
@@ -1259,6 +1261,7 @@ class Game:
                         else:
                             time.sleep(0.001*self.delay)
                     self.update()
+            
                 
         elif self.mode == 'not_auto': # che do nguoi choi
             start = self.start
@@ -1456,7 +1459,8 @@ class Game:
                     self.handle_hint()
                     if self.player_name == 'Square':    
                         time.sleep(0.0012*self.delay)
-                                    
+
+                # update                
                 music.set_volume(music_vol*0.01) 
                 self.sound['ting'].set_volume(sound_effect_vol*0.01)
                 if self.level == 'hard':
@@ -1464,43 +1468,9 @@ class Game:
                 else:
                     time_move.set_duration(self.delay*0.9 + 20)
                 self.update()
-    
-    def test(self):
-        self.new_game()
-        run = True
-        self.set_player('MaskDude')
-        menu_state = 'menu'
-        pause = False
-        time_move = Timer(75)
-        time_move.activate()
-        while run:
-            self.draw()
-            if not pause:
-                self.player.loop()    
-                self.player.draw(self.screen)
-                time_move.update()
-                if not time_move.active:
-                    self.handle_move_pro()                                    
-                    time_move.activate()
-            elif pause:
-                if menu_state == 'menu':
-                    self.buttons['delay'].draw(self.screen)
-                    self.delay = self.set_delay()  
-
-            for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        run = False
-                    if event.type == pygame.KEYDOWN:
-                            if event.key == pygame.K_SPACE:
-                                if menu_state == 'menu':
-                                    if not pause: pause = True
-                                    else: pause = False 
-            time_move.set_duration(20 + self.delay*0.9)
-            self.update()
-        pygame.quit()
         
 if __name__ == '__main__':
-    game = Game('easy', 'not_auto', True, 'Tom')
+    game = Game('hard', 'not_auto', True, 'Tom', 'grey')
     game.run()
     # game = Game()
     # if game.load('quan3'):
