@@ -80,6 +80,7 @@ class MainWindow(QMainWindow):
         self.Load_Window.Play_Button.clicked.connect(self.LoadGame)
         #
         self.Menu_Window.log_out_button.clicked.connect(self.LOG_OUT)
+
     def login(self):
         self.sound.clickSound()
         filename = "Do_an/UI/user_interface/account.json"
@@ -115,10 +116,14 @@ class MainWindow(QMainWindow):
         self.sound.clickSound()
         
         self.stWidget.setCurrentIndex(4)
+
     def back(self):
         self.sound.clickSound()
-        
-        self.stWidget.setCurrentIndex(2)
+        if(self.New_Window.Custom):
+            self.New_Window.Custom = False
+            self.New_Window.Off_Custom()
+        else:
+            self.stWidget.setCurrentIndex(2)
     def quit(self):
         self.close()
     def Create_account(self):
@@ -145,65 +150,13 @@ class MainWindow(QMainWindow):
         self.Menu_Window.off_volume()
         #self.close()
         self.close()
-        a = -1
-        if self.New_Window.human.isChecked():
-            if self.New_Window.ez.isChecked():
-                if self.New_Window.random.isChecked():
-                    self.gameWindow = Game_Window()
-                    self.close()
-                    self.gameWindow.show()
-                else:
-                    self.gameWindow = Game_Window()
-                    self.close()
-                    self.gameWindow.show()
-
-            elif self.New_Window.medium.isChecked():
-                if self.New_Window.random.isChecked():
-                    self.gameWindow = Game_Window()
-                    self.close()
-                    self.gameWindow.show()
-                else:
-                    self.gameWindow = Game_Window()
-                    self.close()
-                    self.gameWindow.show()
-            else:
-                if self.New_Window.random.isChecked():
-                    self.gameWindow = Game_Window()
-                    self.close()
-                    self.gameWindow.show()
-                else:
-                    self.gameWindow = Game_Window()
-                    self.close()
-                    self.gameWindow.show()
-        else:
-            if self.New_Window.ez.isChecked():
-                if self.New_Window.random.isChecked():
-                    self.gameWindow = Game_Window()
-                    self.close()
-                    self.gameWindow.show()
-                else:
-                    self.gameWindow = Game_Window()
-                    self.close()
-                    self.gameWindow.show()
-            elif self.New_Window.medium.isChecked():
-                if self.random.isChecked():
-                    self.gameWindow = Game_Window()
-                    self.close()
-                    self.gameWindow.show()
-                else:
-                    self.gameWindow = Game_Window()
-                    self.close()
-                    self.gameWindow.show()
-            else:
-                if self.New_Window.random.isChecked():
-                    self.gameWindow = Game_Window()
-                    self.close()
-                    self.gameWindow.show()
-                else:
-                    self.gameWindow = Game_Window()
-                    self.close()
-                    self.gameWindow.show()
-        print(a)
+        a1 = self.New_Window.difficult
+        a2 = self.New_Window.mode
+        a3 = self.New_Window.optionKey
+        a4 = self.New_Window.skin
+        a5 = self.New_Window.PygameKey
+        game = Game(a1,a2,a3,a4,a5)
+        game.run()
         #self.show()
             
     def LoadGame(self):
@@ -219,11 +172,11 @@ class MainWindow(QMainWindow):
         
         game.run()
         
-
-app = QApplication(sys.argv)
-login = MainWindow()
-login.show()
-sys.exit(app.exec_())
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    login = MainWindow()
+    login.show()
+    sys.exit(app.exec_())
 
 
 

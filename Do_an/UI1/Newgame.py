@@ -22,77 +22,231 @@ class NewGame(QWidget):
         self.BackButton.setText("Back")
         self.BackButton.setStyleSheet("QPushButton{background-color:rgb(82,204, 206);border-radius:25px ;border: 3px solid green;color:white;font: bold 10pt \"MS Shell Dlg 2\"}\n QPushButton:hover{background-color: rgb(3, 57, 108);border-radius:25px ;border :3px solid green;color:white;font: bold 10pt \"MS Shell Dlg 2\"}")
 
-        self.Box_1 = QtWidgets.QGroupBox(self)
-        self.Box_1.setGeometry(QtCore.QRect(200, 100, 600, 100))
-        self.Box_1.setStyleSheet("border:1px solid black")
-        #Human
-        self.human = QtWidgets.QRadioButton(self.Box_1)
-        self.human.setGeometry(QRect(20,20,120,60))
-        self.human.setStyleSheet("border:none")
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.human.setFont(font)
-        self.human.setText("Player")
-        #Bot
+        self.mode_button =  QPushButton(self)
+        self.mode_button.setGeometry(QRect(400,200,200,50))
+        self.mode_button.setStyleSheet("QPushButton{background-color:rgb(82,204, 206) ;border: 3px solid green;color:white;font: bold 10pt \"MS Shell Dlg 2\"}\n QPushButton:hover{background-color: rgb(3, 57, 108) ;border :3px solid green;color:white;font: bold 10pt \"MS Shell Dlg 2\"}")
+        self.mode_button.clicked.connect(self.change_mode)
+        #difficult button
+        self.difficult_button = QPushButton(self)
+        self.difficult_button.setGeometry(QRect(400,300,200,50))
+        self.difficult_button.setStyleSheet("QPushButton{background-color:rgb(82,204, 206) ;border: 3px solid green;color:white;font: bold 10pt \"MS Shell Dlg 2\"}\n QPushButton:hover{background-color: rgb(3, 57, 108);border :3px solid green;color:white;font: bold 10pt \"MS Shell Dlg 2\"}")
+        self.difficult_button.clicked.connect(self.change_diff)
+        #Option Button
+        self.option_button = QPushButton(self)
+        self.option_button.setGeometry(QRect(400,400,200,50))
+        self.option_button.setStyleSheet("QPushButton{background-color:rgb(82,204, 206) ;border: 3px solid green;color:white;font: bold 10pt \"MS Shell Dlg 2\"}\n QPushButton:hover{background-color: rgb(3, 57, 108);border :3px solid green;color:white;font: bold 10pt \"MS Shell Dlg 2\"}")
+        self.option_button.clicked.connect(self.change_option)
+        #Custom
+        self.Custom_button = QPushButton(self)
+        self.Custom_button.setGeometry(QRect(400,500,200,50))
+        self.Custom_button.setStyleSheet("QPushButton{background-color:rgb(82,204, 206) ;border: 3px solid green;color:white;font: bold 10pt \"MS Shell Dlg 2\"}\n QPushButton:hover{background-color: rgb(3, 57, 108);border :3px solid green;color:white;font: bold 10pt \"MS Shell Dlg 2\"}")
+        self.Custom_button.setText("Custom")
+        self.Custom_button.clicked.connect(self.Custom_window)
 
-        self.cpt = QtWidgets.QRadioButton(self.Box_1)
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.cpt.setFont(font)
-        self.cpt.setGeometry(QRect(300, 20, 120, 60))
-        self.cpt.setStyleSheet("border:none")
-        self.cpt.setText("BOT")
-        #Box 2
-        self.Box_2 = QtWidgets.QGroupBox(self)
-        self.Box_2.setGeometry(QtCore.QRect(200, 300, 600, 100))
-        self.Box_2.setStyleSheet("border:1px solid black")
-        # easy
-        self.ez = QtWidgets.QRadioButton(self.Box_2)
-        self.ez.setGeometry(QRect(20, 20, 120, 60))
-        self.ez.setStyleSheet("border:none")
-        self.ez.setText("easy")
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.ez.setFont(font)
-        # medium
+        self.mode_list = ["Player","Bot"]
+        self.mode_key_list = ["not_auto","auto"]
+        self.mode_index = 0
+        self.mode = self.mode_key_list[self.mode_index]
+        self.mode_button.setText("Mode: Player")
 
-        self.medium = QtWidgets.QRadioButton(self.Box_2)
-        self.medium.setFont(font)
-        self.medium.setGeometry(QRect(220, 20, 120, 60))
-        self.medium.setStyleSheet("border:none")
-        self.medium.setText("Medium")
-        #Hard
-        self.hard = QtWidgets.QRadioButton(self.Box_2)
-        self.hard.setFont(font)
-        self.hard.setGeometry(QRect(420, 20, 120, 60))
-        self.hard.setStyleSheet("border:none")
-        self.hard.setText("Hard")
-        #Box 3
-        self.Box_3 = QtWidgets.QGroupBox(self)
-        self.Box_3.setGeometry(QtCore.QRect(200, 500, 600, 100))
-        self.Box_3.setStyleSheet("border:1px solid black")
-        # random
-        self.random = QtWidgets.QRadioButton(self.Box_3)
-        self.random.setGeometry(QRect(20, 20, 120, 60))
-        self.random.setStyleSheet("border:none")
-        self.random.setText("Random")
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.random.setFont(font)
-        #Option
-        self.option = QtWidgets.QRadioButton(self.Box_3)
-        self.option.setGeometry(QRect(320, 20, 120, 60))
-        self.option.setStyleSheet("border:none")
-        self.option.setText("OPTION")
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.option.setFont(font)
+        self.difficult_list = ["easy","medium","hard"]
+        self.difficult_index = 0
+        self.difficult = self.difficult_list[self.difficult_index]
+        self.difficult_button.setText("Difficult: Easy")
+
+        self.options_list = ["Random","Custom"]
+        self.option_index = 0
+        self.optionKey = [False,True]
+        self.option = self.optionKey[self.option_index]
+        self.option_button.setText("Option: Random")
 
 
 
-#app = QApplication(sys.argv)
-#newgame = NewGame()
-#newgame.show()
-#sys.exit(app.exec_())
+
+        self.prew_button1 = QPushButton(self)
+        self.prew_button1.setGeometry(QRect(200,460,30,30))
+        self.current_index = 0
+        self.prew_button1.clicked.connect(self.change_Player_Prew)
+
+        self.next_button1 = QPushButton(self)
+        self.next_button1.setGeometry(QRect(370,460,30,30))
+        self.next_button1.clicked.connect(self.change_Player_Next)
+
+        self.list_image = []
+        self.setList_image()
+        # skin_list
+
+        self.current_index = 0
+        self.skin = self.list_image[self.current_index]["Player"]
+        QIcon1 = QIcon()
+        QIcon1.addFile("Do_an/UI1/Image/prew.png")
+        self.prew_button1.setIcon(QIcon1)
+        #self.change_button1.hide()
+        QIcon2 = QIcon()
+        QIcon2.addFile("Do_an/UI1/Image/next.png")
+        self.next_button1.setIcon(QIcon2)
+        self.next_button1.setStyleSheet("background-color:None;")
+        #self.change_button2.hide()
+
+        # display skin
+        self.skin_display = QLabel(self)
+        self.skin_display.setGeometry(QRect(200, 250, 200, 200))
+        self.skin_display.setStyleSheet("border:2px solid black")
+        self.skin_display.setPixmap(QPixmap(self.list_image[0]["path"]))
+        #Player_Label
+        self.Player_Label = QLabel(self)
+        self.Player_Label.setGeometry(QRect(200,180,200,50))
+        self.Player_Label.setStyleSheet("font: 16pt \"Segoe Print\"")
+        self.Player_Label.setAlignment(Qt.AlignCenter)
+        self.Player_Label.setText("Player")
+        #skin name
+        self.skin_name = QLabel(self)
+        self.skin_name.setGeometry(QRect(220,460,160,30))
+        self.skin_name.setText(self.skin)
+        self.skin_name.setStyleSheet((
+        "font: 8pt \"Segoe Print\";"))
+        self.skin_name.setAlignment(Qt.AlignCenter)
+        #Map Display
+        self.Map_display = QLabel(self)
+        self.Map_display.setGeometry(QRect(600, 250, 200, 200))
+        self.Map_display.setStyleSheet("border:None")
+        #Map Label
+        self.Map_Label = QLabel(self)
+        self.Map_Label.setGeometry(QRect(600,180,200,50))
+        self.Map_Label.setStyleSheet("font: 16pt \"Segoe Print\"")
+        self.Map_Label.setAlignment(Qt.AlignCenter)
+        self.Map_Label.setText("Map")
+        # Map_list
+        self.Map_list = []
+        self.MapIndex = 0
+        self.setMap_List()
+        self.Map = self.Map_list[self.MapIndex]["Map"]
+        self.Map_display.setPixmap(QPixmap(self.Map_list[self.MapIndex]["path"]))
+        self.PygameKey = self.Map_list[self.MapIndex]["gameKey"]
+        #Map_name
+        self.Map_name = QLabel(self)
+        self.Map_name.setGeometry(QRect(620, 460, 160, 30))
+        self.Map_name.setText(self.Map)
+        self.Map_name.setStyleSheet((
+            "font: 8pt \"Segoe Print\";"))
+        self.Map_name.setAlignment(Qt.AlignCenter)
+
+
+        self.prew_button2 = QPushButton(self)
+        self.prew_button2.setGeometry(QRect(600, 460, 30, 30))
+
+        self.prew_button2.clicked.connect(self.change_Map_Prew)
+        self.prew_button2.setIcon(QIcon1)
+
+        self.next_button2 = QPushButton(self)
+        self.next_button2.setGeometry(QRect(770, 460, 30, 30))
+        self.next_button2.clicked.connect(self.change_Map_Next)
+        self.next_button2.setIcon(QIcon2)
+        
+
+
+
+        self.Custom = False
+        self.Off_Custom()
+        #
+    
+    def set_skinList(self):
+        skin1 = {"Name":"1","Path":"abc"}
+        skin2 = {"Name":"2","Path":"abc"}
+        skin3 = {"Name":"3","Path":"abc"}
+        skin4 = {"Name":"4","Path":"abc"}
+        self.skin_list = [skin1,skin2,skin3,skin4]
+
+    def Off_Custom(self):
+        self.skin_display.hide()
+        self.Map_display.hide()
+        self.prew_button1.hide()
+        self.prew_button2.hide()
+        self.next_button1.hide()
+        self.next_button2.hide()
+        self.Player_Label.hide()
+        self.Map_Label.hide()
+        self.skin_name.hide()
+        self.mode_button.show()
+        self.difficult_button.show()
+        self.option_button.show()
+        self.Custom_button.show()
+    def setMap_List(self):
+        a1 = 'Do_an/UI1/Image/Map/Green.png'
+        a2 = 'Do_an/UI1/Image/Map/grey_path.png'
+        a3 = 'Do_an/UI1/Image/Map/water_path.png'
+        a4 = 'Do_an/UI1/Image/Map/green_path.png'
+        a5 = 'Do_an/UI1/Image/Map/Gray.png'
+        a6 = 'Do_an/UI1/Image/Map/Yellow.png'
+        A = [a1,a2,a3,a4,a5,a6]
+        Map = ["green","grey_path","water_path","green_path","Gray","Yellow"]
+        gameKey = ["path","grey","blue","green","path_2","path_3"]
+        self.Map_list = [{"path":A[i],"Map":Map[i],"gameKey":gameKey[i]} for i in range(6)]
+    def setList_image(self):
+        a1 = "Do_an/UI1/Image/Player/square.png"
+        a2 =  "Do_an/UI1/Image/Player/MaskDude.png"
+        a3 = "Do_an/UI1/Image/Player/Tom.png"
+        a4 = "Do_an/UI1/Image/Player/Frog.png"
+        a5 = "Do_an/UI1/Image/Player/Blueman.png"
+        A = [a1,a2,a3,a4,a5]
+        name = ["Default","MaskDude","Tom","Frog","Blueman"]
+        List1 = [{"path":A[i],"Player":name[i]} for i in range(5)]
+        self.list_image = List1
+    def change_Player_Next(self):
+        self.current_index = (self.current_index+1)%5
+        self.skin_display.setPixmap(QPixmap(self.list_image[self.current_index]["path"]))
+        self.skin = self.list_image[self.current_index]["Player"]
+        self.skin_name.setText(self.skin)
+    def change_Player_Prew(self):
+        self.current_index = (self.current_index-1)%5
+        self.skin_display.setPixmap(QPixmap(self.list_image[self.current_index]["path"]))
+        self.skin = self.list_image[self.current_index]["Player"]
+        self.skin_name.setText(self.skin)
+    def change_Map_Prew(self):
+        self.MapIndex = (self.MapIndex-1)%6
+        self.Map_display.setPixmap(QPixmap(self.Map_list[self.MapIndex]["path"]))
+        self.Map = self.Map_list[self.MapIndex]["Map"]
+        self.Map_name.setText(self.Map)
+        self.PygameKey = self.Map_list[self.MapIndex]["gameKey"]
+
+    def change_Map_Next(self):
+        self.MapIndex = (self.MapIndex+1)%6
+        self.Map_display.setPixmap(QPixmap(self.Map_list[self.MapIndex]["path"]))
+        self.Map = self.Map_list[self.MapIndex]["Map"]
+        self.Map_name.setText(self.Map)
+        self.PygameKey = self.Map_list[self.MapIndex]["gameKey"]
+
+    def change_mode(self):
+        self.mode_index = (self.mode_index+1)%2
+        self.mode_button.setText("Mode: "+self.mode_list[self.mode_index])
+        self.mode = self.mode_key_list[self.mode_index]
+    def change_diff(self):
+        self.difficult_index = (self.difficult_index+1)%3
+        self.difficult_button.setText("Difficult: "+self.difficult_list[self.difficult_index])
+        self.difficult = self.difficult_list[self.difficult_index]
+    def change_option(self):
+        self.option_index = (self.option_index+1)%2
+        self.option_button.setText("Option: "+self.options_list[self.option_index])
+        self.option = self.optionKey[self.option_index]
+    def Custom_window(self):
+        self.Custom = True
+        self.mode_button.hide()
+        self.difficult_button.hide()
+        self.option_button.hide()
+        self.Custom_button.hide()
+        self.skin_display.show()
+        self.Map_display.show()
+        self.prew_button1.show()
+        self.prew_button2.show()
+        self.next_button1.show()
+        self.next_button2.show()
+        self.skin_name.show()
+        self.Player_Label.show()
+        self.Map_Label.show()
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    login = NewGame()
+    login.show()
+    sys.exit(app.exec_())
 
 
