@@ -1495,7 +1495,7 @@ class Game:
                 self.update()
         
 if __name__ == '__main__':
-    game = Game('medium', 'not_auto', True, 'Tom', 'grey')
+    game = Game('easy', 'auto', True, 'Tom', 'green')
     game.run()
     # game = Game()
     # if game.load('quan3'):
