@@ -70,7 +70,7 @@ class Timer:
         hou = _time//3600
         min = (_time - hou*3600)//60
         sec = _time - hou*3600 - min*60
-        return str('Time: {}:{}:{}'.format(hou, min, sec))
+        return str('Time: {:02}:{:02}:{:02}'.format(hou, min, sec))
     
     def draw(self, screen, _time):
         text_suf = self.font.render(self.time_text(_time), True, 'black')
@@ -395,29 +395,25 @@ class Game:
         vol_on_img = pygame.image.load('Do_an/button/volume_on.png').convert_alpha()
         vol_off_img = pygame.image.load('Do_an/button/volume_off.png').convert_alpha()
         sound_img = pygame.image.load('Do_an/button/SoundButton.png').convert_alpha()
-        a = [resume_img,load_img,menu_img,options_img,quit_img,save_img]
-        b = [pause_img, mute_img, hint_img]
-        for i in range(len(a)):
-            a[i] = pygame.transform.scale(a[i],Size_img)
-        for i in range(len(b)):
-            b[i] = pygame.transform.scale(b[i], Size_img_IG)
-        # create button
-        resume_button = Button(500, 320, a[0], 1)
-        load_button = Button(500, 400, a[1], 1)
-        menu_button = Button(500, 240, a[2], 1)
-        options_button = Button(500, 480, a[3], 1)
-        quit_button = Button(500, 560, a[4], 1)
+        newgame_img = pygame.image.load('Do_an/button/NewGame.png').convert_alpha()
+        saveFrame_img = pygame.image.load('Do_an/button/saveFrame.png').convert_alpha()
+
+        resume_button = Button(500, 320, resume_img, 1)
+        load_button = Button(500, 400, load_img, 1)
+        menu_button = Button(500, 240, menu_img, 1)
+        options_button = Button(500, 480, options_img, 1)
+        quit_button = Button(500, 560, quit_img, 1)
         change_alg_button = Button(500, 430, change_alg_img, 1)
         back_button = Button(530, 520, back_img, 1)
-        play_again_button = Button(900, 400, play_again_img, 1)
-        save_button_1 = Button(500, 400, a[5], 1)
-        save_button_2 = Button(900, 450, a[5], 1)
+        play_again_button = Button(900, 450, play_again_img, 1)
+        save_button_1 = Button(500, 400, save_img, 1)
+        save_button_2 = Button(900, 500, save_img, 1)
         accept_button_1 = Button(600, 350, accept_img, 1)
         cancel_button_1 = Button(430, 350, cancel_img, 1)
-        accept_button_2 = Button(600, 300, accept_img, 1)
-        cancel_button_2 = Button(400, 300, cancel_img, 1)
-        accept_button_3 = Button(1000, 300, accept_img, 1)
-        cancel_button_3 = Button(850, 300, cancel_img, 1)
+        accept_button_2 = Button(500, 600, accept_img, 1)
+        cancel_button_2 = Button(300, 600, cancel_img, 1)
+        accept_button_3 = Button(1000, 400, accept_img, 1)
+        cancel_button_3 = Button(850, 400, cancel_img, 1)
         gameFrame = Button(380,120,gameFrame_img,1)
         delay_button = Button(520, 260, delay_img, 1)
         pause_button = Button(850, 700, pause_img, 1)
@@ -426,6 +422,10 @@ class Game:
         vol_on_button = Button(980, 700, vol_on_img, 1)
         vol_off_button = Button(980, 700, vol_off_img, 1)
         sound_button = Button(520, 380, sound_img, 1)
+        menu_button_2 = Button(900, 550, menu_img, 1)
+        quit_button_2 = Button(900, 600, quit_img, 1)
+        newgame_button = Button(900, 400, newgame_img, 1)
+        saveFrame = Button(230,420,saveFrame_img,1)
         return {'resume': resume_button, 
                 'load': load_button,
                 'main_menu': menu_button,
@@ -449,7 +449,12 @@ class Game:
                 'hint' : hint_button,
                 'vol_on': vol_on_button,
                 'vol_off': vol_off_button,
-                'sound': sound_button}
+                'sound': sound_button,
+                'main_menu_2': menu_button_2,
+                'quit_2': quit_button_2,
+                'newgame_button' : newgame_button,
+                'saveFrame': saveFrame
+                }
 
     def tile_images(self):
         img_path = pygame.image.load('Do_an/Assets/Background/Green.png').convert_alpha()
@@ -718,12 +723,12 @@ class Game:
         hou = _time//3600
         min = (_time - hou*3600)//60
         sec = _time - hou*3600 - min*60
-        return str('Time of completion: {}:{}:{}'.format(hou, min, sec))
+        return str('Time Results: {:02}:{:02}:{:02}'.format(hou, min, sec))
     def record_text_mini(self, _time):
         hou = _time//3600
         min = (_time - hou*3600)//60
         sec = _time - hou*3600 - min*60
-        return str('{}:{}:{}'.format(hou, min, sec))
+        return str('{:02}:{:02}:{:02}'.format(hou, min, sec))
     
     def take_score(self):
         games = []
@@ -819,20 +824,20 @@ class Game:
                 if self.start is None:
                     if pygame.mouse.get_pressed()[0] and cell_choosen is not None:          
                         self.start = cell_choosen
-                    self.draw_text('Choose start: ', 'black', 850, 100)
+                    self.draw_text('Choose start: ', 'black', 850, 200)
                 
                 if self.end is None and self.start is not None:
                     self.draw_cur(self.start)
                     if pygame.mouse.get_pressed()[0] and cell_choosen != self.start:
                         self.end = cell_choosen
-                    self.draw_text('Start: {}'.format(self.start), 'black', 850, 100)
-                    self.draw_text('Choose end: ', 'black', 850, 200)
+                    self.draw_text('Start: {}'.format(self.start), 'black', 850, 200)
+                    self.draw_text('Choose end: ', 'black', 850, 300)
                     
                 if self.start is not None and self.end is not None:
                     self.draw_cur(self.start)
                     self.draw_end()
-                    self.draw_text('Start: {}'.format(self.start), 'black', 850, 100)
-                    self.draw_text('End: {}'.format(self.end), 'black', 850, 200)          
+                    self.draw_text('Start: {}'.format(self.start), 'black', 850, 200)
+                    self.draw_text('End: {}'.format(self.end), 'black', 850, 300)          
                     if self.buttons['cancel_3'].draw(self.screen):
                         self.start = None
                         self.end = None
@@ -908,7 +913,7 @@ class Game:
 
                         elif menu_state == 'save1':
                             self.buttons['gameFrame'].draw(self.screen)
-                            self.draw_text('Enter name of file: {}'.format(self.file_name), 'black', 400, 250)
+                            self.draw_text('Enter file name: {}'.format(self.file_name), 'black', 400, 250)
                             user_input = True
                             if self.buttons['accept_1'].draw(self.screen):
                                 self.sound['ting'].play()
@@ -953,7 +958,7 @@ class Game:
                         elif menu_state == 'finish':
                             bg_img = pygame.image.load('Do_an/Assets/Background/tom_catch_jerry.png').convert_alpha()
                             self.screen.blit(bg_img, (0, 0))
-                            self.draw_text(self.record_text(self.record), 'black', 400, 100)
+                            self.draw_text(self.record_text(self.record), 'black', 800, 320)
                             if self.buttons['play_again'].draw(self.screen): # play_again
                                 self.sound['ting'].play()
                                 running = False
@@ -965,16 +970,39 @@ class Game:
                             if self.buttons['save_2'].draw(self.screen): # save
                                 self.sound['ting'].play()
                                 menu_state = 'save2'
+                            if self.buttons['newgame_button'].draw(self.screen): # save
+                                self.sound['ting'].play()
+                                pass
+                            if self.buttons['main_menu_2'].draw(self.screen): # resume
+                                self.sound['ting'].play()
+                                pause = False
+                                pass
+
+                            if self.buttons['quit_2'].draw(self.screen): # resume
+                                self.sound['ting'].play()
+                                pause = False
+                                mess = Tk()
+                                mess.geometry('0x0')
+                                mess.eval('tk::PlaceWindow %s center' %mess.winfo_toplevel())
+                                mess.withdraw()
+                                if messagebox.askyesno('Question', 'Do you really want to quit game?'): break
+                                mess.quit()
+
 
                         elif menu_state == 'save2':
                             self.buttons['gameFrame'].draw(self.screen)
                             user_input = True
                             bg_img = pygame.image.load('Do_an/Assets/Background/tom_catch_jerry.png').convert_alpha()
                             self.screen.blit(bg_img, (0, 0))
-                            self.draw_text(self.record_text(self.record), 'black', 400, 100)
+                            self.draw_text(self.record_text(self.record), 'black', 800, 320)
+                            self.buttons['saveFrame'].draw(self.screen)
                             self.buttons['play_again'].draw(self.screen)
                             self.buttons['save_2'].draw(self.screen)
-                            self.draw_text('Enter name of file: {}'.format(self.file_name), 'black', 400, 250)
+
+                            self.buttons['main_menu_2'].draw(self.screen)
+                            self.buttons['quit_2'].draw(self.screen)
+                            self.buttons['newgame_button'].draw(self.screen)
+                            self.draw_text('Enter file name: {}'.format(self.file_name), 'black', 250, 510)
                             if self.buttons['accept_2'].draw(self.screen):
                                 self.sound['ting'].play()
                                 user_input = False
@@ -1102,7 +1130,7 @@ class Game:
                                 
                         elif menu_state == 'save1':
                             self.buttons['gameFrame'].draw(self.screen)
-                            self.draw_text('Enter name of file: {}'.format(self.file_name), 'black', 400, 250)
+                            self.draw_text('Enter file name: {}'.format(self.file_name), 'black', 400, 250)
                             user_input = True
                             if self.buttons['accept_1'].draw(self.screen):
                                 self.sound['ting'].play()
@@ -1147,7 +1175,7 @@ class Game:
                         elif menu_state == 'finish':
                             bg_img = pygame.image.load('Do_an/Assets/Background/tom_catch_jerry.png').convert_alpha()
                             self.screen.blit(bg_img, (0, 0))
-                            self.draw_text(self.record_text(self.record), 'black', 400, 100)
+                            self.draw_text(self.record_text(self.record), 'black', 800, 320)
                             if self.buttons['play_again'].draw(self.screen): # play_again
                                 self.sound['ting'].play()
                                 running = False
@@ -1159,16 +1187,36 @@ class Game:
                             if self.buttons['save_2'].draw(self.screen): # save
                                 self.sound['ting'].play()
                                 menu_state = 'save2'
+                            if self.buttons['newgame_button'].draw(self.screen): # save
+                                self.sound['ting'].play()
+                                pass
+                            if self.buttons['main_menu_2'].draw(self.screen): # resume
+                                self.sound['ting'].play()
+                                pause = False
+                                pass
 
+                            if self.buttons['quit_2'].draw(self.screen): # resume
+                                self.sound['ting'].play()
+                                pause = False
+                                mess = Tk()
+                                mess.geometry('0x0')
+                                mess.eval('tk::PlaceWindow %s center' %mess.winfo_toplevel())
+                                mess.withdraw()
+                                if messagebox.askyesno('Question', 'Do you really want to quit game?'): break
+                                mess.quit()
                         elif menu_state == 'save2':
                             self.buttons['gameFrame'].draw(self.screen)
                             user_input = True
                             bg_img = pygame.image.load('Do_an/Assets/Background/tom_catch_jerry.png').convert_alpha()
                             self.screen.blit(bg_img, (0, 0))
-                            self.draw_text(self.record_text(self.record), 'black', 400, 100)
+                            self.draw_text(self.record_text(self.record), 'black', 800, 320)
+                            self.buttons['saveFrame'].draw(self.screen)
                             self.buttons['play_again'].draw(self.screen)
                             self.buttons['save_2'].draw(self.screen)
-                            self.draw_text('Enter name of file: {}'.format(self.file_name), 'black', 400, 250)
+                            self.buttons['main_menu_2'].draw(self.screen)
+                            self.buttons['quit_2'].draw(self.screen)
+                            self.buttons['newgame_button'].draw(self.screen)
+                            self.draw_text('Enter file name: {}'.format(self.file_name), 'black', 250, 510)
                             if self.buttons['accept_2'].draw(self.screen):
                                 self.sound['ting'].play()
                                 user_input = False
@@ -1343,7 +1391,7 @@ class Game:
                     elif menu_state == 'finish':
                         bg_img = pygame.image.load('Do_an/Assets/Background/tom_catch_jerry.png').convert_alpha()
                         self.screen.blit(bg_img, (0, 0))
-                        self.draw_text(self.record_text(self.record), 'black', 400, 100)
+                        self.draw_text(self.record_text(self.record), 'black', 800, 320)
                         if self.buttons['play_again'].draw(self.screen): # play_again
                             self.sound['ting'].play()
                             running = False
@@ -1356,10 +1404,28 @@ class Game:
                         if self.buttons['save_2'].draw(self.screen): # save
                             self.sound['ting'].play()
                             menu_state = 'save2'
+                        if self.buttons['main_menu_2'].draw(self.screen): # resume
+                                self.sound['ting'].play()
+                                pause = False
+                                pass
+                        
+                        if self.buttons['newgame_button'].draw(self.screen): # save
+                                self.sound['ting'].play()
+                                pass
+                        
+                        if self.buttons['quit_2'].draw(self.screen): # resume
+                            self.sound['ting'].play()
+                            pause = False
+                            mess = Tk()
+                            mess.geometry('0x0')
+                            mess.eval('tk::PlaceWindow %s center' %mess.winfo_toplevel())
+                            mess.withdraw()
+                            if messagebox.askyesno('Question', 'Do you really want to quit game?'): break
+                            mess.quit()
 
                     elif menu_state == 'save1':
                         self.buttons['gameFrame'].draw(self.screen)
-                        self.draw_text('Enter name of file:', 'black', 430, 250)
+                        self.draw_text('Enter file name:', 'black', 430, 250)
                         self.draw_text('{}'.format(self.file_name), 'black', 460, 280)
                         user_input = True
                         if self.buttons['accept_1'].draw(self.screen):
@@ -1376,10 +1442,14 @@ class Game:
                         user_input = True
                         bg_img = pygame.image.load('Do_an/Assets/Background/tom_catch_jerry.png').convert_alpha()
                         self.screen.blit(bg_img, (0, 0))
-                        self.draw_text(self.record_text(self.record), 'black', 400, 100)
+                        self.draw_text(self.record_text(self.record), 'black', 800, 320)
+                        self.buttons['saveFrame'].draw(self.screen)
                         self.buttons['play_again'].draw(self.screen)
                         self.buttons['save_2'].draw(self.screen)
-                        self.draw_text('Enter name of file: {}'.format(self.file_name), 'black', 400, 250)
+                        self.buttons['main_menu_2'].draw(self.screen)
+                        self.buttons['quit_2'].draw(self.screen)
+                        self.buttons['newgame_button'].draw(self.screen)
+                        self.draw_text('Enter file name: {}'.format(self.file_name), 'black', 250, 510)
                         if self.buttons['accept_2'].draw(self.screen):
                             self.sound['ting'].play()
                             user_input = False
