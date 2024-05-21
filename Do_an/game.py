@@ -341,7 +341,7 @@ class Player_pro(pygame.sprite.Sprite):
         win.blit(self.sprite, (self.rect.x, self.rect.y))
 
 class Game:
-    def __init__(self, level = None, mode = None, choose = False, player_name = 'Square', map = 'green'):
+    def __init__(self, level = None, mode = None, choose = False, player_name = 'Square', map ='grey'):
         pygame.init()
         pygame.mixer.init()
         pygame.display.set_caption('Maze Game')
@@ -403,8 +403,8 @@ class Game:
         menu_button = Button(500, 240, menu_img, 1)
         options_button = Button(500, 480, options_img, 1)
         quit_button = Button(500, 560, quit_img, 1)
-        change_alg_button = Button(500, 430, change_alg_img, 1)
-        back_button = Button(530, 520, back_img, 1)
+        change_alg_button = Button(435, 470, change_alg_img, 1)
+        back_button = Button(530, 600, back_img, 1)
         play_again_button = Button(900, 450, play_again_img, 1)
         save_button_1 = Button(500, 400, save_img, 1)
         save_button_2 = Button(900, 500, save_img, 1)
@@ -415,7 +415,7 @@ class Game:
         accept_button_3 = Button(1000, 400, accept_img, 1)
         cancel_button_3 = Button(850, 400, cancel_img, 1)
         gameFrame = Button(380,120,gameFrame_img,1)
-        delay_button = Button(520, 260, delay_img, 1)
+        delay_button = Button(435, 295, delay_img, 1)
         pause_button = Button(850, 700, pause_img, 1)
         mute_button = Button(980, 700, mute_img, 1)
         hint_button = Button(1100, 700, hint_img, 1)
@@ -472,7 +472,7 @@ class Game:
         return {'path': img_path, 'path_2': img_path_2,'path_3': img_path_3, 'grey': img_path_4, 'blue': img_path_5,  'green': img_path_6}
     
     def slider(self):
-        delay_slider = Slider((590, 350), (200, 30), 0.5, 0, 100)
+        delay_slider = Slider((650, 320), (200, 30), 0.5, 0, 100)
         music_slider = Slider((650, 364), (150, 30), 0.5, 0, 100)
         sound_effect_slider = Slider((650, 464), (150, 30), 0.5, 0, 100)
         return {'delay': delay_slider, 'music': music_slider, 'sound_effect': sound_effect_slider}
@@ -870,6 +870,7 @@ class Game:
                     visited_cells = []
                 while running_dfs:
                     self.draw()
+                    self.draw_text_mini("Tips: You can't use Hint while Bot play", 'yellow', 820, 760)
                     jerry.draw(self.screen, 0, 0)
                     if self.buttons['pause'].draw(self.screen): # pause
                         pause = True
@@ -879,11 +880,13 @@ class Game:
                                 music.pause()
                                 user_turnoff = False
                     else:
-                        if self.buttons['vol_off'].draw(self.screen): # volume off
+                        if self.buttons['mute'].draw(self.screen): # volume off
                             if not pause:
                                 music.unpause()
                                 user_turnoff = True
                     self.buttons['hint'].draw(self.screen)
+                    tom_and_jerry_img = pygame.image.load('Do_an/Assets/Background/tom_and_jerry.png').convert_alpha()
+                    self.screen.blit(tom_and_jerry_img, (850, 180))
                     # check event
                     if pause:
                         if menu_state == 'menu':
@@ -929,7 +932,7 @@ class Game:
                             self.buttons['gameFrame'].draw(self.screen)
                             self.buttons['delay'].draw(self.screen)
                             self.delay = self.set_delay()
-                            self.draw_text('{}'.format(self.algorithm), 'black', 560, 470)
+                            self.draw_text('{}'.format(self.algorithm), 'green', 650, 475)
                             if self.buttons['sound'].draw(self.screen): # sound
                                 self.sound['ting'].play()
                                 menu_state = 'sound'
@@ -1085,6 +1088,7 @@ class Game:
                     flag = False
                 while not running_dfs:
                     self.draw()
+                    self.draw_text_mini("Tips: You can't use Hint while Bot play", 'yellow', 820, 760)
                     jerry.draw(self.screen, 0, 0)
                     if self.buttons['pause'].draw(self.screen): # pause
                         if not pause: 
@@ -1101,6 +1105,8 @@ class Game:
                                 self.sound['ting'].play()
                                 music.unpause()
                     self.buttons['hint'].draw(self.screen)
+                    tom_and_jerry_img = pygame.image.load('Do_an/Assets/Background/tom_and_jerry.png').convert_alpha()
+                    self.screen.blit(tom_and_jerry_img, (850, 180))
                     # check event
                     if pause:
                         if menu_state == 'menu':
@@ -1146,7 +1152,7 @@ class Game:
                             self.buttons['gameFrame'].draw(self.screen)
                             self.buttons['delay'].draw(self.screen)
                             self.delay = self.set_delay()
-                            self.draw_text('{}'.format(self.algorithm), 'black', 560, 470)
+                            self.draw_text('{}'.format(self.algorithm), 'green', 650, 475)
                             if self.buttons['sound'].draw(self.screen): # sound
                                 self.sound['ting'].play()
                                 menu_state = 'sound'
@@ -1314,6 +1320,10 @@ class Game:
             if self.player.row is None: self.player.row, self.player.col = start[0], start[1]
             while running:
                 self.draw()
+                if self.choose == True:
+                    tom_and_jerry_img = pygame.image.load('Do_an/Assets/Background/tom_and_jerry.png').convert_alpha()
+                    self.screen.blit(tom_and_jerry_img, (850, 180))
+                self.draw_text_mini('Tips: Press H to use hint better', 'yellow', 860, 760)
                 if self.buttons['pause'].draw(self.screen): # pause
                     pause = True
                     music.pause()
@@ -1323,7 +1333,7 @@ class Game:
                             music.pause()
                             user_turnoff = False
                 else:
-                    if self.buttons['vol_off'].draw(self.screen): # volume off
+                    if self.buttons['mute'].draw(self.screen): # volume off
                         if not pause:
                             music.unpause()
                             user_turnoff = True
@@ -1367,7 +1377,7 @@ class Game:
                         self.buttons['gameFrame'].draw(self.screen)
                         self.buttons['delay'].draw(self.screen)
                         self.delay = self.set_delay()
-                        self.draw_text('{}'.format(self.algorithm), 'black', 560, 470)
+                        self.draw_text('{}'.format(self.algorithm), 'green', 650, 475)
                         if self.buttons['sound'].draw(self.screen): # sound
                             menu_state = 'sound'
                         if self.buttons['chang_alg'].draw(self.screen): # chang_alg
@@ -1570,7 +1580,7 @@ class Game:
         pygame.quit()
         
 if __name__ == '__main__':
-    game = Game('easy', 'not_auto', True, 'Tom')
+    game = Game('easy', 'auto', False, 'MaskDude')
     game.run()
     # game = Game()
     # if game.load('quan3'):
