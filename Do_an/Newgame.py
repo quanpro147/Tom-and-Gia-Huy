@@ -175,10 +175,10 @@ class NewGame(QWidget):
     def setMap_List(self):
         a1 = 'Do_an/UI1/Image/Map/Green.png'
         a2 = 'Do_an/UI1/Image/Map/grey_path.png'
-        a3 = 'Do_an/UI1/Image/Map/water_path.png'
+        a3 = 'Do_an/UI1/Image/Map/blue_path.png'
         a4 = 'Do_an/UI1/Image/Map/green_path.png'
-        a5 = 'Do_an/UI1/Image/Map/Gray.png'
-        a6 = 'Do_an/UI1/Image/Map/Yellow.png'
+        a5 = 'Do_an/UI1/Image/Map/red_path.png'
+        a6 = 'Do_an/UI1/Image/Map/yellow_path.png'
         A = [a1,a2,a3,a4,a5,a6]
         Map = ["green","grey_path","water_path","green_path","Gray","Yellow"]
         gameKey = ["path","grey","blue","green","path_2","path_3"]

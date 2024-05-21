@@ -461,18 +461,25 @@ class Game:
         img_path = pygame.transform.scale(img_path, (self.tile, self.tile))
         img_path_4 = pygame.image.load('Do_an/Assets/Background/grey_path.png').convert_alpha()
         img_path_4 = pygame.transform.scale(img_path_4, (self.tile, self.tile))
-        img_path_5 = pygame.image.load('Do_an/Assets/Background/water_path.png').convert_alpha()
+        img_path_5 = pygame.image.load('Do_an/Assets/Background/blue_path.png').convert_alpha()
         img_path_5 = pygame.transform.scale(img_path_5, (self.tile, self.tile))
         img_path_6 = pygame.image.load('Do_an/Assets/Background/green_path.png').convert_alpha()
         img_path_6 = pygame.transform.scale(img_path_6, (self.tile, self.tile))
+        img_path_7 = pygame.image.load('Do_an/Assets/Background/red_path.png').convert_alpha()
+        img_path_7 = pygame.transform.scale(img_path_7, (self.tile, self.tile))
+        img_path_8 = pygame.image.load('Do_an/Assets/Background/yellow_path.png').convert_alpha()
+        img_path_8 = pygame.transform.scale(img_path_8, (self.tile, self.tile))
+        img_path_9 = pygame.image.load('Do_an/Assets/Background/brown_path.png').convert_alpha()
+        img_path_9 = pygame.transform.scale(img_path_9, (self.tile, self.tile))
         img_path_2 = pygame.image.load('Do_an/Assets/Background/Gray.png').convert_alpha()
         img_path_2 = pygame.transform.scale(img_path_2, (40, 40))
         img_path_3 = pygame.image.load('Do_an/Assets/Background/Yellow.png').convert_alpha()
         img_path_3 = pygame.transform.scale(img_path_3, (40, 40))
         img_start = pygame.image.load('Do_an/Assets/Other/Start.png').convert_alpha()
         img_start = pygame.transform.scale(img_start, (self.tile, self.tile))
-        return {'path': img_path, 'path_2': img_path_2,'path_3': img_path_3,
-                'grey': img_path_4, 'blue': img_path_5,  'green': img_path_6, 'start': img_start}
+        return {'path': img_path, 'path_2': img_path_2,'path_3': img_path_3,'grey': img_path_4,
+                'blue': img_path_5,  'green': img_path_6, 'red': img_path_7,'yellow': img_path_8,
+                'brown': img_path_9, 'start': img_start}
     
     def slider(self):
         delay_slider = Slider((650, 320), (200, 30), 0.5, 0, 100)
@@ -1075,6 +1082,7 @@ class Game:
                                     if len(self.file_name) < 8: self.file_name += event.unicode
                         if event.type == pygame.QUIT:
                             running = self.quit_mess(running)
+                            if not running: pygame.quit()
                     
                     if not pause:
                         # upload time
@@ -1208,6 +1216,7 @@ class Game:
                                         self.file_name += event.unicode
                         if event.type == pygame.QUIT:
                             running = self.quit_mess(running)
+                            if not running: pygame.quit()
                                      
                     if not pause:
                         # upload time
@@ -1411,7 +1420,7 @@ class Game:
         pygame.quit()
         
 if __name__ == '__main__':
-    game = Game('easy', 'auto', True, 'Tom', 'grey')
+    game = Game('easy', 'auto', True, 'Tom', 'red')
     game.run()
     # game = Game()
     # if game.load('quan3'):
