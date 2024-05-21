@@ -1325,6 +1325,10 @@ class Game:
 
                     elif menu_state == 'options':                   
                         menu_state = self.options(menu_state)
+                        if self.buttons['chang_alg'].draw(self.screen): # chang_alg
+                            self.sound['ting'].play()
+                            if self.algorithm == 'dfs': self.set_algorithm('bfs')
+                            elif self.algorithm == 'bfs': self.set_algorithm('dfs')
                     
                     elif menu_state == 'sound':
                         menu_state, music_vol, sound_effect_vol = self.sound_scene(menu_state, music_vol, sound_effect_vol)
@@ -1407,7 +1411,7 @@ class Game:
         pygame.quit()
         
 if __name__ == '__main__':
-    game = Game('easy', 'not_auto', True, 'Tom', 'grey')
+    game = Game('easy', 'auto', True, 'Tom', 'grey')
     game.run()
     # game = Game()
     # if game.load('quan3'):
