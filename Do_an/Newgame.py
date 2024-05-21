@@ -54,7 +54,7 @@ class NewGame(QWidget):
         self.difficult = self.difficult_list[self.difficult_index]
         self.difficult_button.setText("Difficult: Easy")
 
-        self.options_list = ["Random","Custom"]
+        self.options_list = ["Random","Not Random"]
         self.option_index = 0
         self.optionKey = [False,True]
         self.option = self.optionKey[self.option_index]
@@ -165,6 +165,7 @@ class NewGame(QWidget):
         self.next_button1.hide()
         self.next_button2.hide()
         self.Player_Label.hide()
+        self.Map_name.hide()
         self.Map_Label.hide()
         self.skin_name.hide()
         self.mode_button.show()
@@ -220,6 +221,10 @@ class NewGame(QWidget):
         self.mode_index = (self.mode_index+1)%2
         self.mode_button.setText("Mode: "+self.mode_list[self.mode_index])
         self.mode = self.mode_key_list[self.mode_index]
+        if(self.mode == "auto"):
+            self.Custom_button.hide()
+        else:
+            self.Custom_button.show()
     def change_diff(self):
         self.difficult_index = (self.difficult_index+1)%3
         self.difficult_button.setText("Difficult: "+self.difficult_list[self.difficult_index])
@@ -243,6 +248,7 @@ class NewGame(QWidget):
         self.skin_name.show()
         self.Player_Label.show()
         self.Map_Label.show()
+        self.Map_name.show()
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     login = NewGame()
