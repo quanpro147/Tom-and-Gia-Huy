@@ -341,7 +341,7 @@ class Player_pro(pygame.sprite.Sprite):
         win.blit(self.sprite, (self.rect.x, self.rect.y))
 
 class Game:
-    def __init__(self, level = None, mode = None, choose = False, player_name = 'Square', map ='grey',user_name = ""):
+    def __init__(self, level = None, mode = None, choose = False, player_name = 'Square', map ='grey', user_name = ""):
         pygame.init()
         pygame.mixer.init()
         pygame.display.set_caption('Maze Game')
@@ -370,6 +370,7 @@ class Game:
         self.delay = 50
         self.is_saved = False
         self.sound = self.sound_effect() 
+        self.user_name = user_name
 
     def button(self):
         # load img
@@ -537,9 +538,9 @@ class Game:
         self.maze.start = self.start
         self.maze.end = self.end
         cur = self.player.row, self.player.col
-        if self.algorithm == 'dfs': 
+        if self.algorithm == 'DFS': 
             hint = dfs(self.maze, cur)
-        elif self.algorithm == 'bfs':
+        elif self.algorithm == 'BFS':
             hint = bfs(self.maze, cur)
         key = pygame.key.get_pressed()
         if self.buttons['hint'].draw(self.screen) or key[pygame.K_h]:
@@ -620,7 +621,7 @@ class Game:
 
     def save(self):
         data = {'level': self.level, 'choose': self.choose, 'mode': self.mode,'maze': self.maze,'alg': self.algorithm,
-                'start': self.start,'end': self.end, 'record': self.record, 'file_name': self.file_name,
+                'start': self.start,'end': self.end, 'record': self.record, 'file_name': self.file_name, 'user': self.user_name,
                 'player': self.player_name, 'completed': self.completed, 'is_saved': True, 'delay': self.delay}
         if self.saveloadmanager.check_file_name(self.file_name):
             self.message('File name has already exist')
@@ -646,7 +647,8 @@ class Game:
             self.player_name = data['player']
             self.completed = data['completed'] 
             self.is_saved = data['is_saved']
-            self.delay = data['delay']   
+            self.delay = data['delay']  
+            self.user_name = data['user'] 
             self.message('Load file succeeded')
             return True
 
@@ -1433,7 +1435,7 @@ class Game:
         pygame.quit()
         
 if __name__ == '__main__':
-    game = Game('easy', 'auto', True, 'Tom', 'brown')
+    game = Game('easy', 'not_auto', True, 'Tom', 'brown')
     game.run()
     # game = Game()
     # if game.load('quan3'):
