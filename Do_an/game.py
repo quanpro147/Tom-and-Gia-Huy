@@ -538,6 +538,7 @@ class Game:
         self.maze.start = self.start
         self.maze.end = self.end
         cur = self.player.row, self.player.col
+        if cur == self.end: return
         if self.algorithm == 'DFS': 
             hint = dfs(self.maze, cur)
         elif self.algorithm == 'BFS':
@@ -795,15 +796,13 @@ class Game:
 
     def play_again(self):  
         self.record = 0
-        self.start, self.end = None, None
+        # self.start, self.end = None, None
         self.set_maze_visit()
-        self.new_game()
         self.transitions()
         self.run()
     
     def play_new(self):
         self.maze = None
-        self.new_game()
         self.record = 0
         self.start, self.end = None, None
         self.transitions()
@@ -1435,7 +1434,7 @@ class Game:
         pygame.quit()
         
 if __name__ == '__main__':
-    game = Game('easy', 'not_auto', True, 'Tom', 'brown')
+    game = Game('easy', 'not_auto', False, 'Tom', 'brown')
     game.run()
     # game = Game()
     # if game.load('quan3'):
