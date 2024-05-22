@@ -154,7 +154,7 @@ class MainWindow(QMainWindow):
         a2 = self.New_Window.mode
         a3 = self.New_Window.option
         a4 = self.New_Window.skin
-        a5 = self.New_Window.PygameKey
+        a5 = self.New_Window.Map
         if(a4 == "Default"):
             a4 = "Square"
         if(a2 == "auto"):

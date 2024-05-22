@@ -341,7 +341,7 @@ class Player_pro(pygame.sprite.Sprite):
         win.blit(self.sprite, (self.rect.x, self.rect.y))
 
 class Game:
-    def __init__(self, level = None, mode = None, choose = False, player_name = 'Square', map ='grey'):
+    def __init__(self, level = None, mode = None, choose = False, player_name = 'Square', map ='grey',user_name = ""):
         pygame.init()
         pygame.mixer.init()
         pygame.display.set_caption('Maze Game')
