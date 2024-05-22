@@ -173,7 +173,7 @@ class NewGame(QWidget):
         self.option_button.show()
         self.Custom_button.show()
     def setMap_List(self):
-        a1 = 'Do_an/UI1/Image/Map/Green.png'
+        a1 = 'Do_an/UI1/Image/Map/brown_path.png'
         a2 = 'Do_an/UI1/Image/Map/grey_path.png'
         a3 = 'Do_an/UI1/Image/Map/blue_path.png'
         a4 = 'Do_an/UI1/Image/Map/green_path.png'
