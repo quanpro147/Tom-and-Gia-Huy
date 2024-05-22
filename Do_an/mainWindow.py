@@ -22,7 +22,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setFixedSize(1000,800)
         self.gameWindow = None
-
+        self.user_name = ""
         #background
         self.background = QLabel(self)
         self.background.setGeometry(QRect(0,0,1000,800))
@@ -89,6 +89,7 @@ class MainWindow(QMainWindow):
 
         # Thực hiện kiểm tra tên người dùng và mật khẩu ở đây
         if check_account(filename, username, password) == 1:
+            self.user_name = username
             self.Login_window.User_name.clear()
             self.Login_window.Password.clear()
             self.stWidget.setCurrentIndex(2)
@@ -158,9 +159,9 @@ class MainWindow(QMainWindow):
         if(a4 == "Default"):
             a4 = "Square"
         if(a2 == "auto"):
-            game = Game(a1,a2,a3,'Square','green')
+            game = Game(a1,a2,a3,'Square','green', self.user_name)
         else:
-            game = Game(a1,a2,a3,a4,a5)
+            game = Game(a1,a2,a3,a4,a5, self.user_name)
         game.run()
         #self.show()
             
