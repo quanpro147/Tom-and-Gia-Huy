@@ -172,7 +172,7 @@ class MainWindow(QMainWindow):
         game = Game()
         
         game.load(item.text())
-        self.Menu_Window.sound.off_volume()
+        self.Menu_Window.off_volume()
         self.close()
         
         game.run()

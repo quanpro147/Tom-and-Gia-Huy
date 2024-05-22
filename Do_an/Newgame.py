@@ -64,12 +64,12 @@ class NewGame(QWidget):
 
 
         self.prew_button1 = QPushButton(self)
-        self.prew_button1.setGeometry(QRect(200,460,30,30))
+        self.prew_button1.setGeometry(QRect(200-50,510+50,30,30))
         self.current_index = 0
         self.prew_button1.clicked.connect(self.change_Player_Prew)
 
         self.next_button1 = QPushButton(self)
-        self.next_button1.setGeometry(QRect(370,460,30,30))
+        self.next_button1.setGeometry(QRect(370-50,510+50,30,30))
         self.next_button1.clicked.connect(self.change_Player_Next)
 
         self.list_image = []
@@ -90,29 +90,29 @@ class NewGame(QWidget):
 
         # display skin
         self.skin_display = QLabel(self)
-        self.skin_display.setGeometry(QRect(200, 250, 200, 200))
+        self.skin_display.setGeometry(QRect(100, 200+50, 300, 300))
         self.skin_display.setStyleSheet("border:2px solid black")
         self.skin_display.setPixmap(QPixmap(self.list_image[0]["path"]))
         #Player_Label
         self.Player_Label = QLabel(self)
-        self.Player_Label.setGeometry(QRect(200,180,200,50))
+        self.Player_Label.setGeometry(QRect(150,130+50,200,50))
         self.Player_Label.setStyleSheet("font: 16pt \"Segoe Print\"")
         self.Player_Label.setAlignment(Qt.AlignCenter)
         self.Player_Label.setText("Player")
         #skin name
         self.skin_name = QLabel(self)
-        self.skin_name.setGeometry(QRect(220,460,160,30))
+        self.skin_name.setGeometry(QRect(220-50,510+50,160,30))
         self.skin_name.setText(self.skin)
         self.skin_name.setStyleSheet((
         "font: 8pt \"Segoe Print\";"))
         self.skin_name.setAlignment(Qt.AlignCenter)
         #Map Display
         self.Map_display = QLabel(self)
-        self.Map_display.setGeometry(QRect(600, 250, 200, 200))
-        self.Map_display.setStyleSheet("border:None")
+        self.Map_display.setGeometry(QRect(600, 200+50, 300, 300))
+        self.Map_display.setStyleSheet("border:1px solid black")
         #Map Label
         self.Map_Label = QLabel(self)
-        self.Map_Label.setGeometry(QRect(600,180,200,50))
+        self.Map_Label.setGeometry(QRect(650,130+50,200,50))
         self.Map_Label.setStyleSheet("font: 16pt \"Segoe Print\"")
         self.Map_Label.setAlignment(Qt.AlignCenter)
         self.Map_Label.setText("Map")
@@ -125,7 +125,7 @@ class NewGame(QWidget):
         self.PygameKey = self.Map_list[self.MapIndex]["gameKey"]
         #Map_name
         self.Map_name = QLabel(self)
-        self.Map_name.setGeometry(QRect(620, 460, 160, 30))
+        self.Map_name.setGeometry(QRect(620+50, 510+50, 160, 30))
         self.Map_name.setText(self.Map)
         self.Map_name.setStyleSheet((
             "font: 8pt \"Segoe Print\";"))
@@ -133,13 +133,13 @@ class NewGame(QWidget):
 
 
         self.prew_button2 = QPushButton(self)
-        self.prew_button2.setGeometry(QRect(600, 460, 30, 30))
+        self.prew_button2.setGeometry(QRect(600+50, 510+50, 30, 30))
 
         self.prew_button2.clicked.connect(self.change_Map_Prew)
         self.prew_button2.setIcon(QIcon1)
 
         self.next_button2 = QPushButton(self)
-        self.next_button2.setGeometry(QRect(770, 460, 30, 30))
+        self.next_button2.setGeometry(QRect(770+50, 510+50, 30, 30))
         self.next_button2.clicked.connect(self.change_Map_Next)
         self.next_button2.setIcon(QIcon2)
         
