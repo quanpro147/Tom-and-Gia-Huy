@@ -64,12 +64,12 @@ class NewGame(QWidget):
 
 
         self.prew_button1 = QPushButton(self)
-        self.prew_button1.setGeometry(QRect(200,460,30,30))
+        self.prew_button1.setGeometry(QRect(200-50,530,30,30))
         self.current_index = 0
         self.prew_button1.clicked.connect(self.change_Player_Prew)
 
         self.next_button1 = QPushButton(self)
-        self.next_button1.setGeometry(QRect(370,460,30,30))
+        self.next_button1.setGeometry(QRect(370-50,530,30,30))
         self.next_button1.clicked.connect(self.change_Player_Next)
 
         self.list_image = []
@@ -90,29 +90,28 @@ class NewGame(QWidget):
 
         # display skin
         self.skin_display = QLabel(self)
-        self.skin_display.setGeometry(QRect(200, 250, 200, 200))
+        self.skin_display.setGeometry(QRect(100, 220, 300, 300))
         self.skin_display.setStyleSheet("border:2px solid black")
         self.skin_display.setPixmap(QPixmap(self.list_image[0]["path"]))
         #Player_Label
         self.Player_Label = QLabel(self)
-        self.Player_Label.setGeometry(QRect(200,180,200,50))
+        self.Player_Label.setGeometry(QRect(150,150,200,50))
         self.Player_Label.setStyleSheet("font: 16pt \"Segoe Print\"")
         self.Player_Label.setAlignment(Qt.AlignCenter)
         self.Player_Label.setText("Player")
         #skin name
         self.skin_name = QLabel(self)
-        self.skin_name.setGeometry(QRect(220,460,160,30))
+        self.skin_name.setGeometry(QRect(220-30,530,120,30))
         self.skin_name.setText(self.skin)
-        self.skin_name.setStyleSheet((
-        "font: 8pt \"Segoe Print\";"))
+        self.skin_name.setStyleSheet("font: 8pt \"Segoe Print\";")
         self.skin_name.setAlignment(Qt.AlignCenter)
         #Map Display
         self.Map_display = QLabel(self)
-        self.Map_display.setGeometry(QRect(600, 250, 200, 200))
-        self.Map_display.setStyleSheet("border:None")
+        self.Map_display.setGeometry(QRect(600, 220, 300, 300))
+        self.Map_display.setStyleSheet("border:1px solid black")
         #Map Label
         self.Map_Label = QLabel(self)
-        self.Map_Label.setGeometry(QRect(600,180,200,50))
+        self.Map_Label.setGeometry(QRect(650,150,200,50))
         self.Map_Label.setStyleSheet("font: 16pt \"Segoe Print\"")
         self.Map_Label.setAlignment(Qt.AlignCenter)
         self.Map_Label.setText("Map")
@@ -122,24 +121,23 @@ class NewGame(QWidget):
         self.setMap_List()
         self.Map = self.Map_list[self.MapIndex]["Map"]
         self.Map_display.setPixmap(QPixmap(self.Map_list[self.MapIndex]["path"]))
-        self.PygameKey = self.Map_list[self.MapIndex]["gameKey"]
         #Map_name
         self.Map_name = QLabel(self)
-        self.Map_name.setGeometry(QRect(620, 460, 160, 30))
+        self.Map_name.setGeometry(QRect(620+50+20, 530, 120, 30))
         self.Map_name.setText(self.Map)
-        self.Map_name.setStyleSheet((
-            "font: 8pt \"Segoe Print\";"))
+        self.Map_name.setStyleSheet(
+            "font: 8pt \"Segoe Print\";")
         self.Map_name.setAlignment(Qt.AlignCenter)
 
 
         self.prew_button2 = QPushButton(self)
-        self.prew_button2.setGeometry(QRect(600, 460, 30, 30))
+        self.prew_button2.setGeometry(QRect(600+50, 530, 30, 30))
 
         self.prew_button2.clicked.connect(self.change_Map_Prew)
         self.prew_button2.setIcon(QIcon1)
 
         self.next_button2 = QPushButton(self)
-        self.next_button2.setGeometry(QRect(770, 460, 30, 30))
+        self.next_button2.setGeometry(QRect(770+50, 530, 30, 30))
         self.next_button2.clicked.connect(self.change_Map_Next)
         self.next_button2.setIcon(QIcon2)
         
@@ -173,16 +171,16 @@ class NewGame(QWidget):
         self.option_button.show()
         self.Custom_button.show()
     def setMap_List(self):
-        a1 = 'Do_an/UI1/Image/Map/brown_path.png'
-        a2 = 'Do_an/UI1/Image/Map/grey_path.png'
-        a3 = 'Do_an/UI1/Image/Map/blue_path.png'
-        a4 = 'Do_an/UI1/Image/Map/green_path.png'
-        a5 = 'Do_an/UI1/Image/Map/red_path.png'
-        a6 = 'Do_an/UI1/Image/Map/yellow_path.png'
+        a1 = 'Do_an/UI1/Image/Map/green.png'
+        a2 = 'Do_an/UI1/Image/Map/grey.png'
+        a3 = 'Do_an/UI1/Image/Map/blue.png'
+        a4 = 'Do_an/UI1/Image/Map/brown.png'
+        a5 = 'Do_an/UI1/Image/Map/red.png'
+        a6 = 'Do_an/UI1/Image/Map/Yellow.png'
         A = [a1,a2,a3,a4,a5,a6]
-        Map = ["green","grey_path","water_path","green_path","Gray","Yellow"]
-        gameKey = ["path","grey","blue","green","path_2","path_3"]
-        self.Map_list = [{"path":A[i],"Map":Map[i],"gameKey":gameKey[i]} for i in range(6)]
+        Map = ["green","grey","blue","brown","red","yellow"]
+
+        self.Map_list = [{"path":A[i],"Map":Map[i]} for i in range(6)]
     def setList_image(self):
         a1 = "Do_an/UI1/Image/Player/square.png"
         a2 =  "Do_an/UI1/Image/Player/MaskDude.png"
@@ -208,14 +206,13 @@ class NewGame(QWidget):
         self.Map_display.setPixmap(QPixmap(self.Map_list[self.MapIndex]["path"]))
         self.Map = self.Map_list[self.MapIndex]["Map"]
         self.Map_name.setText(self.Map)
-        self.PygameKey = self.Map_list[self.MapIndex]["gameKey"]
+
 
     def change_Map_Next(self):
         self.MapIndex = (self.MapIndex+1)%6
         self.Map_display.setPixmap(QPixmap(self.Map_list[self.MapIndex]["path"]))
         self.Map = self.Map_list[self.MapIndex]["Map"]
         self.Map_name.setText(self.Map)
-        self.PygameKey = self.Map_list[self.MapIndex]["gameKey"]
 
     def change_mode(self):
         self.mode_index = (self.mode_index+1)%2
@@ -254,5 +251,3 @@ if __name__ == "__main__":
     login = NewGame()
     login.show()
     sys.exit(app.exec_())
-
-
