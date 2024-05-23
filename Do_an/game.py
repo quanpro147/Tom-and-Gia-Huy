@@ -341,7 +341,7 @@ class Player_pro(pygame.sprite.Sprite):
         win.blit(self.sprite, (self.rect.x, self.rect.y))
 
 class Game:
-    def __init__(self, level = None, mode = None, choose = False, player_name = 'Square', map ='grey', user_name = ""):
+    def __init__(self, level = None, mode = None, choose = False, player_name = 'Square', map ='grey', user_name = ''):
         pygame.init()
         pygame.mixer.init()
         pygame.display.set_caption('Maze Game')
@@ -358,7 +358,7 @@ class Game:
         self.algorithm = 'DFS'
         self.tile = None
         self.font = pygame.font.Font('freesansbold.ttf', 32)
-        self.font_mini = pygame.font.Font('freesansbold.ttf', 20)
+        self.font_mini = pygame.font.Font('freesansbold.ttf', 16)
         self.buttons = self.button()
         self.start, self.end = None, None
         self.record = 0
@@ -716,14 +716,15 @@ class Game:
         self.draw_maze()
         
     def draw_rank(self, games):
-        rank_bg_img = pygame.image.load('Do_an/Assets/Background/rank_bg.jpg').convert_alpha()
+        rank_bg_img = pygame.image.load('Do_an/Assets/Background/leader_board.png').convert_alpha()
         rank_bg_img = pygame.transform.scale(rank_bg_img, (300, 400))
         self.screen.blit(rank_bg_img, (850, 250))
         n = min(5, len(games))
         for i in range(n): 
-            self.draw_text_mini(games[i]['file_name'], 'black', 910, 450 + i*43)
-            self.draw_text_mini(games[i]['level'], 'black', 1000, 450 + i*43)
-            self.draw_text_mini(self.record_text_mini(games[i]['record']), 'black', 1080, 450 + i*43)
+            self.draw_text_mini(games[i]['user'], 'black', 895, 450 + i*43)
+            self.draw_text_mini(games[i]['file_name'], 'black', 980, 450 + i*43)
+            self.draw_text_mini(games[i]['level'].upper(), 'red', 1070, 362)
+            self.draw_text_mini(self.record_text_mini(games[i]['record']), 'black', 1060, 450 + i*43)
   
     def draw_choose_cell(self, cell_choose):
         if cell_choose is None: return 
@@ -777,13 +778,13 @@ class Game:
         
     def ranking(self, games):    
         # tra ve hang cua game hien tai
-        if games == []: return [{'file_name': 'You', 'record': self.record, 'level': self.level}]
+        if games == []: return [{'file_name': 'You', 'record': self.record, 'level': self.level, 'user': self.user_name}]
         if self.record > games[-1]['record']:
-            games.append({'file_name': 'You', 'record': self.record, 'level': self.level})
+            games.append({'file_name': 'You', 'record': self.record, 'level': self.level, 'user': self.user_name})
         else:
             for i in range(len(games)):
                 if self.record <= games[i]['record']:
-                    games.insert(i, {'file_name': 'You', 'record': self.record, 'level': self.level})
+                    games.insert(i, {'file_name': 'You', 'record': self.record, 'level': self.level, 'user': self.user_name})
                     break
         return games
 
@@ -796,7 +797,6 @@ class Game:
 
     def play_again(self):  
         self.record = 0
-        # self.start, self.end = None, None
         self.set_maze_visit()
         self.transitions()
         self.run()
@@ -1283,7 +1283,6 @@ class Game:
                             time.sleep(0.001*self.delay)
                     self.update()
             
-       
         elif self.mode == 'not_auto': # che do nguoi choi
             # player move time var
             if self.level != 'hard': time_move = Timer(20 + self.delay*0.9)
