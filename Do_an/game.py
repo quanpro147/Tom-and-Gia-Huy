@@ -8,6 +8,7 @@ from os import listdir
 from os.path import isfile, join
 from tkinter import *
 from tkinter import messagebox
+import json
 
 class Button:
 	def __init__(self, x, y, image, scale):
@@ -103,9 +104,9 @@ class saveloadsystem:
         self.file_extension = file_extension
         self.folder = folder
     
-    def save_game(self, name_file, game):
+    def save_game(self, name_file, game, user_name):
         """ Ham luu maze voi ten file vao game_manager """
-        self.add_file_name(name_file)
+        self.add_file_name(name_file, user_name)
         data = self.process_game_to_save(name_file, game)
         with open(self.folder + self.file_extension, 'wb+') as f:          
             pickle.dump(data, f)
@@ -138,32 +139,29 @@ class saveloadsystem:
             # raise error
             return False
         
-    def add_file_name(self, name_file):
-        with open('Do_an/SaveLoad/saveload.txt', 'a') as f:
-            f.write(name_file + '\n')
+    def add_file_name(self, name_file, user_name):
+        if not self.check_file_name(name_file):
+            with open('Do_an/SaveLoad/saveload.json', "r") as f_out:
+                data = json.load(f_out)
+            data['user'].append({"username": user_name, "file": name_file})
+            with open('Do_an/SaveLoad/saveload.json', "w") as f_in:
+                json.dump(data, f_in, indent=4)
 
     def check_file_name(self, name_file):
-        with open('Do_an/SaveLoad/saveload.txt', 'r') as f:
-            name_files = f.readlines()
-            for _name_file in name_files:
-                _name_file = _name_file[:-1]
-                if name_file == _name_file:
-                    return True
+        with open('Do_an/SaveLoad/saveload.json', 'r') as f:
+            data = json.load(f)
+            for file in data['user']:
+                if file['file'] == name_file: return True
         return False
-    
-    def readfile(path):
-        #doc cac file game co trong file txt
-        with open(path, 'r') as f:
-            l = f.readlines()
-            return [s.strip() for s in l]
         
     def delete_file(self, name_file):
         # xoa ten file trong file txt
         with open('Do_an/SaveLoad/saveload.txt', 'r') as f:
-            name_files = f.readlines()
-            name_files.remove(name_file+'\n')
+            data = json.load(f)
+            for i in range(len(data['user'])):
+                if data['user'][i]['file'] == name_file: data['user'].remove(data['user'][i])
         with open('Do_an/SaveLoad/saveload.txt', 'w') as f:
-            f.writelines(name_files)
+            json.dump(data, f, indent=4)
         # xoa data cua file
         game_manager = self.load_data()
         game_manager.pop(name_file)
@@ -171,6 +169,11 @@ class saveloadsystem:
             game_manager = None
         with open(self.folder + self.file_extension, 'wb') as f:
             pickle.dump(game_manager, f)
+        
+    def readfile(self):
+        with open('Do_an/SaveLoad/saveload.json', 'r') as f:
+            data = json.load(f)
+            return data['user']
 
 class Slider:
     def __init__(self, pos: tuple, size: tuple, initial_val: float, min: int, max: int) -> None:
@@ -627,7 +630,7 @@ class Game:
         if self.saveloadmanager.check_file_name(self.file_name):
             self.message('File name has already exist')
         else:
-            self.saveloadmanager.save_game(self.file_name, data)
+            self.saveloadmanager.save_game(self.file_name, data, self.user_name)
             self.message('Save file succeeded')
 
     def load(self, file_name):
