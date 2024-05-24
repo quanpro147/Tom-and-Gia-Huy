@@ -1436,7 +1436,7 @@ class Game:
         pygame.quit()
         
 if __name__ == '__main__':
-    game = Game('easy', 'not_auto', False, 'Tom', 'brown')
+    game = Game('easy', 'auto', True, 'Tom', 'green')
     game.run()
     # game = Game()
     # if game.load('quan3'):
