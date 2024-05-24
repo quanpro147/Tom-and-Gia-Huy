@@ -98,6 +98,7 @@ class MainWindow(QMainWindow):
         # Thực hiện kiểm tra tên người dùng và mật khẩu ở đây
         if check_account(filename, username, password) == 1:
             self.user_name = username
+            self.Load_Window.user_name = username
             self.Login_window.User_name.clear()
             self.Login_window.Password.clear()
             self.stWidget.setCurrentIndex(2)
@@ -185,12 +186,13 @@ class MainWindow(QMainWindow):
         item = self.Load_Window.listGame.item(currentIndex)
         game = Game()
         
-        game.load(item.text())
-        self.Menu_Window.sound.off_volume()
-        self.close()
-        
-        game.run()
-        
+        if game.load(item.text()):
+            if game.user_name == self.user_name:
+                self.Menu_Window.sound.off_volume()
+                self.close()
+                
+                game.run()
+            
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     login = MainWindow()

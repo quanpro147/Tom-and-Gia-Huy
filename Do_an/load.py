@@ -15,7 +15,7 @@ class LoadWidget(QWidget):
         #Label
         self.Label = QLabel(self)
         self.Label.setGeometry(QRect(300,100,400,100))
-        
+        self.user_name = ''
         self.Label.setStyleSheet("border:2px solid black;font: bold 40pt \"Freestyle Script\"")
         self.Label.setAlignment(Qt.AlignCenter)
         self.Label.setText("LOAD GAME")
@@ -46,7 +46,9 @@ class LoadWidget(QWidget):
 
     def loadfilegame(self):
         self.oldgame = saveloadsystem.readfile(self.path)
-        self.listGame.addItems(self.oldgame)
+        for game in self.oldgame:
+            if game['username'] == self.user_name:
+                self.listGame.addItems(game['file'])
 
 
 
