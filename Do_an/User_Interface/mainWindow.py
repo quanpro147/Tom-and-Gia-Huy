@@ -182,13 +182,13 @@ class MainWindow(QMainWindow):
         currentIndex = self.Load_Window.listGame.currentRow()
         
         item = self.Load_Window.listGame.item(currentIndex)
-        
-        
+ 
         if item is not None:
+            game = Game()   
+            game.load(item.text())
             if game.user_name == self.user_name:
                 self.Menu_Window.off_volume()
-                self.close()   
-                game = Game()           
+                self.stWidget.setCurrentIndex(2)
                 game.run()
             
 
