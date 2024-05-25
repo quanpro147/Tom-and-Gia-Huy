@@ -382,7 +382,6 @@ class Game:
         load_img = pygame.image.load('Do_an/button/LoadButton.png').convert_alpha()
         menu_img = pygame.image.load('Do_an/button/MenuButton.png').convert_alpha()
         options_img = pygame.image.load('Do_an/button/OptionsButton.png').convert_alpha()
-        quit_img = pygame.image.load('Do_an/button/QuitButton.png').convert_alpha()
         change_alg_img = pygame.image.load('Do_an/button/Change_AlgButton.png').convert_alpha()
         back_img = pygame.image.load('Do_an/button/BackButton.png').convert_alpha()
         play_again_img = pygame.image.load('Do_an/button/Play_againButton.png').convert_alpha()
@@ -395,20 +394,18 @@ class Game:
         mute_img = pygame.image.load('Do_an/button/mute_IG.png').convert_alpha()
         hint_img = pygame.image.load('Do_an/button/hint_IG.png').convert_alpha()
         vol_on_img = pygame.image.load('Do_an/button/volume_on.png').convert_alpha()
-        vol_off_img = pygame.image.load('Do_an/button/volume_off.png').convert_alpha()
         sound_img = pygame.image.load('Do_an/button/SoundButton.png').convert_alpha()
         newgame_img = pygame.image.load('Do_an/button/NewGame.png').convert_alpha()
         saveFrame_img = pygame.image.load('Do_an/button/saveFrame.png').convert_alpha()
 
-        resume_button = Button(500, 320, resume_img, 1)
+        resume_button = Button(500, 360, resume_img, 1)
         load_button = Button(500, 400, load_img, 1)
-        menu_button = Button(500, 240, menu_img, 1)
-        options_button = Button(500, 480, options_img, 1)
-        quit_button = Button(500, 560, quit_img, 1)
+        menu_button = Button(500, 260, menu_img, 1)
+        options_button = Button(500, 560, options_img, 1)
         change_alg_button = Button(435, 315, change_alg_img, 1)
         back_button = Button(530, 600, back_img, 1)
         play_again_button = Button(900, 450, play_again_img, 1)
-        save_button_1 = Button(500, 400, save_img, 1)
+        save_button_1 = Button(500, 460, save_img, 1)
         save_button_2 = Button(900, 500, save_img, 1)
         accept_button_1 = Button(600, 350, accept_img, 1)
         cancel_button_1 = Button(430, 350, cancel_img, 1)
@@ -422,10 +419,8 @@ class Game:
         mute_button = Button(980, 700, mute_img, 1)
         hint_button = Button(1100, 700, hint_img, 1)
         vol_on_button = Button(980, 700, vol_on_img, 1)
-        vol_off_button = Button(980, 700, vol_off_img, 1)
         sound_button = Button(520, 380, sound_img, 1)
         menu_button_2 = Button(900, 550, menu_img, 1)
-        quit_button_2 = Button(900, 600, quit_img, 1)
         newgame_button = Button(900, 400, newgame_img, 1)
         saveFrame = Button(230,420,saveFrame_img,1)
 
@@ -433,7 +428,6 @@ class Game:
                 'load': load_button,
                 'main_menu': menu_button,
                 'options': options_button,
-                'quit': quit_button,
                 'chang_alg': change_alg_button,
                 'back': back_button,
                 'play_again': play_again_button,
@@ -451,10 +445,8 @@ class Game:
                 'mute' : mute_button,
                 'hint' : hint_button,
                 'vol_on': vol_on_button,
-                'vol_off': vol_off_button,
                 'sound': sound_button,
                 'main_menu_2': menu_button_2,
-                'quit_2': quit_button_2,
                 'newgame_button' : newgame_button,
                 'saveFrame': saveFrame
                 }
@@ -858,15 +850,17 @@ class Game:
             self.sound['ting'].play()
             menu_state = 'save_2'
         if self.buttons['main_menu_2'].draw(self.screen): # resume
-            self.sound['ting'].play()                      
+            self.sound['ting'].play()
+            pause = False
+            running = self.quit_mess(running)                      
         if self.buttons['newgame_button'].draw(self.screen): # save
             self.sound['ting'].play()
             running = False
             self.play_new()       
-        if self.buttons['quit_2'].draw(self.screen): # resume
-            self.sound['ting'].play()
-            pause = False
-            running = self.quit_mess(running)
+        #if self.buttons['quit_2'].draw(self.screen): # resume
+        #    self.sound['ting'].play()
+        #    pause = False
+        #    running = self.quit_mess(running)
         return menu_state, pause, running
 
     def save_1(self, menu_state, user_input): 
@@ -893,7 +887,7 @@ class Game:
         self.buttons['play_again'].draw(self.screen)
         self.buttons['save_2'].draw(self.screen)
         self.buttons['main_menu_2'].draw(self.screen)
-        self.buttons['quit_2'].draw(self.screen)
+        #self.buttons['quit_2'].draw(self.screen)
         self.buttons['newgame_button'].draw(self.screen)
         self.draw_text('Enter file name: {}'.format(self.file_name), 'black', 250, 510)
         if self.buttons['accept_2'].draw(self.screen):
@@ -1050,12 +1044,13 @@ class Game:
                                 menu_state = 'save_1'
                             if self.buttons['main_menu'].draw(self.screen): # main_menu
                                 self.sound['ting'].play()
+                                running, running_dfs = self.quit_mess(running, running_dfs)
                             if self.buttons['options'].draw(self.screen): # options
                                 self.sound['ting'].play()
                                 menu_state = 'options'
-                            if self.buttons['quit'].draw(self.screen): # quit 
-                                self.sound['ting'].play()                              
-                                running, running_dfs = self.quit_mess(running, running_dfs)
+                            #if self.buttons['quit'].draw(self.screen): # quit 
+                            #    self.sound['ting'].play()                              
+                            #    running, running_dfs = self.quit_mess(running, running_dfs)
 
                         elif menu_state == 'options':
                             menu_state = self.options(menu_state)
@@ -1188,14 +1183,13 @@ class Game:
                                 menu_state = 'save_1'
                             if self.buttons['main_menu'].draw(self.screen): # main_menu
                                 self.sound['ting'].play()
-                                pass
+                                running, running_bfs = self.quit_mess(running, running_bfs)
                             if self.buttons['options'].draw(self.screen): # options
                                 self.sound['ting'].play()
                                 menu_state = 'options'
-                            if self.buttons['quit'].draw(self.screen): # quit
-                                self.sound['ting'].play()
-                                running, running_bfs = self.quit_mess(running, running_bfs)
-                                
+                            #if self.buttons['quit'].draw(self.screen): # quit
+                            #    self.sound['ting'].play()
+                            #    running, running_bfs = self.quit_mess(running, running_bfs)
                         elif menu_state == 'save1':
                             menu_state, user_input = self.save_1(menu_state, user_input)
 
@@ -1347,11 +1341,12 @@ class Game:
                             menu_state = 'save_1'                        
                         if self.buttons['main_menu'].draw(self.screen): # main_menu
                             self.sound['ting'].play()
+                            running = self.quit_mess(running) 
                         if self.buttons['options'].draw(self.screen): # options
                             self.sound['ting'].play()
                             menu_state = 'options'
-                        if self.buttons['quit'].draw(self.screen): # quit
-                            running = self.quit_mess(running)                     
+                        #if self.buttons['quit'].draw(self.screen): # quit
+                        #    running = self.quit_mess(running)                     
 
                     elif menu_state == 'options':                   
                         menu_state = self.options(menu_state)
