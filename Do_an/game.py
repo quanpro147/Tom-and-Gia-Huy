@@ -1352,11 +1352,8 @@ class Game:
                         menu_state = self.options(menu_state)
                         if self.buttons['chang_alg'].draw(self.screen): # chang_alg
                             self.sound['ting'].play()
-                            self.set_algorithm('DFS') 
-                            running_dfs = True
-                            running_bfs = False
-                            tmp_start = cur_cell
-                            self.set_maze_visit()
+                            if self.algorithm == 'DFS': self.set_algorithm('BFS') 
+                            else: self.set_algorithm('DFS')
                                              
                     elif menu_state == 'sound':
                         menu_state, music_vol, sound_effect_vol = self.sound_scene(menu_state, music_vol, sound_effect_vol)
