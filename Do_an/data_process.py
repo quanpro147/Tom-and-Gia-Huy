@@ -1,5 +1,5 @@
 import json
-
+import os
 #Các hàm quản lí tài khoản người dùng
 def load_data(file_name):
     with open(file_name, "r") as file:
@@ -20,3 +20,12 @@ def add_user(file_name, username, password):
     data = load_data(file_name)
     data["users"].append({"username": username, "password": password})
     save_data(data, file_name)
+def loadGame(user_name):
+    with open(os.path.join('Do_an', 'SaveLoad', 'loadGame.json'), mode='r', encoding='utf8') as file:
+        data = json.load(file)
+        if(data != []):
+            gameLoad = []
+            for acc in data:
+                if(acc['username'] == user_name):
+                    gameLoad.append(acc['username'])
+            return gameLoad

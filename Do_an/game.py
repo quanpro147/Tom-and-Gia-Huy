@@ -8,7 +8,7 @@ from os import listdir
 from os.path import isfile, join
 from tkinter import *
 from tkinter import messagebox
-
+import json
 class Button:
 	def __init__(self, x, y, image, scale):
 		width = image.get_width()
@@ -142,13 +142,13 @@ class saveloadsystem:
         with open('Do_an/SaveLoad/saveload.txt', 'a') as f:
             f.write(name_file + '\n')
 
-    def check_file_name(self, name_file):
-        with open('Do_an/SaveLoad/saveload.txt', 'r') as f:
-            name_files = f.readlines()
-            for _name_file in name_files:
-                _name_file = _name_file[:-1]
-                if name_file == _name_file:
-                    return True
+    def check_file_name(self, file_name):
+        with open('Do_an/SaveLoad/loadGame.json', 'r') as f:
+            data = json.load(f)
+            if(data != []):
+                for acc in data:
+                    if(acc['game'] == file_name):
+                        return True
         return False
     
     def readfile(path):
@@ -627,6 +627,12 @@ class Game:
         if self.saveloadmanager.check_file_name(self.file_name):
             self.message('File name has already exist')
         else:
+            with open('Do_an/SaveLoad/loadGame.json',mode = 'r') as File:
+                data = json.load(File)
+            with open('Do_an/SaveLoad/loadGame.json',mode = 'w') as File:
+                newData = {'game':self.file_name,'username':self.user_name}
+                data.append(newData)
+                json.dump(data,File,indent= 4)
             self.saveloadmanager.save_game(self.file_name, data)
             self.message('Save file succeeded')
 

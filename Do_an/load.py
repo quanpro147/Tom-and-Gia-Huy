@@ -6,12 +6,14 @@ from PyQt5.QtWidgets import*
 from PyQt5.QtCore import *
 from PyQt5 import QtGui,QtCore
 from PyQt5.QtGui import *
+from data_process import *
 from game import *
 import sys
 class LoadWidget(QWidget):
     def __init__(self):
         super().__init__()
         self.setFixedSize(1000,800)
+        self.user_name =""
         #Label
         self.Label = QLabel(self)
         self.Label.setGeometry(QRect(300,100,400,100))
@@ -45,8 +47,9 @@ class LoadWidget(QWidget):
 
 
     def loadfilegame(self):
-        self.oldgame = saveloadsystem.readfile(self.path)
-        self.listGame.addItems(self.oldgame)
+        self.oldgame = loadGame(self.user_name)
+        if(self.oldgame is not None):
+            self.listGame.addItems(self.oldgame)
 
 
 

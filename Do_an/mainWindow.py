@@ -91,6 +91,9 @@ class MainWindow(QMainWindow):
         if check_account(filename, username, password) == 1:
             self.Login_window.User_name.clear()
             self.Login_window.Password.clear()
+            self.Load_Window.user_name = username
+            self.Load_Window.listGame.clear()
+            self.Load_Window.loadfilegame()
             self.stWidget.setCurrentIndex(2)
             self.Menu_Window.change_Vol()
         else:
