@@ -93,6 +93,7 @@ class MainWindow(QMainWindow):
             self.Load_Window.user_name = username
             self.Login_window.User_name.clear()
             self.Login_window.Password.clear()
+            self.Load_Window.loadfilegame()
             self.stWidget.setCurrentIndex(2)
             self.Menu_Window.change_Vol()
         else:
@@ -175,9 +176,8 @@ class MainWindow(QMainWindow):
         
         if game.load(item.text()):
             if game.user_name == self.user_name:
-                self.Menu_Window.sound.off_volume()
-                self.close()
-                
+                self.Menu_Window.off_volume()
+                self.close()              
                 game.run()
             
 if __name__ == "__main__":

@@ -374,6 +374,7 @@ class Game:
         self.is_saved = False
         self.sound = self.sound_effect() 
         self.user_name = user_name
+        self.cur_pos = None
 
     def button(self):
         # load img
@@ -618,15 +619,18 @@ class Game:
             self.maze.end = self.end
         else:
             self.start, self.end = self.maze.start, self.maze.end
+        if self.cur_pos is None: self.cur_pos = self.start
         
     def update(self):
         pygame.display.update()
         self.clock.tick(60)
 
     def save(self):
+        self.cur_pos = self.player.row, self.player.col
         data = {'level': self.level, 'choose': self.choose, 'mode': self.mode,'maze': self.maze,'alg': self.algorithm,
                 'start': self.start,'end': self.end, 'record': self.record, 'file_name': self.file_name, 'user': self.user_name,
-                'player': self.player_name, 'completed': self.completed, 'is_saved': True, 'delay': self.delay}
+                'player': self.player_name,'map': self.map, 'completed': self.completed, 'is_saved': True, 'delay': self.delay,
+                'cur_pos': self.cur_pos}
         if self.saveloadmanager.check_file_name(self.file_name):
             self.message('File name has already exist')
         else:
@@ -643,6 +647,7 @@ class Game:
             self.mode = data['mode']
             self.choose = data['choose']
             self.maze = data['maze']
+            self.map = data['map']
             self.algorithm = data['alg']
             self.start = data['start']
             self.end = data['end']
@@ -653,6 +658,7 @@ class Game:
             self.is_saved = data['is_saved']
             self.delay = data['delay']  
             self.user_name = data['user'] 
+            self.cur_pos = data['cur_pos']
             self.message('Load file succeeded')
             return True
 
@@ -906,15 +912,15 @@ class Game:
     # Game funtions 
     def set_player(self, name):
         if name == 'Frog': 
-            self.player = Player_pro(self.start[1]*self.tile, self.start[0]*self.tile, self.tile, 'Frog')
+            self.player = Player_pro(self.cur_pos[1]*self.tile, self.cur_pos[0]*self.tile, self.tile, 'Frog')
         elif name == 'Blueman': 
-            self.player = Player_pro(self.start[1]*self.tile, self.start[0]*self.tile, self.tile, 'Blueman')
+            self.player = Player_pro(self.cur_pos[1]*self.tile, self.cur_pos[0]*self.tile, self.tile, 'Blueman')
         elif name == 'Tom': 
-            self.player = Player_pro(self.start[1]*self.tile, self.start[0]*self.tile, self.tile, 'Tom')
+            self.player = Player_pro(self.cur_pos[1]*self.tile, self.cur_pos[0]*self.tile, self.tile, 'Tom')
         elif name == 'MaskDude':
-            self.player = Player_pro(self.start[1]*self.tile, self.start[0]*self.tile, self.tile, 'MaskDude')
+            self.player = Player_pro(self.cur_pos[1]*self.tile, self.cur_pos[0]*self.tile, self.tile, 'MaskDude')
         else: 
-            self.player = Player(self.start[0], self.start[1], self.tile)
+            self.player = Player(self.cur_pos[0], self.cur_pos[1], self.tile)
         
     def set_maze_visit(self):
         for i in range(self.maze.num_rows):
@@ -983,7 +989,8 @@ class Game:
                     if event.type == pygame.QUIT:
                         running = self.quit_mess(running)   
                         if not running: pygame.quit()            
-                self.update()   
+                self.update()  
+            self.cur_pos = self.start 
         self.transitions()
         # character
         self.set_player(self.player_name)
@@ -1399,6 +1406,7 @@ class Game:
                             self.handle_move_pro()                                    
                             time_move.activate()
                     if (self.player.row, self.player.col) == end:
+                        self.cur_pos = self.end
                         self.completed = True
                         self.record = _time
                         pause = True
@@ -1436,8 +1444,8 @@ class Game:
         pygame.quit()
         
 if __name__ == '__main__':
-    game = Game('easy', 'auto', True, 'Tom', 'green')
-    game.run()
-    # game = Game()
-    # if game.load('quan3'):
-    #     game.run()
+    # game = Game('easy', 'not_auto', True, 'Tom', 'green')
+    # game.run()
+    game = Game()
+    if game.load('test'):
+        game.run()

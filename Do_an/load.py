@@ -48,7 +48,7 @@ class LoadWidget(QWidget):
         self.oldgame = saveloadsystem.readfile(self.path)
         for game in self.oldgame:
             if game['username'] == self.user_name:
-                self.listGame.addItems(game['file'])
+                self.listGame.addItem(game['file'])
 
 
 
