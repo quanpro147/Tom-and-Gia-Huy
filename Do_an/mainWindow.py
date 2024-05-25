@@ -11,6 +11,7 @@ from login import LoginWidget
 from register import RegisterWidget
 from menu import MenuWidget
 from load import LoadWidget
+from Help import HelpWidget
 from about import AboutWidget
 from music import Sound
 from data_process import check_account,add_user
@@ -40,6 +41,8 @@ class MainWindow(QMainWindow):
         self.Load_Window = LoadWidget()
         #About_Window
         self.About_Window = AboutWidget()
+        #Help_window
+        self.Help_Window = HelpWidget()
         # Play
         self.New_Window = NewGame()
         self.stWidget.addWidget(self.Login_window)
@@ -48,6 +51,7 @@ class MainWindow(QMainWindow):
         self.stWidget.addWidget(self.Load_Window)
         self.stWidget.addWidget(self.About_Window)
         self.stWidget.addWidget(self.New_Window)
+        self.stWidget.addWidget(self.Help_Window)
         self.stWidget.setCurrentIndex(0)
         #setup Sound
         self.sound = Sound()
@@ -62,10 +66,14 @@ class MainWindow(QMainWindow):
         self.Menu_Window.load_button.clicked.connect(self.Load)
         #menu -> about
         self.Menu_Window.about_button.clicked.connect(self.about)
+        #menu -> help
+        self.Menu_Window.help_button.clicked.connect(self.help)
         # load -> menu
         self.Load_Window.Back_Button.clicked.connect(self.back)
         #about -> menu
         self.About_Window.Back_Button.clicked.connect(self.back)
+        #help -> menu
+        self.Help_Window.Back_Button.clicked.connect(self.back)
         #Newgame -> Menu
         self.New_Window.BackButton.clicked.connect(self.back)
         #Menu -> NewGame
@@ -120,6 +128,11 @@ class MainWindow(QMainWindow):
         
         self.stWidget.setCurrentIndex(4)
 
+    def help(self):
+        self.sound.clickSound()
+        
+        self.stWidget.setCurrentIndex(6)
+#
     def back(self):
         self.sound.clickSound()
         if(self.New_Window.Custom):
@@ -152,7 +165,7 @@ class MainWindow(QMainWindow):
     def play(self):
         self.Menu_Window.off_volume()
         #self.close()
-        self.close()
+        #self.close()
         a1 = self.New_Window.difficult
         a2 = self.New_Window.mode
         a3 = self.New_Window.option

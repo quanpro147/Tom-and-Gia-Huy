@@ -39,7 +39,8 @@ class AboutWidget(QWidget):
         self.Label4.setStyleSheet("font: bold 16pt \"Constantia\"")
         #Label 5
         self.Label5 = QLabel(self)
-        self.Label5.setGeometry(QRect(260, 520, 480, 60))
+        self.Label5.setGeometry(QRect(270, 520, 480, 60))
+        self.Label5.setText("<html><head/><body><p align=\"center\">GVHD: Tùng Lê - Minh Nguyễn</p></body></html>")
         self.Label5.setStyleSheet("font: bold 16pt \"Constantia\"")
         #Back_Button
         Icon = QIcon()
