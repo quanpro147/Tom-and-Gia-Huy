@@ -982,7 +982,9 @@ class Game:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         running = self.quit_mess(running)   
-                        if not running: pygame.quit()            
+                        if not running: 
+                            pygame.quit()
+                                        
                 self.update()   
         self.transitions()
         # character
@@ -1127,9 +1129,10 @@ class Game:
                                     self.draw_path(path_dfs)
                                     self.draw_cur(cur_cell)   
                         else:
-                            tmp_path.append(solution_path.pop())                         
-                            self.draw_path(path_dfs)
-                            self.draw_solution(tmp_path)
+                            if solution_path != []:
+                                tmp_path.append(solution_path.pop())                         
+                                self.draw_path(path_dfs)
+                                self.draw_solution(tmp_path)
                             if solution_path == []:
                                 running_dfs = False
                                 self.completed = True
@@ -1160,7 +1163,7 @@ class Game:
                                 self.sound['ting'].play()
                                 music.pause()
                     else:
-                        if self.buttons['vol_off'].draw(self.screen): # volume off
+                        if self.buttons['mute'].draw(self.screen): # mute là nút đẹp, còn vol_off xấu hơn
                             if not pause: 
                                 self.sound['ting'].play()
                                 music.unpause()
@@ -1436,7 +1439,7 @@ class Game:
         pygame.quit()
         
 if __name__ == '__main__':
-    game = Game('easy', 'auto', True, 'Tom', 'green')
+    game = Game('easy', 'auto', False, 'Tom', 'green')
     game.run()
     # game = Game()
     # if game.load('quan3'):
