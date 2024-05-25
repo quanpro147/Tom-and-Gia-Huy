@@ -1443,5 +1443,5 @@ if __name__ == '__main__':
     # game = Game('easy', 'not_auto', True, 'Tom', 'green')
     # game.run()
     game = Game()
-    if game.load('test'):
+    if game.load('quan1'):
         game.run()

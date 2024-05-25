@@ -179,16 +179,14 @@ class MainWindow(QMainWindow):
             
     def LoadGame(self):
         
-        currentIndex = self.Load_Window.listGame.currentRow()
-        
+        currentIndex = self.Load_Window.listGame.currentRow()       
         item = self.Load_Window.listGame.item(currentIndex)
-        
-        
         if item is not None:
-            if game.user_name == self.user_name:
-                self.Menu_Window.off_volume()
-                self.close()   
-                game = Game()           
+            # if game.user_name == self.user_name:
+            game = Game()
+            self.Menu_Window.off_volume()
+            self.close()   
+            if game.load(item.text()):         
                 game.run()
             
 

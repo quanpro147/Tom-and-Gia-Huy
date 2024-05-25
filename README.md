@@ -5,4 +5,4 @@ Step1. Download nescessary library
 - pip install pygame
 - pip install PyQt5
 Step2. Run
-Choose MainWindow.py file and run this
+run main.py to start game
