@@ -817,9 +817,6 @@ class Game:
         if self.buttons['sound'].draw(self.screen): # sound
             self.sound['ting'].play()
             menu_state = 'sound'
-        # if self.buttons['chang_alg'].draw(self.screen): # chang_alg
-        #     if self.algorithm == 'dfs': self.set_algorithm('bfs')
-        #     elif self.algorithm == 'bfs': self.set_algorithm('dfs')
         if self.buttons['back'].draw(self.screen): # back
             self.sound['ting'].play()
             menu_state = 'menu'
@@ -857,10 +854,6 @@ class Game:
             self.sound['ting'].play()
             running = False
             self.play_new()       
-        #if self.buttons['quit_2'].draw(self.screen): # resume
-        #    self.sound['ting'].play()
-        #    pause = False
-        #    running = self.quit_mess(running)
         return menu_state, pause, running
 
     def save_1(self, menu_state, user_input): 
@@ -872,6 +865,7 @@ class Game:
             self.sound['ting'].play()
             user_input = False                            
             menu_state = 'menu'
+            self.set_maze_visit()
             self.save()
         if self.buttons['cancel_1'].draw(self.screen):
             self.sound['ting'].play()
@@ -1206,7 +1200,7 @@ class Game:
                         elif menu_state == 'finish':
                             menu_state, pause, running = self.finish(menu_state, pause, running)
 
-                        elif menu_state == 'save2':
+                        elif menu_state == 'save_2':
                             menu_state, user_input = self.save_2(menu_state)
 
                     for event in pygame.event.get():
@@ -1348,8 +1342,9 @@ class Game:
                         
                         if self.buttons['chang_alg'].draw(self.screen): # chang_alg
                             self.sound['ting'].play()
-                            self.set_algorithm('DFS') 
-                                            
+                            if self.algorithm == 'DFS': self.set_algorithm('BFS') 
+                            else: self.set_algorithm('DFS')
+                                             
                     elif menu_state == 'sound':
                         menu_state, music_vol, sound_effect_vol = self.sound_scene(menu_state, music_vol, sound_effect_vol)
 
@@ -1432,8 +1427,8 @@ class Game:
         pygame.quit()
         
 if __name__ == '__main__':
-    # game = Game('easy', 'not_auto', True, 'Tom', 'green')
-    # game.run()
-    game = Game()
-    if game.load('test'):
-        game.run()
+    game = Game('easy', 'auto', False, 'Tom', 'green')
+    game.run()
+    # game = Game()
+    # if game.load('quan3'):
+    #     game.run()

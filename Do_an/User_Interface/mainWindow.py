@@ -179,8 +179,7 @@ class MainWindow(QMainWindow):
             
     def LoadGame(self):
         
-        currentIndex = self.Load_Window.listGame.currentRow()
-        
+        currentIndex = self.Load_Window.listGame.currentRow()       
         item = self.Load_Window.listGame.item(currentIndex)
  
         if item is not None:
