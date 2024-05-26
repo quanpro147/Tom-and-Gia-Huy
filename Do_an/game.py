@@ -800,12 +800,14 @@ class Game:
         self.record = 0
         self.set_maze_visit()
         self.transitions()
+        self.cur_pos = self.start
         self.run()
     
     def play_new(self):
         self.maze = None
         self.record = 0
         self.start, self.end = None, None
+        self.cur_pos = self.start
         self.transitions()
         self.run()  
     # scenes
@@ -1431,7 +1433,7 @@ class Game:
         pygame.quit()
         
 if __name__ == '__main__':
-    game = Game('easy', 'auto', False, 'Tom', 'green')
+    game = Game('easy', 'not_auto', False, 'Tom', 'green')
     game.run()
     # game = Game()
     # if game.load('quan3'):
