@@ -1,10 +1,7 @@
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import (QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout,
-                             QSizePolicy, QMessageBox,
-                             QFrame)
+from PyQt5 import QtGui
 from PyQt5.QtWidgets import*
 from PyQt5.QtCore import *
-from PyQt5 import QtGui,QtCore
+from PyQt5 import QtGui
 from PyQt5.QtGui import *
 import sys
 class RegisterWidget(QWidget):
@@ -14,7 +11,7 @@ class RegisterWidget(QWidget):
         # background
         self.background = QLabel(self)
         self.background.setGeometry(QRect(0, 0, 1000, 800))
-        self.background.setPixmap(QtGui.QPixmap("Do_an/UI/UI1/blue1.png"))
+        self.background.setPixmap(QtGui.QPixmap("Do_an/Image/blue1.png"))
 
         # Label
         self.label = QLabel(self)
@@ -77,8 +74,8 @@ class RegisterWidget(QWidget):
         self.Password.setPlaceholderText("password")
         self.Password.setEchoMode(QLineEdit.Password)
 
-        self.acc_icon = QIcon("Do_an/UI1/Icon/username.jpg")
-        self.pass_icon = QIcon("Do_an/UI1/Icon/password.jpg")
+        self.acc_icon = QIcon("Do_an/Image/Icon/username.jpg")
+        self.pass_icon = QIcon("Do_an/Image/Icon/password.jpg")
         #
         self.accButton = QPushButton(self)
         self.accButton.setGeometry(QRect(350,260,40,40))

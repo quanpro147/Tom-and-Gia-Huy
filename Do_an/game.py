@@ -478,8 +478,8 @@ class Game:
     
     def slider(self):
         delay_slider = Slider((650, 280), (200, 30), 0.5, 0, 100)
-        music_slider = Slider((650, 364), (150, 30), 0.5, 0, 100)
-        sound_effect_slider = Slider((650, 464), (150, 30), 0.5, 0, 100)
+        music_slider = Slider((675, 364), (150, 30), 0.5, 0, 100)
+        sound_effect_slider = Slider((675, 464), (150, 30), 0.5, 0, 100)
         return {'delay': delay_slider, 'music': music_slider, 'sound_effect': sound_effect_slider}
     
     # Player funtions
@@ -824,8 +824,8 @@ class Game:
     
     def sound_scene(self, menu_state, music_vol, sound_effect_vol):
         self.buttons['gameFrame'].draw(self.screen)
-        self.draw_text('Music', 'black', 400, 350)
-        self.draw_text('Sound effect', 'black', 400, 450)
+        self.draw_text('Music', 'yellow', 450, 350)
+        self.draw_text('SFX', 'yellow', 450, 450)
         self.sliders['music'].draw(self.screen)
         music_vol = self.set_volume(self.sliders['music'])
         self.sliders['sound_effect'].draw(self.screen)
@@ -1181,10 +1181,7 @@ class Game:
                             if self.buttons['options'].draw(self.screen): # options
                                 self.sound['ting'].play()
                                 menu_state = 'options'
-                            #if self.buttons['quit'].draw(self.screen): # quit
-                            #    self.sound['ting'].play()
-                            #    running, running_bfs = self.quit_mess(running, running_bfs)
-                        elif menu_state == 'save_1':
+                        elif menu_state == 'save1':
                             menu_state, user_input = self.save_1(menu_state, user_input)
 
                         elif menu_state == 'options':
@@ -1338,12 +1335,11 @@ class Game:
                             running = self.quit_mess(running) 
                         if self.buttons['options'].draw(self.screen): # options
                             self.sound['ting'].play()
-                            menu_state = 'options'
-                        #if self.buttons['quit'].draw(self.screen): # quit
-                        #    running = self.quit_mess(running)                     
+                            menu_state = 'options'                
 
                     elif menu_state == 'options':                   
                         menu_state = self.options(menu_state)
+                        
                         if self.buttons['chang_alg'].draw(self.screen): # chang_alg
                             self.sound['ting'].play()
                             if self.algorithm == 'DFS': self.set_algorithm('BFS') 
