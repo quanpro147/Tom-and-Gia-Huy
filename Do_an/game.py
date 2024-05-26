@@ -154,13 +154,15 @@ class saveloadsystem:
                 if file['file'] == name_file: return True
         return False
         
-    def delete_file(self, name_file):
+    def delete_file(self, user_name, name_file):
         # xoa ten file trong file txt
-        with open('Do_an/SaveLoad/saveload.txt', 'r') as f:
+        with open('Do_an/SaveLoad/saveload.json', 'r') as f:
             data = json.load(f)
-            for i in range(len(data['user'])):
-                if data['user'][i]['file'] == name_file: data['user'].remove(data['user'][i])
-        with open('Do_an/SaveLoad/saveload.txt', 'w') as f:
+            for user in data['user']:
+                if user['username'] == user_name and user['file'] == name_file:
+                    data['user'].remove(user)
+                    break
+        with open('Do_an/SaveLoad/saveload.json', 'w') as f:
             json.dump(data, f, indent=4)
         # xoa data cua file
         game_manager = self.load_data()

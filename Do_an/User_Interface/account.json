@@ -43,6 +43,10 @@
         {
             "username": "groupten",
             "password": "groupten"
+        },
+        {
+            "username": "group_ten",
+            "password": "group_ten"
         }
     ]
 }

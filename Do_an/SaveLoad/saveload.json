@@ -6,18 +6,6 @@
         },
         {
             "username": "123456",
-            "file": "top1flo"
-        },
-        {
-            "username": "123456",
-            "file": "babaasda"
-        },
-        {
-            "username": "123456",
-            "file": "top1zuka"
-        },
-        {
-            "username": "123456",
             "file": "aaaaaaaa"
         },
         {
@@ -35,6 +23,14 @@
         {
             "username": "",
             "file": "quan4"
+        },
+        {
+            "username": "123456",
+            "file": "abc"
+        },
+        {
+            "username": "group_ten",
+            "file": "10diem"
         }
     ]
 }
