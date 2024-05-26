@@ -83,6 +83,8 @@ class MainWindow(QMainWindow):
         self.New_Window.PlayButton.clicked.connect(self.play)
         #Load Old game
         self.Load_Window.Play_Button.clicked.connect(self.LoadGame)
+        #Delete Old game
+        self.Load_Window.Delete_Button.clicked.connect(self.DeleteGame)
         #
         self.Menu_Window.log_out_button.clicked.connect(self.LOG_OUT)
 
@@ -155,14 +157,12 @@ class MainWindow(QMainWindow):
             QMessageBox.information(self, "Thông Báo", "Đăng Ký Thành Công!")
             self.stWidget.setCurrentIndex(0)
     def newgame(self):
-        
+
         self.stWidget.setCurrentIndex(5)
         
 
     def play(self):
         self.Menu_Window.off_volume()
-        #self.close()
-        #self.close()
         a1 = self.New_Window.difficult
         a2 = self.New_Window.mode
         a3 = self.New_Window.option
@@ -189,6 +189,22 @@ class MainWindow(QMainWindow):
                 self.Menu_Window.off_volume()
                 self.stWidget.setCurrentIndex(2)
                 game.run()
+
+    def DeleteGame(self):
+        currentIndex = self.Load_Window.listGame.currentRow()
+        item = self.Load_Window.listGame.item(currentIndex)
+        if item is None:
+            return
+        question = QMessageBox.question(self, "Remove Game",
+                                        "Do you want to remove this Game?" + item.text(),
+                                        QMessageBox.Yes | QMessageBox.No)
+
+        if question == QMessageBox.Yes:
+            item = self.Load_Window.listGame.takeItem(currentIndex)
+            saveloadmanager = saveloadsystem('.save', 'Do_an/SaveLoad/game_manager')
+            saveloadmanager.delete_file(self.user_name, item.text())
+            del item
+        pass
             
 
 
