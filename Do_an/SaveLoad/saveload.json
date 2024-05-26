@@ -27,10 +27,6 @@
         {
             "username": "123456",
             "file": "abc"
-        },
-        {
-            "username": "group_ten",
-            "file": "10diem"
         }
     ]
 }
