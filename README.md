@@ -1,5 +1,5 @@
 # Tâm-and-Gia-Huy
-This is my team project on school
+This is my team project of Python Introduction subject
 # Follow these step to set up my game
 Step1. Download nescessary library
 - pip install pygame
